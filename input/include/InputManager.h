@@ -1,0 +1,31 @@
+#ifndef INPUTMANAGER_H
+#define INPUTMANAGER_H
+
+#include <vector>
+#include <memory>
+#include <string>
+
+namespace avl {
+
+    struct InputFile;
+
+    struct InputManager {
+
+        std::vector<std::string> filenames;
+        std::vector<std::shared_ptr<InputFile> > open;
+        std::vector<std::shared_ptr<InputFile> > closed;
+        std::shared_ptr<InputFile> currentInputFile;
+
+        bool isProcessed(const std::string&) const;
+        bool isActive(const std::string&) const;
+        bool isValid() const;
+        std::string getFileName(uint16_t) const;
+        std::string getFilePath(uint16_t) const;
+
+        bool set(const std::string&);
+        bool reset();
+    };
+
+}
+
+#endif
