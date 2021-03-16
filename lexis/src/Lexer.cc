@@ -59,7 +59,7 @@ namespace avl {
         { RULE_SUB_ASSIGN,       "-="       },
         { RULE_MUL_ASSIGN,       "*="       },
         { RULE_DIV_ASSIGN,       "/="       },
-        { RULE_MOD_ASSIGN,       "%="       },
+        { RULE_REM_ASSIGN,       "%="       },
         { RULE_AND_ASSIGN,       "&="       },
         { RULE_OR_ASSIGN,        "|="       },
         { RULE_XOR_ASSIGN,       "^="       },
@@ -225,7 +225,7 @@ namespace avl {
                 case RULE_SUB_ASSIGN       : return TOKEN_SUB_ASSIGN;
                 case RULE_MUL_ASSIGN       : return TOKEN_MUL_ASSIGN;
                 case RULE_DIV_ASSIGN       : return TOKEN_DIV_ASSIGN;
-                case RULE_MOD_ASSIGN       : return TOKEN_MOD_ASSIGN;
+                case RULE_REM_ASSIGN       : return TOKEN_REM_ASSIGN;
                 case RULE_AND_ASSIGN       : return TOKEN_AND_ASSIGN;
                 case RULE_OR_ASSIGN        : return TOKEN_OR_ASSIGN;
                 case RULE_XOR_ASSIGN       : return TOKEN_XOR_ASSIGN;

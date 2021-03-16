@@ -174,7 +174,7 @@ namespace avl {
         RULE_SUB_ASSIGN,
         RULE_MUL_ASSIGN,
         RULE_DIV_ASSIGN,
-        RULE_MOD_ASSIGN,
+        RULE_REM_ASSIGN,
         RULE_AND_ASSIGN,
         RULE_OR_ASSIGN,
         RULE_XOR_ASSIGN,

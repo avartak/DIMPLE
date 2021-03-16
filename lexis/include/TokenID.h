@@ -97,7 +97,7 @@ namespace avl {
         TOKEN_SUB_ASSIGN,
         TOKEN_MUL_ASSIGN,
         TOKEN_DIV_ASSIGN,
-        TOKEN_MOD_ASSIGN,
+        TOKEN_REM_ASSIGN,
         TOKEN_AND_ASSIGN,
         TOKEN_OR_ASSIGN,
         TOKEN_XOR_ASSIGN,

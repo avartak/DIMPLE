@@ -262,12 +262,12 @@ namespace avl {
         while (true) {
             std::shared_ptr<Identifier> name;
             std::shared_ptr<Node> type;
-            if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, ':') && parseToken(it+n+2, TOKEN_IDENT)) {
+            if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseToken(it+n+2, TOKEN_IDENT)) {
                 name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 type = std::make_shared<Identifier>(tokens[it+n+2]->str, tokens[it+n+2]->loc);
                 n += 3;
             }
-            else if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, ':') && parseDataType(it+n+2)) {
+            else if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseDataType(it+n+2)) {
                 name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 type = result;
                 n += 2+nParsed;

@@ -94,7 +94,7 @@ namespace avl {
     bool Parser::isAssigner(std::size_t it) {
         return (parseToken(it, TOKEN_ADD_ASSIGN) || parseToken(it, TOKEN_SUB_ASSIGN) ||
                 parseToken(it, TOKEN_MUL_ASSIGN) || parseToken(it, TOKEN_DIV_ASSIGN) ||
-                parseToken(it, TOKEN_MOD_ASSIGN) || parseToken(it, TOKEN_AND_ASSIGN) ||
+                parseToken(it, TOKEN_REM_ASSIGN) || parseToken(it, TOKEN_AND_ASSIGN) ||
                 parseToken(it, TOKEN_XOR_ASSIGN) || parseToken(it, TOKEN_OR_ASSIGN ) ||
                 parseToken(it, TOKEN_BIT_RIGHT_ASSIGN) || parseToken(it, TOKEN_BIT_LEFT_ASSIGN) ||
                 parseToken(it, TOKEN_ASSIGN) || parseToken(it, TOKEN_INC) || parseToken(it, TOKEN_DEC));

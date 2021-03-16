@@ -43,7 +43,7 @@ namespace avl {
         {TOKEN_SUB_ASSIGN      , ASSIGNOP_SUB_ASSIGN      },
         {TOKEN_MUL_ASSIGN      , ASSIGNOP_MUL_ASSIGN      },
         {TOKEN_DIV_ASSIGN      , ASSIGNOP_DIV_ASSIGN      },
-        {TOKEN_MOD_ASSIGN      , ASSIGNOP_MOD_ASSIGN      },
+        {TOKEN_REM_ASSIGN      , ASSIGNOP_REM_ASSIGN      },
         {TOKEN_AND_ASSIGN      , ASSIGNOP_AND_ASSIGN      },
         {TOKEN_OR_ASSIGN       , ASSIGNOP_OR_ASSIGN       },
         {TOKEN_XOR_ASSIGN      , ASSIGNOP_XOR_ASSIGN      },
