@@ -57,8 +57,6 @@ namespace avl {
         BINARYOP_LESSER_EQUAL,
 
         ASSIGNOP_ASSIGN,
-        ASSIGNOP_INC,
-        ASSIGNOP_DEC,
         ASSIGNOP_ADD_ASSIGN,
         ASSIGNOP_SUB_ASSIGN,
         ASSIGNOP_MUL_ASSIGN,

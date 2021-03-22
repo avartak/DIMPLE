@@ -29,8 +29,11 @@ namespace avl {
 
         std::shared_ptr<Token> scan();
 
+        bool isUnaryOp(std::size_t);
+        bool isBinaryMathOp(std::size_t);
         bool isAssigner(std::size_t);
-        bool isComparator(std::size_t);
+        bool isLiteral(std::size_t);
+        bool isDefined(std::size_t);
 
         bool parseToken(std::size_t, int);
         bool parseTerm(std::size_t, bool);
@@ -39,9 +42,8 @@ namespace avl {
         bool parseEmpty(std::size_t);
         bool parseInclude(std::size_t);
         bool parseRepresentation(std::size_t);
-        bool parseDeclaration(std::size_t);
         bool parseDefinition(std::size_t);
-        bool parseMain(std::size_t);
+        bool parseStart(std::size_t);
 
         bool parseType(std::size_t);
         bool parseDataType(std::size_t);

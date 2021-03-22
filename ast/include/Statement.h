@@ -7,7 +7,6 @@ namespace avl {
 
     enum Statement_ID {
 
-        STATEMENT_EMPTY,
         STATEMENT_CONTINUE,
         STATEMENT_BREAK,
         STATEMENT_RETURN,

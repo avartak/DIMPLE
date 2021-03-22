@@ -14,9 +14,8 @@ namespace avl {
         if (parseEmpty(it) ||
             parseInclude(it) ||
             parseRepresentation(it) ||
-            parseDeclaration(it) ||
             parseDefinition(it) ||
-            parseMain(it))
+            parseStart(it))
         {
             tokens.erase(tokens.begin()+it, tokens.begin()+it+nParsed);
             return parseProg(it);
@@ -100,82 +99,20 @@ namespace avl {
 
         std::shared_ptr<Identifier> name;
 
-        auto nm = tokens[it]->str;
-        if (ast->representations.find(nm) != ast->representations.end()) {
-            name = ast->representations[nm]->name;
+        if (!isDefined(it)) {
+            return error();
         }
-        else if (ast->declarations.find(nm) != ast->declarations.end()) {
-            name = ast->declarations[nm][0]->name;
-        }
-        else if (ast->definitions.find(nm) != ast->definitions.end()) {
-            name = ast->definitions[nm]->name;
-        }
-        if (name) {
-            std::stringstream err;
-            err << "Invalid reassignment of " << nm << ". ";
-            err << "Previous occurence at " << name->loc.filename() << ":" << name->loc.start.line;
-            return error(tokens[it], err.str());
-        }
+        const auto& nm = tokens[it]->str;
         name = std::make_shared<Identifier>(nm, tokens[it]->loc);
         n += 2;
 
         if (parseType(it+n) || parseExpr(it+n)) {
-            ast->representations[name->name] = std::make_shared<NameNode>(name, result);
+            ast->representations[nm] = std::make_shared<NameNode>(name, result);
             n += nParsed;
         }
         else {
-            return error(tokens[it+n], "Expect representation definition");
+            return error(tokens[it+n], "Failed to parse the definition of representation " + nm);
         }
-
-        if (!parseTerm(it+n, false)) {
-            return error();
-        }
-        n += nParsed;
-        return success(n);
-    }
-
-    bool Parser::parseDeclaration(std::size_t it) {
-
-        std::size_t n = 0;
-
-        if (!parseToken(it, TOKEN_IDENT) || !parseToken(it+1, TOKEN_DECLARE)) {
-            return error();
-        }
-
-        std::shared_ptr<Identifier> name;
-        std::shared_ptr<Node> type;
-
-        auto nm = tokens[it]->str;
-        if (ast->representations.find(nm) != ast->representations.end()) {
-            name = ast->representations[nm]->name;
-        }
-        else if (ast->definitions.find(nm) != ast->definitions.end()) {
-            if (ast->definitions[nm]->storage == STORAGE_INTERNAL) {
-                name = ast->representations[nm]->name;
-            }
-        }
-        if (name) {
-            std::stringstream err;
-            err << "Invalid reassignment of " << nm << ". ";
-            err << "Previous occurence at " << name->loc.filename() << ":" << name->loc.start.line;
-            return error(tokens[it], err.str());
-        }
-        name = std::make_shared<Identifier>(nm, tokens[it]->loc);
-        n += 2;
-
-        if (parseToken(it+n, TOKEN_IDENT)) {
-            type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
-            n++;
-        }
-        else if (parseType(it+n) > 0) {
-            type = result;
-            n += nParsed;
-        }
-        else {
-            return error(tokens[it+n], "Unable to parse the declaration of " + tokens[it+n-2]->str);
-        }
-
-        ast->declarations[name->name].push_back(std::make_shared<NameNode>(name, type));
 
         if (!parseTerm(it+n, false)) {
             return error();
@@ -201,22 +138,10 @@ namespace avl {
             storage = STORAGE_EXTERNAL;
         }
 
-        auto nm = tokens[it]->str;
-        if (ast->representations.find(nm) != ast->representations.end()) {
-            name = ast->representations[nm]->name;
+        if (!isDefined(it)) {
+            return error();
         }
-        else if (ast->declarations.find(nm) != ast->declarations.end() && storage == STORAGE_INTERNAL) {   
-            name = ast->declarations[nm][0]->name;
-        }
-        else if (ast->definitions.find(nm) != ast->definitions.end()) {
-            name = ast->definitions[nm]->name;
-        }
-        if (name) {
-            std::stringstream err;
-            err << "Invalid reassignment of " << nm << ". ";
-            err << "Previous occurence at " << name->loc.filename() << ":" << name->loc.start.line;
-            return error(tokens[it], err.str());
-        }
+        const auto& nm = tokens[it]->str;
         name = std::make_shared<Identifier>(nm, tokens[it]->loc);
         n += (storage == STORAGE_INTERNAL ? 2 : 3);
 
@@ -235,10 +160,10 @@ namespace avl {
         }
 
         if (!def) {
-            return error(tokens[it], "Unable to parse the definition of " + tokens[it]->str);
+            return error(tokens[it], "Unable to parse the definition of " + nm);
         }
 
-        ast->definitions[name->name] = std::make_shared<Definition>(storage, name, type, def);
+        ast->definitions[nm] = std::make_shared<Definition>(storage, name, type, def);
 
         if (!parseTerm(it+n, false)) {
             return error();
@@ -247,37 +172,28 @@ namespace avl {
         return success(n);
     }
 
-    bool Parser::parseMain(std::size_t it) {
+    bool Parser::parseStart(std::size_t it) {
 
         std::size_t n = 0;
 
-        if (!parseToken(it, TOKEN_MAIN)) {
+        if (!parseToken(it, TOKEN_START)) {
             return error();
         }
-        if (parseToken(it+1, TOKEN_DECLARE)) {
-            return error(tokens[it], "Declaration of \'main\' is not allowed");
-        }
         if (!parseToken(it+1, TOKEN_DEFINE)) {
-            return error(tokens[it+1], "Expect \':=\' after \'main\'");
+            return error(tokens[it+1], "Expect \':=\' after \'start\'");
         }
         if (!parseToken(it+2, TOKEN_EXTERN)) {
-            return error(tokens[it+2], "Expect \'extern\' specifier for \'main\' after \':=\'");
+            return error(tokens[it+2], "Expect \'extern\' specifier for \'start\' after \':=\'");
         }
 
         std::shared_ptr<Identifier> name;
         std::shared_ptr<Node> type;
         std::shared_ptr<Node> def;
 
-        auto nm = tokens[it]->str;
-        if (ast->definitions.find(nm) != ast->definitions.end()) {
-            name = ast->definitions[nm]->name;
+        if (!isDefined(it)) {
+            return error();
         }
-        if (name) {
-            std::stringstream err;
-            err << "Redefinition of " << nm << ". ";
-            err << "Previous occurence at " << name->loc.filename() << ":" << name->loc.start.line;
-            return error(tokens[it], err.str());
-        }
+        const auto& nm = tokens[it]->str;
         name = std::make_shared<Identifier>(nm, tokens[it]->loc);
         n += 3;
 
@@ -296,15 +212,34 @@ namespace avl {
         }
 
         if (!def) {
-            return error(tokens[it], "Unable to parse the definition of " + tokens[it]->str);
+            return error(tokens[it], "Unable to parse the definition of " + nm);
         }
 
-        ast->definitions[name->name] = std::make_shared<Definition>(STORAGE_EXTERNAL, name, type, def);
+        ast->definitions[nm] = std::make_shared<Definition>(STORAGE_EXTERNAL, name, type, def);
 
         if (!parseTerm(it+n, false)) {
             return error();
         }
         n += nParsed;
         return success(n);
+    }
+
+    bool Parser::isDefined(std::size_t it) {
+
+        std::shared_ptr<Identifier> prev;
+        const auto& nm = tokens[it]->str;
+        if (ast->representations.find(nm) != ast->representations.end()) {
+            prev = ast->representations[nm]->name;
+        }
+        else if (ast->definitions.find(nm) != ast->definitions.end()) {
+            prev = ast->definitions[nm]->name;
+        }
+        if (prev) {
+            std::stringstream err;
+            err << "Redefinition of " << nm << ". ";
+            err << "Previous occurence at " << prev->loc.filename() << ":" << prev->loc.start.line;
+            return error(tokens[it], err.str());
+        }
+        return true;
     }
 } 

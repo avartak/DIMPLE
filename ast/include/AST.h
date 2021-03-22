@@ -22,7 +22,6 @@ namespace avl {
 
     struct AST {
         std::map<std::string, std::shared_ptr<NameNode> > representations;
-        std::map<std::string, std::vector<std::shared_ptr<NameNode> > > declarations;
         std::map<std::string, std::shared_ptr<Definition> > definitions;
     };
 

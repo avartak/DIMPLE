@@ -5,7 +5,6 @@
 #include <BinaryExprNode.h>
 #include <CallExprNode.h>
 #include <AssignExprNode.h>
-#include <One.h>
 #include <IntNode.h>
 #include <BoolNode.h>
 #include <CharNode.h>
@@ -19,38 +18,28 @@ namespace avl {
         std::size_t n = 0;
         auto loc = tokens[it]->loc;
 
-        if (parseToken(it, TOKEN_TRUE) || parseToken(it, TOKEN_FALSE) ||
-            parseToken(it, TOKEN_INT ) || parseToken(it, TOKEN_REAL ) ||
-            parseToken(it, TOKEN_CHAR) || parseToken(it, TOKEN_STRING))
-        {
-            auto s = tokens[it]->str;
+        if (isLiteral(it)) {
+            std::string err = "";
             if (parseToken(it, TOKEN_INT)) {
-                auto i = IntNode::construct(tokens[it]);
-                if (!i) {
-                    return error(tokens[it], "Integer out of range");
-                }
-                result = i;
+                result = IntNode::construct(tokens[it]);
+                err = "Integer out of range";
             }
             else if (parseToken(it, TOKEN_REAL)) {
-                auto r = RealNode::construct(tokens[it]);
-                if (!r) {
-                    return error(tokens[it], "Real out of range");
-                }
-                result = r;
+                result = RealNode::construct(tokens[it]);
+                err = "Real out of range";
             }
             else if (parseToken(it, TOKEN_CHAR)) {
-                auto c = CharNode::construct(tokens[it]);
-                if (!c) {
-                    return error(tokens[it], "Multi-byte characters not allowed");
-                }
-                result = c;
+                result = CharNode::construct(tokens[it]);
+                err = "Multi-byte characters not allowed";
             }
             else if (parseToken(it, TOKEN_TRUE) || parseToken(it, TOKEN_FALSE)) {
-                auto b = BoolNode::construct(tokens[it]);
-                result = b;
+                result = BoolNode::construct(tokens[it]);
             }
             else {
                 result = StringNode::construct(tokens[it]);
+            }
+            if (!result) {
+                return error(tokens[it], err);
             }
             result->loc = loc;
             n++;
@@ -59,8 +48,7 @@ namespace avl {
                 while (parseToken(it+n, TOKEN_STRING)) {
                     auto l = result->loc;
                     auto str = StringNode::construct(tokens[it+n]);
-                    str->loc = tokens[it+n]->loc;
-                    result = std::make_shared<BinaryExprNode>(BINARYOP_STR_CONCAT, result, StringNode::construct(tokens[it+n]));
+                    result = std::make_shared<BinaryExprNode>(BINARYOP_STR_CONCAT, result, str);
                     l.end = str->loc.end;
                     result->loc = l;
                     n++;
@@ -147,13 +135,7 @@ namespace avl {
         std::size_t n = 0;
         auto loc = tokens[it]->loc;
 
-        if (parseToken(it, TOKEN_PLUS) ||
-            parseToken(it, TOKEN_MINUS) ||
-            parseToken(it, TOKEN_COMPLEMENT) ||
-            parseToken(it, TOKEN_NOT) ||
-            parseToken(it, TOKEN_ADDRESS) ||
-            parseToken(it, TOKEN_SIZE))
-        {
+        if (isUnaryOp(it)) {
             auto op = ExprNode::unopFromToken(tokens[it]->is);
             bool issizeop = parseToken(it, TOKEN_SIZE);
             if ((issizeop && parseType(it+1)) || parseUnary(it+1)) {
@@ -182,24 +164,23 @@ namespace avl {
         std::size_t n = 0;
         auto loc = result->loc;
 
-        n++;
         if (parseToken(it, TOKEN_DOT)) {
-            if (!parseToken(it+n, TOKEN_IDENT)) {
-                return error(tokens[it+n], "Failed to parse member after \'.\'");
+            n++;
+            if (!parseToken(it+1, TOKEN_IDENT)) {
+                return error(tokens[it+1], "Failed to parse member after \'.\'");
             }
-            auto member = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+            auto member = std::make_shared<Identifier>(tokens[it+1]->str, tokens[it+1]->loc);
             result = std::make_shared<BinaryExprNode>(BINARYOP_MEMBER, result, member);
         }
         else if (parseToken(it, TOKEN_DEREF)) {
-            n--;
             result = std::make_shared<UnaryExprNode>(UNARYOP_DEREFERENCE, result);
         }
         else if (parseToken(it, TOKEN_SQUARE_OPEN)) {
             auto e = result;
-            if (!parseExpr(it+n)) {
-                return error(tokens[it+n], "Failed to parse index element");
+            if (!parseExpr(it+1)) {
+                return error(tokens[it+1], "Failed to parse index element");
             }
-            n += nParsed;
+            n += 1+nParsed;
             if (!parseToken(it+n, TOKEN_SQUARE_CLOSE)) {
                 return error(tokens[it+n], "Missing \']\'");
             }
@@ -208,11 +189,12 @@ namespace avl {
         else if (parseToken(it, TOKEN_ROUND_OPEN)) {
             auto e = result;
             std::vector<std::shared_ptr<Node> > argv;
+            n++;
             while (true) {
                 if (parseToken(it+n, TOKEN_ROUND_CLOSE)) {
                     break;
                 }
-                if (!parseRvalue(it+n)) {
+                if (!parseExpr(it+n)) { // parseRvalue here would allow initializers as function arguments
                     return error(tokens[it+n], "Failed to parse argument");
                 }
                 n += nParsed;
@@ -258,17 +240,11 @@ namespace avl {
         if (isAssigner(it+n)) {
             int op = ExprNode::assopFromToken(tokens[it+n]->is);
             n++;
-            if (op == ASSIGNOP_INC || op == ASSIGNOP_DEC) {
-                exp = std::make_shared<One>();
-                exp->loc = tokens[it+n]->loc;
+            if (!parseExpr(it+n)) { // parseRvalue here would allow initializers in assignment 
+                return error(tokens[it+n], "Failed to parse expression after " + tokens[it+n-1]->str);
             }
-            else {
-                if (!parseRvalue(it+n)) {
-                    return error(tokens[it+n], "Failed to parse expression after " + tokens[it+n-1]->str);
-                }
-                exp = result;
-                n += nParsed;
-            }
+            n += nParsed;
+            exp = result;
             result = std::make_shared<AssignExprNode>(op, lhs, exp);
             result->loc = lhs->loc;
             result->loc.end = exp->loc.end;
@@ -284,11 +260,9 @@ namespace avl {
         auto loc = lhs->loc;
 
         while (true) {
+
             int current_op = tokens[it+n]->is;
-            int current_prec = ExprNode::precedence(current_op);
-            if (current_prec <= 0) {
-                current_prec = -1;
-            }
+            int current_prec = isBinaryMathOp(it+n) ? ExprNode::precedence(current_op) : -1;
 
             if (current_prec < prec) {
                 result = lhs;
@@ -296,15 +270,11 @@ namespace avl {
             }
             n++;
 
-            std::shared_ptr<Node> rhs;
-            if (it+n == tokens.size()) {
-                tokens.push_back(scan());
-            }
             if (!parseUnary(it+n)) {
                 return error(tokens[it+n], "Failed to parse expression");
             }
             n += nParsed;
-            rhs = result;
+            auto rhs = result;
 
             int next_op = tokens[it+n]->is;
             int next_prec = ExprNode::precedence(next_op);

@@ -65,8 +65,6 @@ namespace avl {
         { RULE_XOR_ASSIGN,       "^="       },
         { RULE_BIT_RIGHT_ASSIGN, ">>="      },
         { RULE_BIT_LEFT_ASSIGN,  "<<="      },
-        { RULE_INC,              "++"       },
-        { RULE_DEC,              "--"       },
 
         { RULE_GENERIC_POINTER,  "%?"       }
     };
@@ -74,7 +72,7 @@ namespace avl {
     std::map<int, std::string> Lexer::keywords = {
         { RULE_INCLUDE,          "include"  },
 
-        { RULE_MAIN,             "main"     },
+        { RULE_START,            "start"    },
 
         { RULE_TRUE,             "true"     },
         { RULE_FALSE,            "false"    },
@@ -98,7 +96,7 @@ namespace avl {
 
         { RULE_IF,               "if"       },
         { RULE_ELSE,             "else"     },
-        { RULE_FOR,              "for"      },
+        { RULE_LOOP,             "loop"     },
         { RULE_BREAK,            "break"    },
         { RULE_CONTINUE,         "continue" },
         { RULE_RETURN,           "return"   }
@@ -123,7 +121,7 @@ namespace avl {
         read();
     }
 
-    int Lexer::scan() {
+    int Lexer::lex() {
 
         while (true) {
 
@@ -149,7 +147,7 @@ namespace avl {
                 case RULE_STRING           : return TOKEN_STRING;
 
                 case RULE_IDENT            : return TOKEN_IDENT;
-                case RULE_MAIN             : return TOKEN_MAIN;
+                case RULE_START            : return TOKEN_START;
 
                 case RULE_BOOL             : return TOKEN_BOOL;
                 case RULE_UINT8            : return TOKEN_UINT8;
@@ -171,7 +169,7 @@ namespace avl {
 
                 case RULE_IF               : return TOKEN_IF;
                 case RULE_ELSE             : return TOKEN_ELSE;
-                case RULE_FOR              : return TOKEN_FOR;
+                case RULE_LOOP             : return TOKEN_LOOP;
                 case RULE_BREAK            : return TOKEN_BREAK;
                 case RULE_CONTINUE         : return TOKEN_CONTINUE;
                 case RULE_RETURN           : return TOKEN_RETURN;
@@ -231,8 +229,6 @@ namespace avl {
                 case RULE_XOR_ASSIGN       : return TOKEN_XOR_ASSIGN;
                 case RULE_BIT_RIGHT_ASSIGN : return TOKEN_BIT_RIGHT_ASSIGN;
                 case RULE_BIT_LEFT_ASSIGN  : return TOKEN_BIT_LEFT_ASSIGN;
-                case RULE_INC              : return TOKEN_INC;
-                case RULE_DEC              : return TOKEN_DEC;
 
                 default                    : return TOKEN_UNDEF;
             }

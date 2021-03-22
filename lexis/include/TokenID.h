@@ -21,7 +21,7 @@ namespace avl {
         TOKEN_STRING,
         
         TOKEN_IDENT,
-        TOKEN_MAIN,
+        TOKEN_START,
         
         TOKEN_BOOL,
         TOKEN_UINT8,
@@ -44,7 +44,7 @@ namespace avl {
         TOKEN_RETURN,
         TOKEN_IF,
         TOKEN_ELSE,
-        TOKEN_FOR,
+        TOKEN_LOOP,
         TOKEN_BREAK,
         TOKEN_CONTINUE,
        
@@ -102,9 +102,7 @@ namespace avl {
         TOKEN_OR_ASSIGN,
         TOKEN_XOR_ASSIGN,
         TOKEN_BIT_RIGHT_ASSIGN,
-        TOKEN_BIT_LEFT_ASSIGN,
-        TOKEN_INC,
-        TOKEN_DEC
+        TOKEN_BIT_LEFT_ASSIGN
 
     };
 

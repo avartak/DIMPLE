@@ -4,7 +4,7 @@ The Lexer performs lexical analysis for our compiler.
 It reads text from an input file character-by-character,
 and constructs tokens that are then passed on to the Parser.
 The Lexer stores all the pertinent information about a token
-- The token type or ID (int) that is returned by the scan() function
+- The token type or ID (int) that is returned by the lex() function
 - The token string (str : std::string) that contains the textual representation of the token
 - The line on which the first character of the token appears (start_line : int)
 - The column on which the first character of the token appears (start_column : int)
@@ -71,7 +71,7 @@ namespace avl {
         void read();
         void append();
         int rule();
-        int scan();
+        int lex();
 
         std::shared_ptr<int> match(bool);
         bool isWS(bool);
@@ -107,7 +107,7 @@ namespace avl {
         RULE_REAL,
 
         RULE_IDENT,
-        RULE_MAIN,
+        RULE_START,
 
         RULE_BOOL,
         RULE_UINT8,
@@ -129,7 +129,7 @@ namespace avl {
 
         RULE_IF,
         RULE_ELSE,
-        RULE_FOR,
+        RULE_LOOP,
         RULE_BREAK,
         RULE_CONTINUE,
         RULE_RETURN,
@@ -180,8 +180,6 @@ namespace avl {
         RULE_XOR_ASSIGN,
         RULE_BIT_RIGHT_ASSIGN,
         RULE_BIT_LEFT_ASSIGN,
-        RULE_INC,
-        RULE_DEC,
 
         RULE_CURLY_OPEN,  
         RULE_CURLY_CLOSE,

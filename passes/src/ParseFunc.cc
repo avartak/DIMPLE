@@ -3,7 +3,6 @@
 #include <TokenID.h>
 #include <Initializer.h>
 #include <NullInit.h>
-#include <EmptyStatement.h>
 #include <ContinueStatement.h>
 #include <BreakStatement.h>
 #include <AssignStatement.h>
@@ -46,7 +45,7 @@ namespace avl {
                 break;
             }
             else if (parseToken(it+n, TOKEN_SEMICOLON)) {
-                stmt = std::make_shared<EmptyStatement>();
+                n++;
             }
             else if (parseStatement(it+n, b)) {
                 stmt = std::static_pointer_cast<Statement>(result);
@@ -82,9 +81,11 @@ namespace avl {
 
         if (parseToken(it, TOKEN_CONTINUE)) {
             n++;
+            result = std::make_shared<ContinueStatement>();
         }
         else if (parseToken(it, TOKEN_BREAK)) {
             n++;
+            result = std::make_shared<BreakStatement>();
         }
         else if (parseToken(it, TOKEN_RETURN)) {
             n++;
@@ -172,7 +173,7 @@ namespace avl {
         std::shared_ptr<Statement> init;
         std::shared_ptr<Statement> update;
 
-        if (!parseToken(it, TOKEN_FOR)) {
+        if (!parseToken(it, TOKEN_LOOP)) {
             return error();
         }
         n++;
@@ -253,19 +254,19 @@ namespace avl {
         if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
             def = std::make_shared<NullInit>(false);
         }
-        else {
-            if (!parseInit(it+n)) {
-                return error(tokens[it+n], "Failed to parse initializer of local variable " + tokens[it]->str);
-            }
+        else if (parseInit(it+n)) {
             n += nParsed;
             def = result;
+        }
+        else {
+            return error(tokens[it+n], "Failed to parse initializer of local variable " + tokens[it]->str);
         }
 
         auto vdef = std::make_shared<Definition>(STORAGE_LOCAL, name, type, def);
         auto vname = vdef->name->name;
         if (b->vars.find(vdef->name->name) != b->vars.end()) {
             std::stringstream err;
-            err << "Invalid reassignment of " << vname << ". " << "Previous occurence at ";
+            err << "Redefinition of " << vname << ". " << "Previous occurence at ";
             err << b->vars[vname]->loc.filename() << ":" << b->vars[vname]->loc.start.line;
             return error(vdef->name, err.str());
         }

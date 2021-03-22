@@ -37,8 +37,6 @@ namespace avl {
 
     std::map<int, uint16_t> ExprNode::assopsmap = {
         {TOKEN_ASSIGN          , ASSIGNOP_ASSIGN          },
-        {TOKEN_INC             , ASSIGNOP_INC             },
-        {TOKEN_DEC             , ASSIGNOP_DEC             },
         {TOKEN_ADD_ASSIGN      , ASSIGNOP_ADD_ASSIGN      },
         {TOKEN_SUB_ASSIGN      , ASSIGNOP_SUB_ASSIGN      },
         {TOKEN_MUL_ASSIGN      , ASSIGNOP_MUL_ASSIGN      },

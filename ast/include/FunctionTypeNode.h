@@ -13,6 +13,7 @@ namespace avl {
         std::shared_ptr<Node> ret;
 
         FunctionTypeNode(const std::shared_ptr<NameNodeSet>&, const std::shared_ptr<Node>&);
+        FunctionTypeNode(const std::string&);
 
         virtual bool hasNamedType(const std::string&) const override;
         virtual bool construct(const std::shared_ptr<TypeNode>&) override;

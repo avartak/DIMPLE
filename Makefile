@@ -22,7 +22,7 @@ CC       := clang++
 
 .PHONY: all clean
 
-all: avl
+all: dimple
 
 clean:
 	$(RM) $(OBJECTS) $(DEPENDS)
@@ -30,7 +30,7 @@ clean:
 %.o: %.cc Makefile
 	$(CC) -O3 -c -MMD -MP $(CXXFLAGS) $(INCLUDES) -o $@ $<
 
-avl: $(OBJECTS)
+dimple: $(OBJECTS)
 	$(CC) -O3 -o $@ $(OBJECTS) $(LDFLAGS)
 
 -include $(DEPENDS)

@@ -10,6 +10,11 @@ namespace avl {
         complete = true;
     }
 
+    FunctionTypeNode::FunctionTypeNode(const std::string& n):
+        TypeNode(TYPE_UNION, n)
+    {
+    }
+
     bool FunctionTypeNode::hasNamedType(const std::string& n) const {
         for (const auto& a : args->set) {
             if (a.node->kind == NODE_IDENTIFIER) {
@@ -43,7 +48,14 @@ namespace avl {
     }
 
     bool FunctionTypeNode::construct(const std::shared_ptr<TypeNode>& t) {
-        return false;
+        if (isComplete() || t->is != is) {
+            return false;
+        }
+        auto ft = static_cast<const FunctionTypeNode*>(t.get());
+        args = ft->args;
+        ret = ft->ret;
+        complete = true;
+        return true;
     }
 
 }
