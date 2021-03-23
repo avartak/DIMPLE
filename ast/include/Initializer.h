@@ -1,11 +1,31 @@
 #ifndef INITIALIZER_H
 #define INITIALIZER_H
 
+#include <memory>
+#include <string>
 #include <vector>
 #include <Node.h>
-#include <InitElement.h>
 
 namespace avl {
+
+    enum Init_ID {
+
+        INIT_UNTAGGED,
+        INIT_LABELED,
+        INIT_INDEXED
+
+    };
+
+    struct InitElement : public Node {
+
+        uint16_t is;
+        std::shared_ptr<Node> tag;
+        std::shared_ptr<Node> value;
+
+        InitElement(const std::shared_ptr<Node>&);
+        InitElement(uint16_t, const std::shared_ptr<Node>&, const std::shared_ptr<Node>&);
+
+    };
 
     struct Initializer : public Node {
     
@@ -14,6 +34,15 @@ namespace avl {
         Initializer(const std::vector<InitElement>&);
 
     };
+
+    struct NullInit : public Node {
+
+        bool zero;
+
+        NullInit(bool);
+
+    };
+
 }
 
 #endif

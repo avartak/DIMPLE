@@ -31,18 +31,11 @@ namespace avl {
     struct TypeBase {
 
         uint16_t is;
-        bool complete;
-        unsigned flags;
-        std::string name;
+        uint16_t flags;
 
         TypeBase(uint16_t);
-        TypeBase(uint16_t, const std::string&);
 
         virtual ~TypeBase() = default;
-
-        inline bool isComplete() const {
-            return complete;
-        }
 
         inline bool isUnknown() const {
             return is == TYPE_UNKNOWN;

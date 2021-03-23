@@ -2,16 +2,8 @@
 #include <Parser.h>
 #include <TokenID.h>
 #include <Initializer.h>
-#include <NullInit.h>
-#include <ContinueStatement.h>
-#include <BreakStatement.h>
-#include <AssignStatement.h>
-#include <CallStatement.h>
-#include <ReturnStatement.h>
-#include <CondBlockNode.h>
-#include <IfBlockNode.h>
-#include <LoopBlockNode.h>
-#include <FuncBlockNode.h>
+#include <Statement.h>
+#include <BlockNode.h>
 
 namespace avl {
 
@@ -262,7 +254,7 @@ namespace avl {
             return error(tokens[it+n], "Failed to parse initializer of local variable " + tokens[it]->str);
         }
 
-        auto vdef = std::make_shared<Definition>(STORAGE_LOCAL, name, type, def);
+        auto vdef = std::make_shared<DefineStatement>(STORAGE_LOCAL, name, type, def);
         auto vname = vdef->name->name;
         if (b->vars.find(vdef->name->name) != b->vars.end()) {
             std::stringstream err;

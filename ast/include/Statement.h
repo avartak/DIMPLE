@@ -2,6 +2,8 @@
 #define STATEMENT_H
 
 #include <Node.h>
+#include <Identifier.h>
+#include <ExprNode.h>
 
 namespace avl {
 
@@ -21,6 +23,17 @@ namespace avl {
 
     };
 
+    enum Storage_ID {
+
+        STORAGE_UNDEFINED,
+        STORAGE_EXTERNAL,
+        STORAGE_INTERNAL,
+        STORAGE_STATIC,
+        STORAGE_LOCAL,
+        STORAGE_PRIVATE
+
+    };
+
     struct Statement : public Node {
 
         uint16_t is;
@@ -28,6 +41,53 @@ namespace avl {
         Statement(uint16_t);
 
         virtual ~Statement() = default;
+
+    };
+
+    struct ContinueStatement : public Statement {
+
+        ContinueStatement();
+
+    };
+
+    struct BreakStatement : public Statement {
+
+        BreakStatement();
+
+    };
+
+    struct ReturnStatement : public Statement {
+
+        std::shared_ptr<Node> val;
+
+        ReturnStatement(const std::shared_ptr<Node>&);
+
+    };
+
+    struct CallStatement : public Statement {
+
+        std::shared_ptr<CallExprNode> exp;
+
+        CallStatement(const std::shared_ptr<CallExprNode>&);
+
+    };
+
+    struct AssignStatement : public Statement {
+
+        std::shared_ptr<AssignExprNode> exp;
+
+        AssignStatement(const std::shared_ptr<AssignExprNode>&);
+
+    };
+
+    struct DefineStatement : public Statement {
+
+        uint16_t storage;
+        std::shared_ptr<Identifier> name;
+        std::shared_ptr<Node> type;
+        std::shared_ptr<Node> def;
+
+        DefineStatement(uint16_t, const std::shared_ptr<Identifier>&, const std::shared_ptr<Node>&, const std::shared_ptr<Node>&);
 
     };
 

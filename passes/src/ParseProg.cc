@@ -163,7 +163,7 @@ namespace avl {
             return error(tokens[it], "Unable to parse the definition of " + nm);
         }
 
-        ast->definitions[nm] = std::make_shared<Definition>(storage, name, type, def);
+        ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
         if (!parseTerm(it+n, false)) {
             return error();
@@ -215,7 +215,7 @@ namespace avl {
             return error(tokens[it], "Unable to parse the definition of " + nm);
         }
 
-        ast->definitions[nm] = std::make_shared<Definition>(STORAGE_EXTERNAL, name, type, def);
+        ast->definitions[nm] = std::make_shared<DefineStatement>(STORAGE_EXTERNAL, name, type, def);
 
         if (!parseTerm(it+n, false)) {
             return error();

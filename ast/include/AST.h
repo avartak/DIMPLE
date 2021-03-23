@@ -16,13 +16,13 @@ There are 3 basic elements at the root of the AST
 #include <vector>
 #include <memory>
 #include <NameNode.h>
-#include <Definition.h>
+#include <Statement.h>
 
 namespace avl {
 
     struct AST {
         std::map<std::string, std::shared_ptr<NameNode> > representations;
-        std::map<std::string, std::shared_ptr<Definition> > definitions;
+        std::map<std::string, std::shared_ptr<DefineStatement> > definitions;
     };
 
 }

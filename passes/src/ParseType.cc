@@ -1,14 +1,6 @@
 #include <Parser.h>
 #include <TokenID.h>
-#include <UnknownTypeNode.h>
-#include <VoidTypeNode.h>
-#include <PrimitiveTypeNode.h>
-#include <PointerTypeNode.h>
-#include <ArrayTypeNode.h>
-#include <StructTypeNode.h>
-#include <UnionTypeNode.h>
-#include <FunctionTypeNode.h>
-#include <NameNodeSet.h>
+#include <TypeNode.h>
 
 namespace avl {
 

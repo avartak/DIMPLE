@@ -416,9 +416,16 @@ namespace avl {
         if (i >= token.length()) {
             return false;
         }
-        if (token[i] == '\'' || token[i] == '\"') {
+        if (token[i] == '\'' || 
+            token[i] == '\"' ||
+            token[i] == '\f' || 
+            token[i] == '\n' ||
+            token[i] == '\r' ||
+            token[i] == '\v') 
+        {
             return false;
         }
+
 
         if (token[i] != '\\') {
             return true;

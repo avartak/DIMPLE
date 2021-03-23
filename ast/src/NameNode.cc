@@ -23,4 +23,9 @@ namespace avl {
         loc.end = nd->loc.end;
     }
 
+    NameNodeSet::NameNodeSet():
+        Node(NODE_NAMENODESET)
+    {
+    }
+
 }

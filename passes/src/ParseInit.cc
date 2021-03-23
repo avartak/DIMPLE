@@ -1,6 +1,5 @@
 #include <Parser.h>
 #include <TokenID.h>
-#include <NullInit.h>
 #include <Initializer.h>
   
 namespace avl {

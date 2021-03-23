@@ -2,6 +2,7 @@
 #define NAMENODE_H
 
 #include <memory>
+#include <vector>
 #include <Node.h>
 #include <Identifier.h>
 
@@ -15,6 +16,14 @@ namespace avl {
         NameNode();
         NameNode(const std::shared_ptr<Node>&);
         NameNode(const std::shared_ptr<Identifier>&, const std::shared_ptr<Node>&);
+
+    };
+
+    struct NameNodeSet : public Node {
+
+        std::vector<NameNode> set;
+
+        NameNodeSet();
 
     };
 

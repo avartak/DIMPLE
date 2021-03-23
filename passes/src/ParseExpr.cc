@@ -1,15 +1,8 @@
 #include <Parser.h>
 #include <TokenID.h>
 #include <TypeNode.h>
-#include <UnaryExprNode.h>
-#include <BinaryExprNode.h>
-#include <CallExprNode.h>
-#include <AssignExprNode.h>
-#include <IntNode.h>
-#include <BoolNode.h>
-#include <CharNode.h>
-#include <RealNode.h>
-#include <StringNode.h>
+#include <LiteralNode.h>
+#include <ExprNode.h>
 
 namespace avl {
 

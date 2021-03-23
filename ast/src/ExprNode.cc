@@ -76,4 +76,34 @@ namespace avl {
     {
     }
 
+    AssignExprNode::AssignExprNode(uint16_t o, const std::shared_ptr<Node>& l, const std::shared_ptr<Node>& r):
+        ExprNode(EXPR_ASSIGN),
+        op(o),
+        lhs(l),
+        rhs(r)
+    {
+    }
+
+    BinaryExprNode::BinaryExprNode(uint16_t o, const std::shared_ptr<Node>& l, const std::shared_ptr<Node>& r):
+        ExprNode(EXPR_BINARY),
+        op(o),
+        lhs(l),
+        rhs(r)
+    {
+    }
+
+    CallExprNode::CallExprNode(const std::shared_ptr<Node>& f, const std::vector<std::shared_ptr<Node> >& a):
+        ExprNode(EXPR_CALL),
+        func(f),
+        args(a)
+    {
+    }
+
+    UnaryExprNode::UnaryExprNode(uint16_t o, const std::shared_ptr<Node>& e):
+        ExprNode(EXPR_UNARY),
+        op(o),
+        exp(e)
+    {
+    }
+
 }

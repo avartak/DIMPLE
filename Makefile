@@ -5,6 +5,7 @@ LDFLAGS  := `$(LLVM)/bin/llvm-config --ldflags --libs all`
 LDFLAGS  += -lz -lcurses -lm -lxml2
 
 SOURCES  := $(wildcard ast/src/*.cc)
+SOURCES  += $(wildcard IR/src/*.cc)
 SOURCES  += $(wildcard input/src/*.cc)
 SOURCES  += $(wildcard lexis/src/*.cc)
 SOURCES  += $(wildcard passes/src/*.cc)
@@ -13,6 +14,7 @@ OBJECTS  := $(patsubst %.cc,%.o,$(SOURCES))
 DEPENDS  := $(patsubst %.cc,%.d,$(SOURCES))
 
 INCLUDES := -I$(PWD)/ast/include 
+INCLUDES += -I$(PWD)/IR/include 
 INCLUDES += -I$(PWD)/input/include 
 INCLUDES += -I$(PWD)/lexis/include 
 INCLUDES += -I$(PWD)/passes/include 

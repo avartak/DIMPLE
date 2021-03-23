@@ -2,6 +2,8 @@
 #define EXPRNODE_H
 
 #include <map>
+#include <vector>
+#include <memory>
 #include <Node.h>
 
 namespace avl {
@@ -24,7 +26,6 @@ namespace avl {
 
     enum Ops_ID {
 
-        UNARYOP_NOP,
         UNARYOP_DEREFERENCE,
         UNARYOP_ADDRESS,
         UNARYOP_SIZE,
@@ -97,6 +98,42 @@ namespace avl {
         static inline int precedence(int t) {
             return prec[t];
         }
+
+    };
+
+    struct AssignExprNode : public ExprNode {
+
+        uint16_t op;
+        std::shared_ptr<Node> lhs;
+        std::shared_ptr<Node> rhs;
+
+        AssignExprNode(uint16_t, const std::shared_ptr<Node>&, const std::shared_ptr<Node>&);
+    };
+
+    struct BinaryExprNode : public ExprNode {
+
+        uint16_t op;
+        std::shared_ptr<Node> lhs;
+        std::shared_ptr<Node> rhs;
+
+        BinaryExprNode(uint16_t, const std::shared_ptr<Node>&, const std::shared_ptr<Node>&);
+
+    };
+
+    struct CallExprNode : public ExprNode {
+
+        std::shared_ptr<Node> func;
+        std::vector<std::shared_ptr<Node> > args;
+
+        CallExprNode(const std::shared_ptr<Node>&, const std::vector<std::shared_ptr<Node> >&);
+    };
+
+    struct UnaryExprNode : public ExprNode {
+
+        uint16_t op;
+        std::shared_ptr<Node> exp;
+
+        UnaryExprNode(uint16_t, const std::shared_ptr<Node>&);
 
     };
 
