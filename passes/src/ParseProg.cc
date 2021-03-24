@@ -14,6 +14,7 @@ namespace avl {
         if (parseEmpty(it) ||
             parseInclude(it) ||
             parseRepresentation(it) ||
+            parseDeclaration(it) ||
             parseDefinition(it) ||
             parseStart(it))
         {
@@ -113,6 +114,42 @@ namespace avl {
         else {
             return error(tokens[it+n], "Failed to parse the definition of representation " + nm);
         }
+
+        if (!parseTerm(it+n, false)) {
+            return error();
+        }
+        n += nParsed;
+        return success(n);
+    }
+
+    bool Parser::parseDeclaration(std::size_t it) {
+
+        std::size_t n = 0;
+
+        if (!parseToken(it, TOKEN_IDENT) || !parseToken(it+1, TOKEN_DECLARE)) {
+            return error();
+        }
+
+        std::shared_ptr<Identifier> name;
+        std::shared_ptr<Node> type;
+
+        if (!isDefined(it)) {
+            return error();
+        }
+        const auto& nm = tokens[it]->str;
+        name = std::make_shared<Identifier>(nm, tokens[it]->loc);
+        n += 2;
+
+        if (parseToken(it+n, TOKEN_IDENT)) {
+            type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+            n++;
+        }
+        else if (parseType(it+n)) {
+            type = result;
+            n += nParsed;
+        }
+
+        ast->declarations[nm] = std::make_shared<NameNode>(name, type);
 
         if (!parseTerm(it+n, false)) {
             return error();
@@ -230,6 +267,9 @@ namespace avl {
         const auto& nm = tokens[it]->str;
         if (ast->representations.find(nm) != ast->representations.end()) {
             prev = ast->representations[nm]->name;
+        }
+        else if (ast->declarations.find(nm) != ast->declarations.end()) {
+            prev = ast->declarations[nm]->name;
         }
         else if (ast->definitions.find(nm) != ast->definitions.end()) {
             prev = ast->definitions[nm]->name;

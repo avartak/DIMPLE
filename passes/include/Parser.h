@@ -41,6 +41,7 @@ namespace avl {
         bool parseEmpty(std::size_t);
         bool parseInclude(std::size_t);
         bool parseRepresentation(std::size_t);
+        bool parseDeclaration(std::size_t);
         bool parseDefinition(std::size_t);
         bool parseStart(std::size_t);
 
