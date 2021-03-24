@@ -56,13 +56,25 @@ namespace avl {
         return ret;
     }
 
-    // Undefined behaviour for constants must be dealt with upstream
     std::shared_ptr<Value> BinaryOp::divide(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
         if (*le->type != *re->type) {
             return ret;
         }
         if (le->type->isInt() && re->type->isInt()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (rc->getZExtValue() == 0) {
+                    return ret;
+				}
+            }
+			if (le->isConst() && re->isConst()) {
+                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
+                    return ret;
+				}
+            }
             if (le->type->isUnsignedInt()) {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateUDiv(le->val(), re->val()));
             }
@@ -71,18 +83,36 @@ namespace avl {
             }
         }
         else if (le->type->isReal() && re->type->isReal()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantFP>(re->val());
+                if (rc->getValue().convertToDouble() == 0.0) {
+                    return ret;
+                }
+            }
             return std::make_shared<Value>(le->type, TheBuilder.CreateFDiv(le->val(), re->val()));
         }
         return ret;
     }
 
-    // Undefined behaviour for constants must be dealt with upstream
     std::shared_ptr<Value> BinaryOp::remainder(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
         if (*le->type != *re->type) {
             return ret;
         }
         if (le->type->isInt() && re->type->isInt()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (rc->getZExtValue() == 0) {
+                    return ret;
+                }
+            }
+            if (le->isConst() && re->isConst()) {
+                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
+                    return ret;
+                }
+            }
             if (le->type->isUnsignedInt()) {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateURem(le->val(), re->val()));
             }
@@ -91,6 +121,12 @@ namespace avl {
             }
         }
         else if (le->type->isReal() && re->type->isReal()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantFP>(re->val());
+                if (rc->getValue().convertToDouble() == 0.0) {
+                    return ret;
+                }
+            }
             return std::make_shared<Value>(le->type, TheBuilder.CreateFRem(le->val(), re->val()));
         }
         return ret;
