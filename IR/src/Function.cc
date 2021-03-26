@@ -2,6 +2,7 @@
 #include <Function.h>
 #include <FunctionType.h>
 #include <CodeBlock.h>
+#include <Statement.h>
 #include <Globals.h>
 
 namespace avl {
@@ -35,7 +36,7 @@ namespace avl {
         return llvm_pointer;
     }
 
-	bool Function::init() {
+	void Function::init() {
         auto fn = llvm::cast<llvm::Function>(llvm_pointer);
         auto ft = static_cast<FunctionType*>(type.get());
 
@@ -67,8 +68,6 @@ namespace avl {
             args.push_back(var);
             scope->vars[argname] = var;
         }
-
-		return true;
 	}
 
     void Function::resetLocals() {

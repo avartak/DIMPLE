@@ -11,7 +11,6 @@ namespace avl {
     struct BinaryOp {
 
         static std::shared_ptr<Value> recast(const std::shared_ptr<Value>&, const std::shared_ptr<Type>&);
-        static std::shared_ptr<Value> recastImplicit(const std::shared_ptr<Value>&, const std::shared_ptr<Type>&);
         static std::shared_ptr<Value> concat(const std::shared_ptr<StringLiteral>&, const std::shared_ptr<StringLiteral>&);
         static std::shared_ptr<Value> add(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> subtract(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
@@ -33,6 +32,7 @@ namespace avl {
         static std::shared_ptr<Value> logOr(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> element(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> member(const std::shared_ptr<Variable>&, const std::shared_ptr<StringLiteral>&);
+        static std::shared_ptr<Value> assign(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
 
     };
 

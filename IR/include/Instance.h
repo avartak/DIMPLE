@@ -6,17 +6,6 @@
 
 namespace avl {
 
-    enum Storage_ID {
-
-        STORAGE_UNDEFINED,
-        STORAGE_EXTERNAL,
-        STORAGE_INTERNAL,
-        STORAGE_STATIC,
-        STORAGE_LOCAL,
-        STORAGE_PRIVATE
-
-    };
-
     struct Instance : public Value {
 
         uint16_t storage;
@@ -29,6 +18,7 @@ namespace avl {
 
         virtual llvm::Value* val() const override = 0;
         virtual llvm::Value* ptr() const = 0;
+        virtual void init() = 0;
     };
 
 }

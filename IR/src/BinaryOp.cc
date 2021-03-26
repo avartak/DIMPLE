@@ -1,11 +1,13 @@
 #include <llvm/IR/Constants.h>
 #include <BinaryOp.h>
 #include <UnaryOp.h>
+#include <MemoryOp.h>
 #include <PrimitiveType.h>
 #include <PointerType.h>
 #include <ArrayType.h>
 #include <StructType.h>
 #include <UnionType.h>
+#include <Statement.h>
 #include <Globals.h>
 
 namespace avl {
@@ -539,18 +541,43 @@ namespace avl {
         return ret;
     }
 
-    std::shared_ptr<Value> BinaryOp::recastImplicit(const std::shared_ptr<Value>& e, const std::shared_ptr<Type>& ty) {
-        if (*e->type == *ty) {
-            return e;
-        }
-        std::shared_ptr<Value> ret;
-        if (e->type->isPtr() && ty->isPtr()) {
-            auto ept = static_cast<PointerType*>(e->type.get());
-            auto pt = static_cast<PointerType*>(ty.get());
-            if (ept->points_to->isUnknown() || pt->points_to->isUnknown()) {
-                return recast(e, ty);
+    std::shared_ptr<Value> BinaryOp::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Value>& ex) {
+
+        std::shared_ptr<Value> fail;
+
+        if (var->type->isPtr()) {
+            auto pt = static_cast<PointerType*>(var->type.get())->points_to;
+            if (ex->is == VALUE_STRING) {
+                if (pt->is != TYPE_INT8) {
+                    return fail;
+                }
+                auto estr = static_cast<StringLiteral*>(ex.get());
+                auto arr = new llvm::GlobalVariable(*TheModule, estr->type->llvm_type, false, llvm::GlobalValue::PrivateLinkage,
+                                                    llvm::cast<llvm::Constant>(estr->val()), "");
+                arr->setAlignment(llvm::Align(estr->type->alignment()));
+                auto strptr = TheBuilder.CreateConstInBoundsGEP2_32(estr->type->llvm_type, arr, 0, 0);
+                TheBuilder.CreateStore(strptr, var->ptr());
+                return var;
             }
         }
-        return ret;
+
+        if (*ex->type != *var->type) {
+            return fail;
+        }
+
+        if (ex->type->moveDirectly()) {
+            TheBuilder.CreateStore(ex->val(), var->ptr());
+            return var;
+        }
+
+        if (!ex->isVar()) {
+            return fail;
+        }
+        auto varex = std::static_pointer_cast<Variable>(ex);
+        if (!MemoryOp::memcpy(var, varex)) {
+            return fail;
+        }
+        return var;
+
     }
 }

@@ -2,6 +2,7 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <Variable.h>
 #include <PointerType.h>
+#include <MemoryOp.h>
 #include <Globals.h>
 
 namespace avl {
@@ -32,6 +33,15 @@ namespace avl {
             }
         }
         return llvm_pointer;
+    }
+
+    void Variable::init() {
+        if (!type->moveDirectly()) {
+            MemoryOp::memset(this, 0);
+        }
+        else {
+            TheBuilder.CreateStore(llvm::Constant::getNullValue(type->llvm_type), ptr());
+        }
     }
 
     bool Variable::align() {

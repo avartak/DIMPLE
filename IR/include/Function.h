@@ -22,8 +22,8 @@ namespace avl {
 
         virtual llvm::Value* val() const override;
         virtual llvm::Value* ptr() const override;
+        virtual void init() override;
 
-        bool init();
         void resetLocals();
         bool checkTerminations() const;
     };

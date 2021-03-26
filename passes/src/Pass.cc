@@ -1,4 +1,5 @@
 #include <Pass.h>
+#include <Entity.h>
 
 namespace avl {
 
@@ -73,5 +74,6 @@ namespace avl {
     }
 
     template struct Pass<Node>;
+    template struct Pass<Entity>;
     template struct Pass<void>;
 }

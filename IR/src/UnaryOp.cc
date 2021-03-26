@@ -6,6 +6,7 @@
 #include <PrimitiveType.h>
 #include <UnknownType.h>
 #include <Function.h>
+#include <Statement.h>
 #include <Globals.h>
 
 namespace avl {
