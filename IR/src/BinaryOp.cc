@@ -304,25 +304,19 @@ namespace avl {
     }
 
     std::shared_ptr<Value> BinaryOp::logAnd(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
-        std::shared_ptr<Value> ret; 
-        if (*le->type != *re->type) {
+        std::shared_ptr<Value> ret;
+        if (!le->type->isBool() || !re->type->isBool()) {
             return ret;
         }
-        if (le->type->isBool()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateAnd(le->val(), re->val()));
-        }
-        return ret;
+        return std::make_shared<Value>(le->type, TheBuilder.CreateAnd(le->val(), re->val()));
     }
 
     std::shared_ptr<Value> BinaryOp::logOr(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret; 
-        if (*le->type != *re->type) {
+        if (!le->type->isBool() || !re->type->isBool()) {
             return ret;
         }
-        if (le->type->isBool()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateOr(le->val(), re->val()));
-        }
-        return ret;
+        return std::make_shared<Value>(le->type, TheBuilder.CreateOr(le->val(), re->val()));
     }
 
     std::shared_ptr<Value> BinaryOp::element(const std::shared_ptr<Variable>& var, const std::shared_ptr<Value>& i) {

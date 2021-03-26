@@ -52,17 +52,9 @@ namespace avl {
             if (constants.find(name->name) != constants.end()) {
                 continue;
             }
-            if (!getValue(node)) {
-                if (hasErrors()) {
-                    return error(name, "Unable to construct constant representation " + name->name);
-                }
-                continue;
+            if (!getValue(node) && hasErrors()) {
+                return error(name, "Unable to construct constant representation " + name->name);
             }
-            auto constant = std::static_pointer_cast<Value>(result);
-            if (!constant->isConst()) {
-                return error(name, "Representation " + name->name + " is not a compile-time constant");
-            }
-            constants[name->name] = constant;
         }
         return success();
     }

@@ -76,13 +76,10 @@ namespace avl {
 
         std::shared_ptr<Value> ue;
 
-        if (e->isVar() || e->isFunction()) {
+        if (e->isInstance()) {
             auto inst = static_cast<const Instance*>(e.get());
             auto type = std::make_shared<PointerType>(inst->type);
-            auto val = inst->ptr();
-            if (val != nullptr) {
-                ue = std::make_shared<Value>(type, val);
-            }
+            ue = std::make_shared<Value>(type, inst->ptr());
         }
         else if (e->type->isInt() && e->isConst()) {
             auto type = std::make_shared<PointerType>(std::make_shared<UnknownType>());
@@ -101,15 +98,15 @@ namespace avl {
             return ue;
         }
         auto pt = static_cast<const PointerType*>(e->type.get());
-        if (pt->points_to->size() == 0) {
-            return ue;   
-        }
-        else if (pt->points_to->isFunction()) {
+        if (pt->points_to->isFunction()) {
             auto func = std::make_shared<Function>(STORAGE_UNDEFINED, "", pt->points_to);
             func->llvm_pointer = e->val();
             ue = func;
         }
         else {
+            if (pt->points_to->size() == 0) {
+                return ue;   
+            }
             auto var = std::make_shared<Variable>(STORAGE_UNDEFINED, "", pt->points_to);
             var->llvm_pointer = e->val();
             ue = var;
