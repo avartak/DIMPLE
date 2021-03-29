@@ -6,7 +6,12 @@
 #include <FunctionOp.h>
 #include <Statement.h>
 #include <BlockNode.h>
+#include <CodeBlock.h>
 #include <Globals.h>
+
+#define INSERT(b)           b->insert()
+#define JUMP(b)             do { if (!b) b = std::make_shared<CodeBlock>(); b->jump(); } while (false)
+#define BRANCH(b,a,c)       do { if (!b) b = std::make_shared<CodeBlock>(); if (!a) a = std::make_shared<CodeBlock>(); b->branch(c, a); } while (false)
 
 namespace avl {
 
@@ -101,9 +106,7 @@ namespace avl {
 
     bool Analyzer::defineCurrentFunction(const std::shared_ptr<DefineStatement>& defn) {
         
-        auto fnode = static_cast<Node*>(defn->def.get());
-
-        if (fnode->kind == NODE_NULLINIT) {
+        if (defn->def->kind == NODE_NULLINIT) {
             auto ft = static_cast<FunctionType*>(currentFunction->type.get());
             if (!ft->ret->isVoid()) {
                 return error(defn->name, "Function with a non-void return type cannot have an empty body");
@@ -112,7 +115,7 @@ namespace avl {
             return success();
         }
         else {
-            auto funcblock = static_cast<FuncBlockNode*>(fnode);
+            auto funcblock = std::static_pointer_cast<FuncBlockNode>(defn->def);
             for (const auto& statement : funcblock->body) {
                 if (statement->is == STATEMENT_BREAK) {
                     return error(statement, "\'break\' statement is not allowed in this block");
@@ -122,7 +125,7 @@ namespace avl {
                 }
             }
 
-            if (!defineBlock(funcblock->body)) {
+            if (!defineBlock(funcblock)) {
                 return error(defn->name, "Unable to define \'" + defn->name->name + "\'");
             }
             if (!currentFunction->checkTerminations()) {
@@ -161,14 +164,8 @@ namespace avl {
             argvals.push_back(std::static_pointer_cast<Value>(result));
         }
         for (std::size_t i = 0; i < ft->args.size(); i++) {
-            if (ft->args[i].type->isPtr() && argvals[i]->type->isPtr()) {
-                auto fpt = static_cast<PointerType*>(ft->args[i].type.get());
-                auto apt = static_cast<PointerType*>(argvals[i]->type.get());
-                if (fpt->points_to->isUnknown() || apt->points_to->isUnknown()) {
-                    argvals[i] = BinaryOp::recast(argvals[i], ft->args[i].type);
-                }
-            }
-            if (*ft->args[i].type != *argvals[i]->type) {
+            argvals[i] = BinaryOp::recastImplicit(argvals[i], ft->args[i].type);
+            if (!argvals[i]) {
                 return error(args[i], "Function argument " + std::to_string(i+1) + " has inconsistent type");
             }
         }
@@ -180,9 +177,245 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::defineBlock(const std::vector<std::shared_ptr<Statement> >&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>) {
+    bool Analyzer::ret(const std::shared_ptr<ReturnStatement>& retstat) {
+        auto ft = static_cast<FunctionType*>(currentFunction->type.get());
+        if (!retstat->val && !ft->ret->isVoid()) {
+            return error(retstat, "This function does not return void");
+        }
+        if (retstat->val && ft->ret->isVoid()) {
+            return error(retstat, "This function returns void");
+        }
 
-        return error();
+        if (ft->ret->isVoid()) {
+            TheBuilder.CreateRetVoid();
+            return success();
+        }
 
+        if (!getValue(retstat->val)) {
+            return error(retstat, "Unable to determine return value");
+        }
+        auto retval = std::static_pointer_cast<Value>(result);
+        retval = BinaryOp::recastImplicit(retval, ft->ret);
+        if (!retval) {
+            return error(retstat, "Return value is incompatible with the function return type");
+        }
+
+        result = nullptr;
+        return FunctionOp::ret(currentFunction, retval); // This should never be false
     }
+
+    bool Analyzer::defineLocalVar(const std::shared_ptr<DefineStatement>& definition) {
+
+        const auto& n = definition->name->name;
+
+        auto ft = static_cast<FunctionType*>(currentFunction->type.get());
+        for (std::size_t i = 0; i < ft->args.size(); i++) {
+            if (ft->args[i].name && ft->args[i].name->name == n) {
+                return error(definition, "Cannot define variable with argument name " + n);
+            }
+        }
+        if (currentFunction->scope->vars.find(n) != currentFunction->scope->vars.find(n)) {
+            return error(definition, "Cannot redefine variable with name " + n);
+        }
+
+        if (!getType(definition->type, false)) {
+            return error(definition->name, "Unable to determine type of variable " + n);
+        }
+        auto type = std::static_pointer_cast<Type>(result);
+        if (type->isFunction()) {
+            return error(definition, "Cannot use a function type to define a variable");
+        }
+        if (!type->isComplete()) {
+            return error(definition->type, "Variable type is not completely defined");
+        }
+        auto var = std::make_shared<Variable>(STORAGE_LOCAL, n, type);
+        var->llvm_pointer = TheBuilder.CreateAlloca(var->type->llvm_type);
+        var->align();
+        if (!initLocal(var, definition)) {
+            return error(definition->name, "Unable to initialize variable " + n);
+        }
+
+        currentFunction->scope->vars[n] = var;
+        result = var;
+        return success();
+    }
+
+    bool Analyzer::defineBlock(const std::shared_ptr<BlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
+
+        for (const auto& statement : block->body) {
+            if (statement->is == STATEMENT_BREAK) {
+                if (!block->isInLoop()) {
+                    return error(statement, "\'break\' statement cannot be used in this block");
+                }
+                JUMP(end);
+            }
+            else if (statement->is == STATEMENT_CONTINUE) {
+                if (!block->isInLoop()) {
+                    return error(statement, "\'break\' statement cannot be used in this block");
+                }
+                JUMP(start);
+            }
+            else if (statement->is == STATEMENT_RETURN) {
+                if (!ret(std::static_pointer_cast<ReturnStatement>(statement))) {
+                    return error();
+                }
+            }
+            else if (statement->is == STATEMENT_CALL) {
+                auto callstat = static_cast<CallStatement*>(statement.get());
+                if (!getValue(callstat->exp)) {
+                    return error();
+                }
+            }
+            else if (statement->is == STATEMENT_ASSIGN) {
+                auto assignstat = static_cast<AssignStatement*>(statement.get());
+                if (!getValue(assignstat->exp)) {
+                    return error();
+                }
+            }
+            else if (statement->is == STATEMENT_DEFINITION) {
+                if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(statement))) {
+                    return error();
+                }
+            }
+            else if (statement->is == BLOCK_IF) {
+                if (!defineIfBlock(std::static_pointer_cast<IfBlockNode>(statement), start, end)) {
+                    return error();
+                }
+            }
+            else if (statement->is == BLOCK_LOOP) {
+                if (!defineLoopBlock(std::static_pointer_cast<LoopBlockNode>(statement))) {
+                    return error();
+                }
+            }
+            else {
+                return error(statement, "Unable to identify the statement");
+            }
+        }
+
+        return success();
+    }
+
+    bool Analyzer::defineIfBlock(const std::shared_ptr<IfBlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
+
+        auto mergeBB = std::make_shared<CodeBlock>();
+
+        for (std::size_t i = 0; i < block->body.size(); i++) {
+            
+            auto ifblock = std::static_pointer_cast<CondBlockNode>(block->body[i]);
+            auto nextBB = std::make_shared<CodeBlock>();
+            
+            if (ifblock->condition) {
+                if (!getValue(ifblock->condition)) { 
+                    return error(ifblock->condition, "Unable to evaluate the if condition");
+                }
+                auto ex = std::static_pointer_cast<Value>(result);
+                if (!ex->type->isBool()) {
+                    return error(ifblock->condition, "if condition statement does not evaluate to a boolean");
+                }
+                
+                auto ifBB = std::make_shared<CodeBlock>();
+                BRANCH(ifBB, nextBB, ex);
+                INSERT(ifBB);
+            }
+            
+            auto newscope = std::make_shared<Scope>();
+            newscope->prev = currentFunction->scope;
+            currentFunction->scope = newscope;
+            if (!defineBlock(ifblock, start, end)) {
+                return error();
+            }
+            currentFunction->resetLocals();
+            
+            JUMP(mergeBB);
+            INSERT(nextBB);
+        }   
+        
+        JUMP(mergeBB);
+        INSERT(mergeBB);
+        return success();
+    }
+
+    bool Analyzer::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
+
+        auto newscope = std::make_shared<Scope>();
+        newscope->prev = currentFunction->scope;
+        currentFunction->scope = newscope;
+
+        const auto& init = block->body[0];
+        const auto& loop = block->body[1];
+        const auto& updt = block->body[2];
+        auto loopblock = std::static_pointer_cast<CondBlockNode>(loop);
+
+        if (init) {
+            if (init->is == STATEMENT_DEFINITION) {
+                if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(init))) {
+                    return error();
+                }
+            }
+            else if (init->is == STATEMENT_ASSIGN) {
+                auto assignstat = static_cast<AssignStatement*>(init.get());
+                if (!getValue(assignstat->exp)) {
+                    return error();
+                }
+            }
+            else if (init->is == STATEMENT_CALL) {
+                auto callstat = static_cast<CallStatement*>(init.get());
+                if (!getValue(callstat->exp)) {
+                    return error();
+                }
+            }
+            else {
+                return error(init, "Invalid loop initializer statement");
+            }
+        }
+
+        auto loopBB  = std::make_shared<CodeBlock>();
+        auto whileBB = std::make_shared<CodeBlock>();
+        auto updtBB  = std::make_shared<CodeBlock>();
+        auto mergeBB = std::make_shared<CodeBlock>();
+
+        JUMP(loopBB);
+        INSERT(loopBB);
+        if (loopblock->condition) {
+            if (!getValue(loopblock->condition)) {
+                return error(loopblock->condition, "Unable to evaluate the loop condition");
+            }
+            auto ex = std::static_pointer_cast<Value>(result);
+            if (!ex->type->isBool()) {
+                return error(loopblock->condition, "Loop condition statement does not evaluate to a boolean");
+            }
+            BRANCH(whileBB, mergeBB, ex);
+            INSERT(whileBB);
+        }
+        if (!defineBlock(loopblock, loopBB, mergeBB)) {
+            return error();
+        }
+
+        JUMP(updtBB);
+        INSERT(updtBB);
+        if (updt) {
+            if (updt->is == STATEMENT_ASSIGN) {
+                auto assignstat = static_cast<AssignStatement*>(updt.get());
+                if (!getValue(assignstat->exp)) {
+                    return error();
+                }
+            }
+            else if (updt->is == STATEMENT_CALL) {
+                auto callstat = static_cast<CallStatement*>(updt.get());
+                if (!getValue(callstat->exp)) {
+                    return error();
+                }
+            }
+            else {
+                return error(updt, "Invalid loop update statement");
+            }
+        }
+
+        JUMP(loopBB);
+        INSERT(mergeBB);
+
+        currentFunction->resetLocals();
+        return success();
+    }
+
 }

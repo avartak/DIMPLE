@@ -64,7 +64,7 @@ namespace avl {
             else {
                 var->llvm_pointer = fn->getArg(idx);
             }
-			const auto& argname = (ft->args[i].name->name != "" ? ft->args[i].name->name : std::to_string(i));
+			const auto& argname = (bool(ft->args[i].name) ? ft->args[i].name->name : std::to_string(i));
             args.push_back(var);
             scope->vars[argname] = var;
         }

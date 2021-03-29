@@ -500,16 +500,8 @@ namespace avl {
             return error(rval, "Unable to evaluate the right side of the expression");
         }
         auto ex = std::static_pointer_cast<Value>(result);
-
-        if (var->type->isPtr() && ex->type->isPtr()) {
-            auto vpt = static_cast<PointerType*>(var->type.get());
-            auto ept = static_cast<PointerType*>(ex->type.get());
-            if (vpt->points_to->isUnknown() || ept->points_to->isUnknown()) {
-                ex = BinaryOp::recast(ex, var->type);
-            }
-        }
-
-        if (*var->type != *ex->type) {
+        ex = BinaryOp::recastImplicit(ex, var->type);
+        if (!ex) {
             return error(rval, "Attempting to assign incompatible type to variable");
         }
         result = BinaryOp::assign(var, ex);

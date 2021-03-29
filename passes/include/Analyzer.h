@@ -10,6 +10,7 @@
 #include <TypeNode.h>
 #include <ExprNode.h>
 #include <Initializer.h>
+#include <BlockNode.h>
 #include <Value.h>
 #include <Variable.h>
 #include <Function.h>
@@ -70,10 +71,12 @@ namespace avl {
 
         bool getFunction(const std::shared_ptr<Identifier>&);
         bool defineCurrentFunction(const std::shared_ptr<DefineStatement>&);
-        bool defineBlock(const std::vector<std::shared_ptr<Statement> >&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);
-        bool defineIfBlock(const std::vector<std::shared_ptr<Statement> >&, std::size_t&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>);
-        bool defineLoopBlock(const std::vector<std::shared_ptr<Statement> >&, std::size_t);
+        bool defineLocalVar(const std::shared_ptr<DefineStatement>&);
+        bool defineBlock(const std::shared_ptr<BlockNode>&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);
+        bool defineIfBlock(const std::shared_ptr<IfBlockNode>&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>);
+        bool defineLoopBlock(const std::shared_ptr<LoopBlockNode>&);
         bool call(const std::shared_ptr<CallExprNode>&, const std::shared_ptr<Variable>& = nullptr);
+        bool ret(const std::shared_ptr<ReturnStatement>&);
     };
 
 }

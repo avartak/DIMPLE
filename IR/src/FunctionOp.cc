@@ -128,9 +128,6 @@ namespace avl {
         }
         else {
 		    v = retval->val();
-		    if (v == nullptr) {
-                return false;
-            }
         }
 		if (!func->scope->prev) {
 			if (func->retvar) {

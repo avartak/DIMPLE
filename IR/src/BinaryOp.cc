@@ -555,6 +555,26 @@ namespace avl {
         return ret;
     }
 
+    std::shared_ptr<Value> BinaryOp::recastImplicit(const std::shared_ptr<Value>& e, const std::shared_ptr<Type>& ty) {
+
+        std::shared_ptr<Value> ret;
+
+        if (e->type->isPtr() && ty->isPtr()) {
+            auto  pt = static_cast<PointerType*>(ty.get());
+            auto ept = static_cast<PointerType*>(e->type.get());
+            if (ept->points_to->isUnknown() || pt->points_to->isUnknown()) {
+                return BinaryOp::recast(e, ty);
+            }
+        }
+
+        if (*e->type == *ty) {
+            return e;
+        }
+
+        return ret;
+
+    }
+        
     std::shared_ptr<Value> BinaryOp::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Value>& ex) {
 
         std::shared_ptr<Value> fail;
