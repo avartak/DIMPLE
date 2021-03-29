@@ -69,9 +69,11 @@ namespace avl {
         bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Node>&);
 
         bool getFunction(const std::shared_ptr<Identifier>&);
-
-        bool call(const std::shared_ptr<CallExprNode>&);
-        bool call(const std::shared_ptr<CallExprNode>&, const std::shared_ptr<Variable>&);
+        bool defineCurrentFunction(const std::shared_ptr<DefineStatement>&);
+        bool defineBlock(const std::vector<std::shared_ptr<Statement> >&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);
+        bool defineIfBlock(const std::vector<std::shared_ptr<Statement> >&, std::size_t&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>);
+        bool defineLoopBlock(const std::vector<std::shared_ptr<Statement> >&, std::size_t);
+        bool call(const std::shared_ptr<CallExprNode>&, const std::shared_ptr<Variable>& = nullptr);
     };
 
 }

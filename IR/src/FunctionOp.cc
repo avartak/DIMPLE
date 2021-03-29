@@ -13,10 +13,7 @@ namespace avl {
         std::shared_ptr<Value> fail;
 
         auto ft = static_cast<FunctionType*>(func->type.get());
-        if (args.size() < ft->args.size()) {
-            return fail;
-        }
-        else if (args.size() > ft->args.size()) {
+        if (args.size() != ft->args.size()) {
             return fail;
         }
 
