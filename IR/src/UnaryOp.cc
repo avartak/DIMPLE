@@ -5,6 +5,7 @@
 #include <PointerType.h>
 #include <PrimitiveType.h>
 #include <UnknownType.h>
+#include <Variable.h>
 #include <Function.h>
 #include <Statement.h>
 #include <Globals.h>
@@ -56,16 +57,6 @@ namespace avl {
         
         std::shared_ptr<Value> ue;
         IntLiteral i(t->size());
-        if (i.literal > 0) {
-            ue = std::make_shared<Value>(std::make_shared<PrimitiveType>(TYPE_UINT64), i.val());
-        }
-        return ue;
-    }
-
-    std::shared_ptr<Value> UnaryOp::size(const std::shared_ptr<Variable>& v) {
-
-        std::shared_ptr<Value> ue;
-        IntLiteral i(v->type->size());
         if (i.literal > 0) {
             ue = std::make_shared<Value>(std::make_shared<PrimitiveType>(TYPE_UINT64), i.val());
         }

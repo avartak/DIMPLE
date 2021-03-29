@@ -1,7 +1,9 @@
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/GlobalVariable.h>
 
 #include <Literal.h>
 #include <PrimitiveType.h>
+#include <PointerType.h>
 #include <ArrayType.h>
 #include <Globals.h>
 
@@ -32,11 +34,14 @@ namespace avl {
     }
 
     StringLiteral::StringLiteral(const std::string& s):
-        Value(VALUE_STRING, 
-             std::make_shared<ArrayType>(std::make_shared<PrimitiveType>(TYPE_INT8), s.length()+1), 
-             llvm::ConstantDataArray::getString(TheContext, s)),
+        Value(VALUE_STRING, std::make_shared<PointerType>(std::make_shared<PrimitiveType>(TYPE_INT8)), nullptr),
         literal(s)
     {
+        auto str_type = std::make_shared<ArrayType>(std::make_shared<PrimitiveType>(TYPE_INT8), s.length()+1);
+        auto str_const = llvm::ConstantDataArray::getString(TheContext, s);
+        auto arr = new llvm::GlobalVariable(*TheModule, str_type->llvm_type, false, llvm::GlobalValue::PrivateLinkage, str_const, "");
+        arr->setAlignment(llvm::Align(str_type->alignment()));
+        llvm_value = TheBuilder.CreatePointerCast(arr, type->llvm_type);
     }
 
 }

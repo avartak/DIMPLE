@@ -13,6 +13,7 @@
 #include <Value.h>
 #include <Variable.h>
 #include <Function.h>
+#include <Initializer.h>
 
 namespace avl {
 
@@ -42,14 +43,26 @@ namespace avl {
         bool getFunctionType(const std::shared_ptr<FunctionTypeNode>&, bool includeOpaquePtr);
 
         bool getValue(const std::shared_ptr<Node>&);
-        bool getLiteral(const std::shared_ptr<ExprNode>&);
-        bool getAssignExpr(const std::shared_ptr<AssignExprNode>&);
-        bool getCallExpr(const std::shared_ptr<CallExprNode>&);
-        bool getUnaryExpr(const std::shared_ptr<UnaryExprNode>&);
-        bool getBinaryExpr(const std::shared_ptr<BinaryExprNode>&);
+        bool literal(const std::shared_ptr<ExprNode>&);
+        bool unary(const std::shared_ptr<UnaryExprNode>&);
+        bool recast(const std::shared_ptr<BinaryExprNode>&);
+        bool member(const std::shared_ptr<BinaryExprNode>&);
+        bool element(const std::shared_ptr<BinaryExprNode>&);
+        bool binary(const std::shared_ptr<ExprNode>&);
+        bool assign(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
 
         bool getGlobalVar(const std::shared_ptr<Identifier>&);
+        bool initGlobal(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
+        bool initLocal(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
+        bool initLocalArray(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
+        bool initLocalStruct(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
+        bool initLocalUnion(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
+        bool initConst(const std::shared_ptr<Type>&, const std::shared_ptr<Node>&);
+
         bool getFunction(const std::shared_ptr<Identifier>&);
+
+        bool call(const std::shared_ptr<CallExprNode>&);
+        bool call(const std::shared_ptr<CallExprNode>&, const std::shared_ptr<Variable>&);
     };
 
 }

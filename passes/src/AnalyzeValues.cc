@@ -1,8 +1,12 @@
+#include <llvm/IR/Constants.h>
 #include <Analyzer.h>
 #include <Literal.h>
 #include <LiteralNode.h>
 #include <UnaryOp.h>
 #include <BinaryOp.h>
+#include <PointerType.h>
+#include <StructType.h>
+#include <UnionType.h>
 
 namespace avl {
 
@@ -12,10 +16,9 @@ namespace avl {
             auto n = ident->name;
             if (constants.find(n) != constants.end()) {
                 if (!constants.find(n)->second) {
-                    return(ident, "Cannot create a complete representation of " + n);
+                    return error(ident, "Cannot create a complete representation of " + n);
                 }
                 result = constants[n];
-                return success();
             }
             else if (ast->representations.find(n) != ast->representations.end()) {
                 auto next_node = ast->representations[n]->node;
@@ -34,23 +37,19 @@ namespace avl {
                 if (!getValue(ast->representations[n]->node)) {
                     return error();
                 }
-                constants[n] = result;
-                return success();
+                result = constants[n] = std::static_pointer_cast<Value>(result);
             }
             else if (currentFunction && currentFunction->scope->isDefined(n)) {
                 result = currentFunction->scope->getVar(n);
-                return success();
             }
             else if (variables.find(n) != variables.end()) {
                 result = variables[n];
-                return success();
             }
             else if (functions.find(n) != functions.end()) {
                 result = functions[n];
-                return success();
             }
             else if (ast->declarations.find(n) != ast->declarations.end() ||
-                     ast->definitions.find(n) != ast->decfinitions.end()) 
+                     ast->definitions.find(n) != ast->definitions.end()) 
             {
                 if (getGlobalVar(ident)) {
                     return success();
@@ -63,6 +62,7 @@ namespace avl {
             else {
                 return error(ident, "Unable to decipher idenitifer " + n);
             }
+            return success();
         }
 
         if (node->kind != NODE_EXPRNODE) {
@@ -70,361 +70,450 @@ namespace avl {
         }
 
         auto expr = static_cast<ExprNode*>(node.get());
-        if (expr->is == EXPR_INT  ||
-            expr->is == EXPR_BOOL ||
-            expr->is == EXPR_REAL ||
-            expr->is == EXPR_CHAR ||
-            expr->is == EXPR_STRING) 
-        {
-            return getLiteral(std::static_pointer_cast<ExprNode>(node));
+        if (expr->isLiteralNode()) {
+            return literal(std::static_pointer_cast<ExprNode>(node));
         }
         else if (expr->is == EXPR_ASSIGN) {
-            return getAssignExpr(std::static_pointer_cast<AssignExprNode>(node));
+            return binary(std::static_pointer_cast<ExprNode>(node));
         }
         else if (expr->is == EXPR_CALL) {
-            return getCallExpr(std::static_pointer_cast<CallExprNode>(node));
+            return call(std::static_pointer_cast<CallExprNode>(node));
         }
         else if (expr->is == EXPR_UNARY) {
-            return getUnaryExpr(std::static_pointer_cast<UnaryExprNode>(node));
+            return unary(std::static_pointer_cast<UnaryExprNode>(node));
         }
         else if (expr->is == EXPR_BINARY) {
-            return getBinaryExpr(std::static_pointer_cast<BinaryExprNode>(node));
+            auto bin = std::static_pointer_cast<BinaryExprNode>(node);
+            if (bin->op == BINARYOP_RECAST) {
+                return recast(bin);
+            }
+            else if (bin->op == BINARYOP_MEMBER) {
+                return member(bin);
+            }
+            else if (bin->op == BINARYOP_ELEMENT) {
+                return element(bin);
+            }
+            else {
+                return binary(bin);
+            }
         }
 
         return error();
 
     }
 
-    bool Analyzer::getLiteral(const std::shared_ptr<ExprNode>& expr) {
+    bool Analyzer::literal(const std::shared_ptr<ExprNode>& expr) {
         if (expr->is == EXPR_INT) {
-            auto intnode = static_cast<IntNode*>(expr);
+            auto intnode = static_cast<IntNode*>(expr.get());
             result = std::make_shared<IntLiteral>(intnode->literal);
-            return success();
         }
         else if (expr->is == EXPR_BOOL) {
-            auto boolnode = static_cast<BoolNode*>(expr);
+            auto boolnode = static_cast<BoolNode*>(expr.get());
             result = std::make_shared<BoolLiteral>(boolnode->literal);
-            return success();
         }
         else if (expr->is == EXPR_REAL) {
-            auto realnode = static_cast<RealNode*>(expr);
+            auto realnode = static_cast<RealNode*>(expr.get());
             result = std::make_shared<RealLiteral>(realnode->literal);
-            return success();
         }
         else if (expr->is == EXPR_CHAR) {
-            auto charnode = static_cast<CharNode*>(expr);
+            auto charnode = static_cast<CharNode*>(expr.get());
             result = std::make_shared<CharLiteral>(charnode->literal);
-            return success();
         }
         else if (expr->is == EXPR_STRING) {
-            auto strnode = static_cast<StringNode*>(expr);
+            auto strnode = static_cast<StringNode*>(expr.get());
             result = std::make_shared<StringLiteral>(strnode->literal);
-            return success();
         }
-        else if (expr->is == EXPR_ASSIGN) {
+        else {
             return error();
         }
+        return success();
     }
 
-    bool Analyzer::getAssignExpr(const std::shared_ptr<AssignExprNode>& assex) {
-        if (!getValue(assex->lhs)) {
-            return hasErrors() ? error() : error(assex, "Unable to construct left side of the assign expression");
-        }
-        auto lval = static_cast<Value*>(result.get());
-        if (lval->is != VALUE_VAR) {
-            return error(assex, "Left side of the assign expression is not instantiable");
-        }
-        auto lvar = std::static_pointer_cast<Variable>(result);
-        return assign(assex->op, lvar, assex->rhs) {
-    }
-
-    bool Analyzer::getCallExpr(const std::shared_ptr<CallExprNode>& callex) {
-        if (!getValue(callex->func)) {
-            return hasErrors() ? error() : error(callex->func, "Unable to obtain function for the call expression");
-        }
-        auto fval = static_cast<Value*>(result.get());
-        if (fval->is != VALUE_FUNC) {
-            return error(callex->func, "A function call is placed on an instance/value that is not a function");
-        }
-        auto func = std::static_pointer_cast<Function>(result);
-        return call(func, callex->args);
-    }
-
-    bool Analyzer::getUnaryExpr(const std::shared_ptr<UnaryExprNode>& unary) {
-        if (unary->op == UNARYOP_ADDRESS) {
-            if (!getValue(unary->exp)) {
-                return error(unary, "Unable to evaluate the operand of the address operation");
-            }
-            auto val = std::static_pointer_cast<Value>(result);
-            if (!val->isInstance() && !(val->type->isInt() && val->isConst())) {
-                return error(unary, "Operand of address operation is neither an instance nor a constant integer");
-            }
-            result = UnaryOp::address(val);
-            return success();
-        }
-        else if (unary->op == UNARYOP_SIZE) {
+    bool Analyzer::unary(const std::shared_ptr<UnaryExprNode>& un) {
+        if (un->op == UNARYOP_SIZE) {
             bool istype = false;
-            if (!getValue(unary->exp)) {
+            if (!getValue(un->exp)) {
                 if (hasErrors()) {
                     return error();
                 }
-                if (!getType(unary->exp, false)) {
-                    return error(unary, "Unable to evaluate the operand of the size operation");
+                if (!getType(un->exp, false)) {
+                    return error(un, "Unable to evaluate the operand of the size operation");
                 }
                 istype = true;
             }
-            if (istype) {
-                auto ty = std::static_pointer_cast<Type>(result);
-                if (!ty->isComplete()) {
-                    return error(unary, "Attempting to size an incomplete type");
-                }
-                if (ty->isUnknown()) {
-                    return error(unary, "Attempting to size unknown type");
-                }
-                if (ty->isVoid()) {
-                    return error(unary, "Attempting to size void type");
-                }
-                if (ty->isFunction()) {
-                    return error(unary, "Attempting to size function type");
-                }
-                result = UnaryOp::size(ty); // result should always be valid
-                return success();
+            auto ty = istype ? std::static_pointer_cast<Type>(result) : std::static_pointer_cast<Value>(result)->type;
+            if (ty->size() == 0) {
+                return error(un, "Cannot perform size operation on this type");
             }
-            else {
-                auto v = std::static_pointer_cast<Value>(result);
-                if (!v->isVar()) {
-                    return error(unary, "Invalid operand of the size operation");
-                }
-                result = UnaryOp::size(std::static_pointer_cast<Variable>(v)); // result should always be valid
-                return success();
-            }
-        }
-        else if (unary->op == UNARYOP_PLUS ||
-                 unary->op == UNARYOP_NEGATE ||
-                 unary->op == UNARYOP_COMPLEMENT ||
-                 unary->op == UNARYOP_NOT ||
-                 unary->op == UNARYOP_DEREFERENCE)
-        {
-            if (!getValue(unary->exp)) {
-                return error(unary, "Unable to evaluate the operand of unary operation");
-            }
-            auto val = std::static_pointer_cast<Value>(result);
-            if (unary->op == UNARYOP_PLUS) {
-                result = UnaryOp::plus(val);
-                if (!result) {
-                    return error(unary, "Operand of \'+\' operator is non-numerical");
-                }
-            }
-            else if (unary->op == UNARYOP_NEGATE) {
-                result = UnaryOp::negate(val);
-                if (!result) {
-                    return error(unary, "Operand of \'-\' operator is non-numerical");
-                }
-            }
-            else if (unary->op == UNARYOP_COMPLEMENT) {
-                result = UnaryOp::complement(val);
-                if (!result) {
-                    return error(unary, "Operand of \'~\' operator is not an integer");
-                }
-            }
-            else if (unary->op == UNARYOP_NOT) {
-                result = UnaryOp::logicalNot(val);
-                if (!result) {
-                    return error(unary, "Operand of \'!\' operator is not a boolean");
-                }
-            }
-            else if (unary->op == UNARYOP_DEREFERENCE) {
-                if (!val->type->isPtr()) {
-                    return error(unary, "Attempting to dereference a non-pointer");
-                }
-                result = UnaryOp::dereference(val);
-                if (!result) {
-                    return error(unary, "Cannot dereference pointer to unknown/incomplete type");
-                }
-            }   
-            return success();
-        }
-    }
-
-    bool Analyzer::getBinaryExpr(const std::shared_ptr<BinaryExprNode>& binary) {
-        if (binary->op == BINARYOP_RECAST) {
-            if (!getType(binary->rhs, false)) {
-                return error(binary, "Unable to obtain recast type");
-            }
-            auto ty = std::static_pointer_cast<Type>(result);
-            if (!getValue(binary->lhs)) {
-                return error(binary, "Unable to obtain expression to recast");
-            }
-            auto ex = std::static_pointer_cast<Value>(result);
-            auto rex = BinaryOp::recast(ex, ty);
-            if (!rex) {
-                return error(binary, "Recast failed");
-            }
-            result = rex;
+            result = UnaryOp::size(ty); // result should always be valid
             return success();
         }
 
-        if (!getValue(binary->lhs)) {
-            return error(binary, "Unable to evaluate the left side of the binary operation");
+        if (!getValue(un->exp)) {
+            return error(un, "Unable to evaluate the operand of unary operation");
         }
-        auto lhs = std::static_pointer_cast<Value>(result);
+        auto val = std::static_pointer_cast<Value>(result);
 
-        if (binary->op == BINARYOP_MEMBER) {
-            if (!lhs->isVar()) {
-                return error(binary, "Need a variable to perform the member operation");
+        if (un->op == UNARYOP_ADDRESS) {
+            result = UnaryOp::address(val);
+            if (!val->isInstance() && !(val->type->isInt() && val->isConst())) {
+                return error(un, "Operand of address operation is neither an instance nor a constant integer");
             }
-            if (!lhs->type->isStruct() && !lhs->type->isUnion()) {
-                return error(binary, "Variable type for the member operation must be struct or union");
-            }
-            // binary->rhs is guranteed to be a Identifier from parseExpr
-            auto memident = static_cast<Identifier*>(binary->rhs.get());
-            auto mem = std::make_shared<StringLiteral>(memident->name);
-            auto var = std::static_pointer_cast<Variable>(lhs);
-            result = BinaryOp::member(var, mem);
+        }
+        else if (un->op == UNARYOP_PLUS) {
+            result = UnaryOp::plus(val);
             if (!result) {
-                return error(binary, "Member operation failed");
+                return error(un, "Operand of \'+\' operator is non-numerical");
             }
-            return success();
         }
-
-        if (!getValue(binary->rhs)) {
-            return error(binary, "Unable to evaluate the right side of the binary operation");
-        }
-        auto rhs = std::static_pointer_cast<Value>(result);
-
-        if (binary->op == BINARYOP_ELEMENT) {
-            if (lhs->is != VALUE_VAR) {
-                return error(binary, "Need a variable to perform the element operation");
-            }
-            if (lhs->type->isPrimitive()) {
-                return error(binary, "Attempting to perform element operation on a primitive type");
-            }
-            if (!rhs->type->isInt()) {
-                return error(binary, "Element operand is not an integer");
-            }
-            auto var = std::static_pointer_cast<Variable>(lhs);
-            result = BinaryOp::element(var, rhs);
+        else if (un->op == UNARYOP_NEGATE) {
+            result = UnaryOp::negate(val);
             if (!result) {
-                return error(binary, "Element operation failed");
+                return error(un, "Operand of \'-\' operator is non-numerical");
             }
         }
-
-        else if (binary->op == BINARYOP_STR_CONCAT) {
-            // Operands should ALWAYS be StringLiterals; no checks needed 
-            auto lstr = std::static_pointer_cast<StringLiteral>(lhs);
-            auto rstr = std::static_pointer_cast<StringLiteral>(rhs);
-            result = BinaryOp::concat(lstr, rstr);
-        }
-        else if (binary->op == BINARYOP_ADD) {
-            result = BinaryOp::add(lhs, rhs);
+        else if (un->op == UNARYOP_COMPLEMENT) {
+            result = UnaryOp::complement(val);
             if (!result) {
-                return error(binary, "Unable to perform \'+\' operation");
+                return error(un, "Operand of \'~\' operator is not an integer");
             }
         }
-        else if (binary->op == BINARYOP_SUBTRACT) {
-            result = BinaryOp::subtract(lhs, rhs);
+        else if (un->op == UNARYOP_NOT) {
+            result = UnaryOp::logicalNot(val);
             if (!result) {
-                return error(binary, "Unable to perform \'-\' operation");
+                return error(un, "Operand of \'!\' operator is not a boolean");
             }
         }
-        else if (binary->op == BINARYOP_MULTIPLY) {
-            result = BinaryOp::multiply(lhs, rhs);
+        else if (un->op == UNARYOP_DEREFERENCE) {
+            if (!val->type->isPtr()) {
+                return error(un, "Attempting to dereference a non-pointer");
+            }
+            result = UnaryOp::dereference(val);
             if (!result) {
-                return error(binary, "Unable to perform \'*\' operation");
+                return error(un, "Cannot dereference pointer to unknown/incomplete type");
             }
         }
-        else if (binary->op == BINARYOP_DIVIDE) {
-            result = BinaryOp::divide(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'/\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_MOD) {
-            result = BinaryOp::remainder(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'%\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_SHIFT_LEFT) {
-            result = BinaryOp::shiftLeft(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'<<\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_SHIFT_RIGHT) {
-            result = BinaryOp::shiftRight(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'>>\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_BIT_OR) {
-            result = BinaryOp::bitOr(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'|\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_BIT_AND) {
-            result = BinaryOp::bitAnd(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'&\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_BIT_XOR) {
-            result = BinaryOp::bitXor(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'^\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_LOGICAL_OR) {
-            result = BinaryOp::logOr(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'||\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_LOGICAL_AND) {
-            result = BinaryOp::logAnd(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'&&\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_EQUAL) {
-            result = BinaryOp::equal(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'==\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_NOT_EQUAL) {
-            result = BinaryOp::unequal(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'!=\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_GREATER) {
-            result = BinaryOp::greater(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'>\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_LESSER) {
-            result = BinaryOp::lesser(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'<\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_GREATER_EQUAL) {
-            result = BinaryOp::greaterEqual(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'<=\' operation");
-            }
-        }
-        else if (binary->op == BINARYOP_LESSER_EQUAL) {
-            result = BinaryOp::lesserEqual(lhs, rhs);
-            if (!result) {
-                return error(binary, "Unable to perform \'&&\' operation");
-            }
+        else {
+            return error();
         }
 
         return success();
     }
 
+    bool Analyzer::recast(const std::shared_ptr<BinaryExprNode>& binary) {
+        if (!getType(binary->rhs, false)) {
+            return error(binary, "Unable to obtain recast type");
+        }
+        auto ty = std::static_pointer_cast<Type>(result);
+        if (!getValue(binary->lhs)) {
+            return error(binary, "Unable to obtain expression to recast");
+        }
+        auto ex = std::static_pointer_cast<Value>(result);
+        if (ty->isCompound()) {
+            return error(binary, "Cannot recast to compound type");
+        }
+        if (ty->isFunction()) {
+            return error(binary, "Cannot recast to function type");
+        }
+        result = BinaryOp::recast(ex, ty);
+        if (!result) {
+            return error(binary, "Recast failed"); // This should never happen
+        }
+        return success();
+    }
+
+    bool Analyzer::member(const std::shared_ptr<BinaryExprNode>& binary) {
+        if (!getValue(binary->lhs)) {
+            return error(binary, "Unable to evaluate the left side of the member operation");
+        }
+        auto lhs = std::static_pointer_cast<Value>(result);
+
+        if (!lhs->isVar()) {
+            return error(binary, "Need a variable to perform the member operation");
+        }
+        if (!lhs->type->isStruct() && !lhs->type->isUnion()) {
+            return error(binary, "Variable type for the member operation must be struct or union");
+        }
+        // binary->rhs is guranteed to be an Identifier from parseExpr
+        auto memident = static_cast<Identifier*>(binary->rhs.get());
+        auto mem = std::make_shared<StringLiteral>(memident->name);
+        auto var = std::static_pointer_cast<Variable>(lhs);
+        result = BinaryOp::member(var, mem);
+        if (!result) {
+            return error(binary, "No member called " + memident->name);
+        }
+        return success();
+    }
+
+    bool Analyzer::element(const std::shared_ptr<BinaryExprNode>& binary) {
+        if (!getValue(binary->lhs)) {
+            return error(binary, "Unable to evaluate the left side of the element operation");
+        }
+        auto lhs = std::static_pointer_cast<Value>(result);
+        if (!getValue(binary->rhs)) {
+            return error(binary, "Unable to evaluate the right side of the element operation");
+        }
+        auto rhs = std::static_pointer_cast<Value>(result);
+
+        if (lhs->is != VALUE_VAR) {
+            return error(binary, "Need a variable to perform the element operation");
+        }
+        if (lhs->type->isPrimitive() || lhs->type->isUnknown() ||
+            lhs->type->isFunction()  || lhs->type->isVoid())
+        {
+            return error(binary, "Attempting to perform element operation on this type");
+        }
+        if (!rhs->type->isInt()) {
+            return error(binary, "Element index is not an integer");
+        }
+        if (lhs->type->isStruct() || lhs->type->isUnion()) {
+            if (!rhs->isConst()) {
+                return error(binary, "Element index is not an integer constant");
+            }
+            auto ci = llvm::cast<llvm::ConstantInt>(rhs->val());
+            if (ci->isNegative()) {
+                return error(binary, "Element index cannot be negative");
+            }
+            auto idx = ci->getZExtValue();
+            if (lhs->type->isStruct()) {
+                auto st = static_cast<StructType*>(lhs->type.get());
+                if (idx >= st->members.size()) {
+                    return error(binary, "Element index beyond the number of struct members");
+                }
+            }
+            else {
+                auto ut = static_cast<UnionType*>(lhs->type.get());
+                if (idx >= ut->members.size()) {
+                    return error(binary, "Element index beyond the number of union members");
+                }
+            }
+        }
+        else if (lhs->type->isPtr()) {
+            auto pt = static_cast<PointerType*>(lhs->type.get());
+            if (pt->points_to->isUnknown()) {
+                return error(binary, "Element operation cannot be performed on a pointer to unknown type");
+            }
+        }
+        auto var = std::static_pointer_cast<Variable>(lhs);
+        result = BinaryOp::element(var, rhs);
+        if (!result) {
+            return error(binary, "Element operation failed"); // This should never happen
+        }
+        return success();
+    }
+
+    bool Analyzer::binary(const std::shared_ptr<ExprNode>& expr) {
+
+        uint16_t op;
+        std::string opstr;
+        std::shared_ptr<Node> lhs_node;
+        std::shared_ptr<Node> rhs_node;
+
+        if (expr->is == EXPR_BINARY) {
+            auto bin = std::static_pointer_cast<BinaryExprNode>(expr);
+            op = bin->op;
+            opstr = ExprNode::binopstring(op);
+            lhs_node = bin->lhs;
+            rhs_node = bin->rhs;
+        }
+        else if (expr->is == EXPR_ASSIGN) {
+            auto assex = std::static_pointer_cast<AssignExprNode>(expr);
+            op = assex->op;
+            opstr = ExprNode::assopstring(op);
+            lhs_node = assex->lhs;
+            rhs_node = assex->rhs;
+        }
+        else {
+            return error();
+        }
+
+        if (!getValue(lhs_node)) {
+            return error(lhs_node, "Unable to evaluate the left side of the expression");
+        }
+        auto lhs = std::static_pointer_cast<Value>(result);
+
+        if (expr->is == EXPR_ASSIGN) {
+            if (lhs->is != VALUE_VAR) {
+                return error(lhs_node, "Left side of the assign expression is not instantiable");
+            }
+            if (op == ASSIGNOP_ASSIGN) {
+                return assign(std::static_pointer_cast<Variable>(lhs), rhs_node);
+            }
+        }
+
+        if (!getValue(rhs_node)) {
+            return error(rhs_node, "Unable to evaluate the right side of the expression");
+        }
+        auto rhs = std::static_pointer_cast<Value>(result);
+
+        if (op == BINARYOP_ADD        || 
+            op == BINARYOP_SUBTRACT   || 
+            op == BINARYOP_MULTIPLY   ||
+            op == ASSIGNOP_ADD_ASSIGN || 
+            op == ASSIGNOP_SUB_ASSIGN || 
+            op == ASSIGNOP_MUL_ASSIGN) 
+        {
+            if (*lhs->type != *rhs->type) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+            }
+            if (!lhs->type->isInt() && !lhs->type->isReal()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
+            }
+            switch (op) {
+                case BINARYOP_ADD        : result = BinaryOp::add(lhs, rhs);      break;
+                case BINARYOP_SUBTRACT   : result = BinaryOp::subtract(lhs, rhs); break;
+                case BINARYOP_MULTIPLY   : result = BinaryOp::multiply(lhs, rhs); break;
+                case ASSIGNOP_ADD_ASSIGN : result = BinaryOp::add(lhs, rhs);      break;
+                case ASSIGNOP_SUB_ASSIGN : result = BinaryOp::subtract(lhs, rhs); break;
+                case ASSIGNOP_MUL_ASSIGN : result = BinaryOp::multiply(lhs, rhs); break;
+            }
+        }
+        else if (op == BINARYOP_DIVIDE     || 
+                 op == BINARYOP_REMAINDER  ||
+                 op == ASSIGNOP_DIV_ASSIGN ||
+                 op == ASSIGNOP_REM_ASSIGN) 
+        {
+            if (*lhs->type != *rhs->type) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+            }
+            if (!lhs->type->isInt() && !lhs->type->isReal()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
+            }
+            if (lhs->type->isInt()) {
+                if (rhs->isConst()) {
+                    auto rc = llvm::cast<llvm::ConstantInt>(rhs->val());
+                    if (rc->getZExtValue() == 0) {
+                        return error(expr, "Divisor of \'" + opstr + "\' operation is zero");
+                    }
+                }
+                if (lhs->type->isSignedInt() && lhs->isConst() && rhs->isConst()) {
+                    auto lc = llvm::cast<llvm::ConstantInt>(lhs->val());
+                    auto rc = llvm::cast<llvm::ConstantInt>(rhs->val());
+                    if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
+                        return error(expr, "\'" + opstr + "\' operation has signed overflow");
+                    }
+                }
+            }
+            else {
+                if (rhs->isConst()) {
+                    auto rc = llvm::cast<llvm::ConstantFP>(rhs->val());
+                    if (rc->getValue().convertToDouble() == 0.0) {
+                        return error(expr, "Divisor of \'" + opstr + "\' operation is zero");
+                    }
+                }
+            }
+            switch (op) {
+                case BINARYOP_DIVIDE     : result = BinaryOp::divide(lhs, rhs);    break;
+                case BINARYOP_REMAINDER  : result = BinaryOp::remainder(lhs, rhs); break;
+                case ASSIGNOP_DIV_ASSIGN : result = BinaryOp::divide(lhs, rhs);    break;
+                case ASSIGNOP_REM_ASSIGN : result = BinaryOp::remainder(lhs, rhs); break;
+            }
+        }
+        else if (op == BINARYOP_SHIFT_LEFT  || 
+                 op == BINARYOP_SHIFT_RIGHT ||
+                 op == BINARYOP_BIT_OR      || 
+                 op == BINARYOP_BIT_AND     || 
+                 op == BINARYOP_BIT_XOR     || 
+                 op == ASSIGNOP_AND_ASSIGN  || 
+                 op == ASSIGNOP_OR_ASSIGN   || 
+                 op == ASSIGNOP_XOR_ASSIGN  ||
+                 op == ASSIGNOP_BIT_RIGHT_ASSIGN || 
+                 op == ASSIGNOP_BIT_LEFT_ASSIGN) 
+        {
+            if (*lhs->type != *rhs->type) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+            }
+            if (!lhs->type->isInt()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have integer type");
+            }
+            switch (op) {
+                case BINARYOP_SHIFT_LEFT       : result = BinaryOp::shiftLeft(lhs, rhs);  break;
+                case BINARYOP_SHIFT_RIGHT      : result = BinaryOp::shiftRight(lhs, rhs); break;
+                case BINARYOP_BIT_OR           : result = BinaryOp::bitOr(lhs, rhs);      break;
+                case BINARYOP_BIT_AND          : result = BinaryOp::bitAnd(lhs, rhs);     break;
+                case BINARYOP_BIT_XOR          : result = BinaryOp::bitXor(lhs, rhs);     break;
+                case ASSIGNOP_BIT_LEFT_ASSIGN  : result = BinaryOp::shiftLeft(lhs, rhs);  break;
+                case ASSIGNOP_BIT_RIGHT_ASSIGN : result = BinaryOp::shiftRight(lhs, rhs); break;
+                case ASSIGNOP_OR_ASSIGN        : result = BinaryOp::bitOr(lhs, rhs);      break;
+                case ASSIGNOP_AND_ASSIGN       : result = BinaryOp::bitAnd(lhs, rhs);     break;
+                case ASSIGNOP_XOR_ASSIGN       : result = BinaryOp::bitXor(lhs, rhs);     break;
+            }
+        }
+        else if (op == BINARYOP_LOGICAL_OR || op == BINARYOP_LOGICAL_AND) {
+            if (!lhs->type->isBool() || !rhs->type->isBool()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have boolean type");
+            }
+            result = (op == BINARYOP_LOGICAL_OR ? BinaryOp::logOr(lhs, rhs) : BinaryOp::logAnd(lhs, rhs));
+        }
+        else if (op == BINARYOP_EQUAL || op == BINARYOP_NOT_EQUAL) {
+            if (*lhs->type != *rhs->type) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+            }
+            if (!lhs->type->isPrimitive() && !lhs->type->isPtr()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have numerical or pointer type");
+            }
+            result = (op == BINARYOP_EQUAL ? BinaryOp::equal(lhs, rhs) : BinaryOp::unequal(lhs, rhs));
+        }
+        else if (op == BINARYOP_GREATER || op == BINARYOP_LESSER ||
+                 op == BINARYOP_GREATER_EQUAL || op == BINARYOP_LESSER_EQUAL) 
+        {
+            if (*lhs->type != *rhs->type) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+            }
+            if (!lhs->type->isInt() && !lhs->type->isReal() && !lhs->type->isPtr()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have integer, real or pointer type");
+            }
+            switch (op) {
+                case BINARYOP_GREATER       : result = BinaryOp::greater(lhs, rhs);       break;
+                case BINARYOP_LESSER        : result = BinaryOp::lesser(lhs, rhs);        break;
+                case BINARYOP_GREATER_EQUAL : result = BinaryOp::greaterEqual(lhs, rhs);  break;
+                case BINARYOP_LESSER_EQUAL  : result = BinaryOp::lesserEqual(lhs, rhs);   break;
+            }
+        }
+        else {
+            return error();
+        }
+
+        if (expr->is != EXPR_ASSIGN) {
+            return success();
+        }
+
+        auto lvar = std::static_pointer_cast<Variable>(lhs);
+        auto rval = std::static_pointer_cast<Value>(result);
+        result = BinaryOp::assign(lvar, rval);
+        if (!result) {
+            return error();
+        }
+        return success();
+    }
+
+    bool Analyzer::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
+
+        if (rval->kind == NODE_EXPRNODE) {
+            auto expr = static_cast<ExprNode*>(rval.get());
+            if (expr->is == EXPR_CALL) {
+                return call(std::static_pointer_cast<CallExprNode>(rval), var);
+            }
+        }
+
+        if (!getValue(rval)) {
+            return error(rval, "Unable to evaluate the right side of the expression");
+        }
+        auto ex = std::static_pointer_cast<Value>(result);
+
+        if (var->type->isPtr() && ex->type->isPtr()) {
+            auto vpt = static_cast<PointerType*>(var->type.get());
+            auto ept = static_cast<PointerType*>(ex->type.get());
+            if (vpt->points_to->isUnknown() || ept->points_to->isUnknown()) {
+                ex = BinaryOp::recast(ex, var->type);
+            }
+        }
+
+        if (*var->type != *ex->type) {
+            return error(rval, "Attempting to assign incompatible type to variable");
+        }
+        result = BinaryOp::assign(var, ex);
+        return success();
+        
+    }
 }

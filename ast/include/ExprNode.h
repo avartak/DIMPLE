@@ -14,8 +14,6 @@ namespace avl {
         EXPR_BINARY,
         EXPR_CALL,
         EXPR_ASSIGN,
-        EXPR_ARG_INDEX,
-        EXPR_ONE,
         EXPR_BOOL,
         EXPR_INT,
         EXPR_REAL,
@@ -34,7 +32,6 @@ namespace avl {
         UNARYOP_NOT,
         UNARYOP_COMPLEMENT,
 
-        BINARYOP_STR_CONCAT,
         BINARYOP_RECAST,
         BINARYOP_MEMBER,
         BINARYOP_ELEMENT,
@@ -42,7 +39,7 @@ namespace avl {
         BINARYOP_SUBTRACT,
         BINARYOP_MULTIPLY,
         BINARYOP_DIVIDE,
-        BINARYOP_MOD,
+        BINARYOP_REMAINDER,
         BINARYOP_SHIFT_LEFT,
         BINARYOP_SHIFT_RIGHT,
         BINARYOP_BIT_OR,
@@ -76,6 +73,9 @@ namespace avl {
         static std::map<int, uint16_t> unopsmap;
         static std::map<int, uint16_t> binopsmap;
         static std::map<int, uint16_t> assopsmap;
+        static std::map<uint16_t, std::string> unopstrmap;
+        static std::map<uint16_t, std::string> binopstrmap;
+        static std::map<uint16_t, std::string> assopstrmap;
 
         uint16_t is;
 
@@ -95,10 +95,25 @@ namespace avl {
             return assopsmap[t];
         }
 
+        static inline std::string unopstring(uint16_t o) {
+            return unopstrmap[o];
+        }
+
+        static inline std::string binopstring(uint16_t o) {
+            return binopstrmap[o];
+        }
+
+        static inline std::string assopstring(uint16_t o) {
+            return assopstrmap[o];
+        }
+
         static inline int precedence(int t) {
             return prec[t];
         }
 
+        inline bool isLiteralNode() {
+            return (is == EXPR_INT || EXPR_REAL || is == EXPR_BOOL || is == EXPR_CHAR || is == EXPR_STRING);
+        }
     };
 
     struct AssignExprNode : public ExprNode {

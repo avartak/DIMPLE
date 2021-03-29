@@ -9,7 +9,6 @@ namespace avl {
     bool Parser::parseLiteral(std::size_t it) {
 
         std::size_t n = 0;
-        auto loc = tokens[it]->loc;
 
         if (isLiteral(it)) {
             std::string err = "";
@@ -29,26 +28,20 @@ namespace avl {
                 result = BoolNode::construct(tokens[it]);
             }
             else {
-                result = StringNode::construct(tokens[it]);
+                auto strnode = StringNode::construct(tokens[it]);
+                while (parseToken(it+n+1, TOKEN_STRING)) {
+                    auto next_strnode = StringNode::construct(tokens[it+n+1]);
+                    strnode->str += next_strnode->str;
+                    strnode->literal += next_strnode->literal;
+                    strnode->loc.end = next_strnode->loc.end;
+                    n++;
+                }
+                result = strnode;
             }
             if (!result) {
                 return error(tokens[it], err);
             }
-            result->loc = loc;
             n++;
-
-            if (parseToken(it+n-1, TOKEN_STRING)) {
-                while (parseToken(it+n, TOKEN_STRING)) {
-                    auto l = result->loc;
-                    auto str = StringNode::construct(tokens[it+n]);
-                    result = std::make_shared<BinaryExprNode>(BINARYOP_STR_CONCAT, result, str);
-                    l.end = str->loc.end;
-                    result->loc = l;
-                    n++;
-                }
-            }
-            loc.end = result->loc.end;
-            result->loc = loc;
         }
 
         if (n > 0) {

@@ -32,7 +32,7 @@ namespace avl {
         {TOKEN_MINUS     , BINARYOP_SUBTRACT     },
         {TOKEN_MULTIPLY  , BINARYOP_MULTIPLY     },
         {TOKEN_DIVIDE    , BINARYOP_DIVIDE       },
-        {TOKEN_REMAINDER , BINARYOP_MOD          }
+        {TOKEN_REMAINDER , BINARYOP_REMAINDER    }
     };
 
     std::map<int, uint16_t> ExprNode::assopsmap = {
@@ -47,6 +47,51 @@ namespace avl {
         {TOKEN_XOR_ASSIGN      , ASSIGNOP_XOR_ASSIGN      },
         {TOKEN_BIT_RIGHT_ASSIGN, ASSIGNOP_BIT_RIGHT_ASSIGN},
         {TOKEN_BIT_LEFT_ASSIGN , ASSIGNOP_BIT_LEFT_ASSIGN }
+    };
+
+    std::map<uint16_t, std::string> ExprNode::unopstrmap = {
+        {UNARYOP_DEREFERENCE, "$"},
+        {UNARYOP_ADDRESS    , "@"},
+        {UNARYOP_SIZE       , "#"},
+        {UNARYOP_PLUS       , "+"},
+        {UNARYOP_NEGATE     , "-"},
+        {UNARYOP_NOT        , "!"},
+        {UNARYOP_COMPLEMENT , "~"}
+    };
+
+    std::map<uint16_t, std::string> ExprNode::binopstrmap = {
+        {BINARYOP_LOGICAL_OR   , "||"},
+        {BINARYOP_LOGICAL_AND  , "&&"},
+        {BINARYOP_EQUAL        , "=="},
+        {BINARYOP_NOT_EQUAL    , "!="},
+        {BINARYOP_GREATER_EQUAL, ">="},
+        {BINARYOP_LESSER_EQUAL , "<="},
+        {BINARYOP_GREATER      , ">" },
+        {BINARYOP_LESSER       , "<" },
+        {BINARYOP_BIT_OR       , "|" },
+        {BINARYOP_BIT_XOR      , "^" },
+        {BINARYOP_BIT_AND      , "&" },
+        {BINARYOP_SHIFT_LEFT   , "<<"},
+        {BINARYOP_SHIFT_RIGHT  , ">>"},
+        {BINARYOP_ADD          , "+" },
+        {BINARYOP_SUBTRACT     , "-" },
+        {BINARYOP_MULTIPLY     , "*" },
+        {BINARYOP_DIVIDE       , "/" },
+        {BINARYOP_REMAINDER    , "//"}
+    };
+
+    std::map<uint16_t, std::string> ExprNode::assopstrmap = {
+        {ASSIGNOP_ASSIGN          , "="  },
+        {ASSIGNOP_ADD_ASSIGN      , "+=" },
+        {ASSIGNOP_SUB_ASSIGN      , "-=" },
+        {ASSIGNOP_MUL_ASSIGN      , "*=" },
+        {ASSIGNOP_DIV_ASSIGN      , "/=" },
+        {ASSIGNOP_REM_ASSIGN      , "//="},
+        {ASSIGNOP_AND_ASSIGN      , "&=" },
+        {ASSIGNOP_OR_ASSIGN       , "|=" },
+        {ASSIGNOP_XOR_ASSIGN      , "^=" },
+        {ASSIGNOP_BIT_RIGHT_ASSIGN, ">>="},
+        {ASSIGNOP_BIT_LEFT_ASSIGN , "<<="}
     };
 
     std::map<int, int> ExprNode::prec = {

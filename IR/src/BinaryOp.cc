@@ -12,10 +12,6 @@
 
 namespace avl {
 
-    std::shared_ptr<Value> BinaryOp::concat(const std::shared_ptr<StringLiteral>& le, const std::shared_ptr<StringLiteral>& re) {
-        return std::make_shared<StringLiteral>(le->literal + re->literal);
-    }
-
     std::shared_ptr<Value> BinaryOp::add(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
         if (*le->type != *re->type) {
@@ -70,7 +66,7 @@ namespace avl {
                     return ret;
 				}
             }
-			if (le->isConst() && re->isConst()) {
+			if (le->type->isSignedInt() && le->isConst() && re->isConst()) {
                 auto lc = llvm::cast<llvm::ConstantInt>(le->val());
                 auto rc = llvm::cast<llvm::ConstantInt>(re->val());
                 if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
@@ -108,7 +104,7 @@ namespace avl {
                     return ret;
                 }
             }
-            if (le->isConst() && re->isConst()) {
+            if (le->type->isSignedInt() && le->isConst() && re->isConst()) {
                 auto lc = llvm::cast<llvm::ConstantInt>(le->val());
                 auto rc = llvm::cast<llvm::ConstantInt>(re->val());
                 if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
@@ -149,6 +145,11 @@ namespace avl {
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOEQ(le->val(), re->val()));
         }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpEQ(li->val(), ri->val()));
+        }
         return ret;
     }
 
@@ -166,6 +167,11 @@ namespace avl {
         }
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpUNE(le->val(), re->val()));
+        }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpNE(li->val(), ri->val()));
         }
         return ret;
     }
@@ -185,6 +191,11 @@ namespace avl {
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOGT(le->val(), re->val()));
         }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGT(li->val(), ri->val()));
+        }
         return ret;
     }
 
@@ -202,6 +213,11 @@ namespace avl {
         }
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOLT(le->val(), re->val()));
+        }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULT(li->val(), ri->val()));
         }
         return ret;
     }
@@ -221,6 +237,11 @@ namespace avl {
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOGE(le->val(), re->val()));
         }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGE(li->val(), ri->val()));
+        }
         return ret;
     }
 
@@ -239,35 +260,34 @@ namespace avl {
         else if (le->type->isReal()) {
             return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOLE(le->val(), re->val()));
         }
+        else if (le->type->isPtr()) {
+            auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
+            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULE(li->val(), ri->val()));
+        }
         return ret;
     }
 
     std::shared_ptr<Value> BinaryOp::shiftLeft(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (!le->type->isInt() || !re->type->isInt()) {
+        if (*le->type != *re->type) {
             return ret;
         }
-        if (le->type->size() != re->type->size()) {
-            return ret;
+        if (le->type->isInt()) {
+            return std::make_shared<Value>(le->type, TheBuilder.CreateShl(le->val(), re->val()));
         }
-        if (!re->type->isUnsignedInt()) {
-            return ret;
-        }
-        return std::make_shared<Value>(le->type, TheBuilder.CreateShl(le->val(), re->val()));
+        return ret;
     }
 
     std::shared_ptr<Value> BinaryOp::shiftRight(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (!le->type->isInt() || !re->type->isInt()) {
+        if (*le->type != *re->type) {
             return ret;
         }
-        if (le->type->size() != re->type->size()) {
-            return ret;
+        if (le->type->isInt()) {
+            return std::make_shared<Value>(le->type, TheBuilder.CreateLShr(le->val(), re->val()));
         }
-        if (!re->type->isUnsignedInt()) {
-            return ret;
-        }   
-        return std::make_shared<Value>(le->type, TheBuilder.CreateLShr(le->val(), re->val()));
+        return ret;
     }
 
     std::shared_ptr<Value> BinaryOp::bitAnd(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
@@ -330,7 +350,7 @@ namespace avl {
             if (!i->isConst()) {
                 return ret;
             }
-            auto ci = llvm::cast<llvm::ConstantInt>(i->llvm_value);
+            auto ci = llvm::cast<llvm::ConstantInt>(i->val());
             if (ci->isNegative()) {
                 return ret;
             }
@@ -538,22 +558,6 @@ namespace avl {
     std::shared_ptr<Value> BinaryOp::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Value>& ex) {
 
         std::shared_ptr<Value> fail;
-
-        if (var->type->isPtr()) {
-            auto pt = static_cast<PointerType*>(var->type.get())->points_to;
-            if (ex->is == VALUE_STRING) {
-                if (pt->is != TYPE_INT8) {
-                    return fail;
-                }
-                auto estr = static_cast<StringLiteral*>(ex.get());
-                auto arr = new llvm::GlobalVariable(*TheModule, estr->type->llvm_type, false, llvm::GlobalValue::PrivateLinkage,
-                                                    llvm::cast<llvm::Constant>(estr->val()), "");
-                arr->setAlignment(llvm::Align(estr->type->alignment()));
-                auto strptr = TheBuilder.CreateConstInBoundsGEP2_32(estr->type->llvm_type, arr, 0, 0);
-                TheBuilder.CreateStore(strptr, var->ptr());
-                return var;
-            }
-        }
 
         if (*ex->type != *var->type) {
             return fail;
