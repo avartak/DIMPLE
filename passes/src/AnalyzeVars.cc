@@ -9,11 +9,6 @@
 #include <BinaryOp.h>
 #include <Variable.h>
 #include <Literal.h>
-#include <PrimitiveType.h>
-#include <PointerType.h>
-#include <ArrayType.h>
-#include <StructType.h>
-#include <UnionType.h>
 #include <Globals.h>
 
 namespace avl {
@@ -340,7 +335,328 @@ namespace avl {
 
     bool Analyzer::initConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
 
-        return error();
+        if (ty->isPrimitive()) {
+            return initPrimitiveConst(std::static_pointer_cast<PrimitiveType>(ty), nd);
+        }
+        else if (ty->isPtr()) {
+            return initPtrConst(std::static_pointer_cast<PointerType>(ty), nd);
+        }
+        else if (ty->isArray()) {
+            return initArrayConst(std::static_pointer_cast<ArrayType>(ty), nd);
+        }
+        else if (ty->isStruct()) {
+            return initStructConst(std::static_pointer_cast<StructType>(ty), nd);
+        }
+        else if (ty->isUnion()) {
+            return initUnionConst(std::static_pointer_cast<UnionType>(ty), nd);
+        }
 
+        return error(nd, "Failed to construct initializer; type is unrecognizable"); // This should never happen
+
+    }
+
+    bool Analyzer::initPrimitiveConst(const std::shared_ptr<PrimitiveType>& ty, const std::shared_ptr<Node>& nd) {
+
+        if (nd->kind == NODE_INITIALIZER) {
+            return error(nd, "Only compound types can be initialized using an initializer");
+        }
+        else {
+            if (!getValue(nd)) {
+                return error(nd, "Unable to construct initializer");
+            }
+        }
+
+        auto ex = std::static_pointer_cast<Value>(result);
+        if (!ex->isConst()) {
+            return error(nd, "Global initializer is not a constant");
+        }
+        else if (*ty != *ex->type) {
+            return error(nd, "Initializer has inconsistent type");
+        }
+
+        result = std::make_shared<Value>(ty, ex->llvm_value);
+        return success();
+    }
+
+    bool Analyzer::initPtrConst(const std::shared_ptr<PointerType>& ty, const std::shared_ptr<Node>& nd) {
+
+        auto t = std::make_shared<PointerType>(ty->points_to);
+
+        if (nd->kind == NODE_INITIALIZER) {
+            return error(nd, "Only compound types can be initialized using an initializer");
+        }
+        else {
+            if (!getValue(nd)) {
+                return error(nd, "Unable to construct initializer");
+            }
+        }
+
+        auto ex = std::static_pointer_cast<Value>(result);
+        if (!ex->isConst()) {
+            return error(nd, "Global initializer not a constant");
+        }
+
+        if (!ex->type->isPtr()) {
+            return error(nd, "Initializer inconsistent with a pointer type");
+        }
+        auto ept = static_cast<PointerType*>(ex->type.get());
+        if (t->points_to->isUnknown() || ept->points_to->isUnknown()) {
+            ex = BinaryOp::recast(ex, t);
+        }
+        else if (*t != *ex->type) {
+            return error(nd, "Initializer has inconsistent type");
+        }
+
+        result = std::make_shared<Value>(t, ex->llvm_value);
+        return success();
+    }
+
+    bool Analyzer::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Node>& nd) {
+
+        auto t = ty->clone();
+
+        if (nd->kind != NODE_INITIALIZER) {
+            return error(nd, "Unable to construct array initializer");
+        }
+        auto in = static_cast<const Initializer*>(nd.get());
+        auto at = static_cast<ArrayType*>(t.get());
+
+        std::size_t last_idx = -1;
+        std::map<std::size_t, llvm::Constant*> cmap;
+        std::map<std::size_t, llvm::Type*> tmap;
+        std::vector<std::pair<std::size_t, llvm::Constant*> > csv;
+        std::vector<std::pair<std::size_t, llvm::Type*> > tsv;
+        for (const auto& ie : in->elements) {
+            auto idx = last_idx + 1;
+            if (ie.is != INIT_UNTAGGED) {
+                if (ie.is == INIT_LABELED) {
+                    return error(&ie, "Labeled initializer for array type");
+                }
+                if (!getValue(ie.tag)) {
+                    return error(ie.tag, "Unable to get the index of the initalizer element");
+                }
+                auto index = static_cast<Value*>(result.get());
+                if (!index->type->isInt()) {
+                    return error(ie.tag, "Index of the initalizer element must be an integer");
+                }
+                auto ci = llvm::cast<llvm::ConstantInt>(index->llvm_value);
+                if (ci->isNegative()) {
+                    return error(ie.tag, "Index of the initalizer element is negative");
+                }
+                idx = ci->getZExtValue();
+            }
+            last_idx = idx;
+            if (idx >= at->nelements) {
+                return error(&ie, "Array initializer element at index " + std::to_string(idx) + " is out of bounds for array of size " + std::to_string(at->nelements));
+            }
+            if (!initConst(at->array_of, ie.value)) {
+                return error(ie.value, "Unable to initialize array element at index " + std::to_string(idx));
+            }
+            auto cs = std::static_pointer_cast<Value>(result);
+            cmap[idx] = llvm::cast<llvm::Constant>(cs->val());
+            tmap[idx] = cs->type->llvm_type;
+        }
+        for (auto icmap : cmap) {
+            csv.push_back(icmap);
+        }
+        for (auto itmap : tmap) {
+            tsv.push_back(itmap);
+        }
+
+        struct {
+            bool operator()(std::pair<std::size_t, llvm::Constant*> a, std::pair<std::size_t, llvm::Constant*> b) const {
+                return a.first < b.first;
+            }
+        } csorter;
+        struct {
+            bool operator()(std::pair<std::size_t, llvm::Type*> a, std::pair<std::size_t, llvm::Type*> b) const {
+                return a.first < b.first;
+            }
+        } tsorter;
+
+        std::sort(csv.begin(), csv.end(), csorter);
+        std::sort(tsv.begin(), tsv.end(), tsorter);
+
+        std::vector<llvm::Type*> tv;
+        std::vector<llvm::Constant*> cv;
+        #define FILLNULL(n)  do { tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, n)); \
+                                  cv.push_back(llvm::Constant::getNullValue(tv.back())); \
+                                } while (false)
+        for (std::size_t i = 0; i < csv.size(); i++) {
+            if (i == 0 && csv[i].first > 0) {
+                FILLNULL(csv[i].first);
+            }
+            cv.push_back(csv[i].second);
+            tv.push_back(tsv[i].second);
+            if (i < csv.size()-1) {
+                if (csv[i+1].first-1-csv[i].first > 0) {
+                    FILLNULL(csv[i+1].first-1-csv[i].first);
+                }
+            }
+            else if (csv[i].first < at->nelements-1) {
+                FILLNULL(at->nelements-1-csv[i].first);
+            }
+        }
+
+        t->llvm_type = llvm::StructType::get(TheContext, tv, true);
+        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), cv));
+        return success();
+
+    }
+
+    bool Analyzer::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Node>& nd) {
+
+        auto t = ty->clone();
+
+        if (nd->kind != NODE_INITIALIZER) {
+            return error(nd, "Unable to construct initializer");
+        }
+        auto in = static_cast<const Initializer*>(nd.get());
+
+        std::size_t last_idx = -1;
+        std::vector<llvm::Constant*> csv;
+        std::vector<llvm::Type*> tsv;
+        for (auto im : ty->members) {
+            tsv.push_back(im.type->llvm_type);
+            csv.push_back(llvm::Constant::getNullValue(im.type->llvm_type));
+        }
+        for (const auto& ie : in->elements) {
+            auto idx = last_idx + 1;
+            if (ie.is != INIT_UNTAGGED) {
+                if (ie.is == INIT_LABELED) {
+                    if (ie.tag->kind != NODE_IDENTIFIER) {
+                        return error(ie.tag, "Unexpected struct initializer label");
+                    }
+                    auto ident = static_cast<const Identifier*>(ie.tag.get());
+                    bool found = false;
+                    for (std::size_t j = 0; j < ty->members.size(); j++) {
+                        if (ty->members[j].name->name == ident->name) {
+                            idx = j;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        return error(ie.tag, "No member " + ident->name + " in struct");
+                    }
+                }
+                else {
+                    if (!getValue(ie.tag)) {
+                        return error(ie.tag, "Unable to obtain struct initializer index as a compile-time constant");
+                    }
+                    auto iv = static_cast<Value*>(result.get());
+                    if (!iv->type->isInt()) {
+                        return error(ie.tag, "Struct initializer index is not an integer");
+                    }
+                    if (!iv->isConst()) {
+                        return error(ie.tag, "Struct initializer index is not a compile-time constant");
+                    }
+                    auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
+                    if (ci->isNegative()) {
+                        return error(ie.tag, "Struct initializer index is negative");
+                    }
+                    idx = ci->getZExtValue();
+                }
+            }
+            last_idx = idx;
+            if (idx >= ty->members.size()) {
+                return error(&ie, "Initializer element out of bounds of the struct");
+            }
+            if (!initConst(ty->members[idx].type, ie.value)) {
+                if (ty->members[idx].name->name == "") {
+                   return error(ie.value, "Unable to initialize struct member at index " + std::to_string(idx));
+                }
+                else {
+                   return error(ie.value, "Unable to initialize struct member " + ty->members[idx].name->name);
+                }
+            }
+            auto cs = std::static_pointer_cast<Value>(result);
+            csv[idx] = llvm::cast<llvm::Constant>(cs->llvm_value);
+            tsv[idx] = cs->type->llvm_type;
+        }
+        t->llvm_type = llvm::StructType::get(TheContext, tsv, ty->isPacked());
+
+        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+        return success();
+    }
+
+    bool Analyzer::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Node>& nd) {
+
+        auto t = ty->clone();
+
+        if (nd->kind != NODE_INITIALIZER) {
+            return error(nd, "Unable to construct initializer");
+        }
+        auto in = static_cast<const Initializer*>(nd.get());
+
+        if (in->elements.size() > 1) {
+            return error(nd, "Union initializer with more than one element");
+        }
+        std::size_t idx = 0;
+        if (in->elements[0].is == INIT_UNTAGGED) {
+            return error(nd, "Union initializer cannot be untagged");
+        }
+        else if (in->elements[0].is == INIT_LABELED) {
+            if (in->elements[0].tag->kind != NODE_IDENTIFIER) {
+                return error(in->elements[0].tag, "Unexpected union initializer label");
+            }
+            auto ident = static_cast<const Identifier*>(in->elements[0].tag.get());
+            bool found = false;
+            for (std::size_t j = 0; j < ty->members.size(); j++) {
+                if (ty->members[j].name->name == ident->name) {
+                    idx = j;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return error(in->elements[0].tag, "No member " + ident->name + " in union");
+            }
+        }
+        else {
+            if (!getValue(in->elements[0].tag)) {
+                return error(in->elements[0].tag, "Unable to obtain union initializer index as a compile-time constant");
+            }
+            auto iv = static_cast<Value*>(result.get());
+            if (!iv->type->isInt()) {
+                return error(in->elements[0].tag, "Union initializer index is not an integer");
+            }
+            if (!iv->isConst()) {
+                return error(in->elements[0].tag, "Union initializer index is not a compile-time constant");
+            }
+            auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
+            if (ci->isNegative()) {
+                return error(in->elements[0].tag, "Union initializer index is negative");
+            }
+            idx = ci->getZExtValue();
+        }
+
+        std::vector<llvm::Constant*> csv;
+        std::vector<llvm::Type*> tsv;
+        if (idx >= ty->members.size()) {
+            return error(in, "Initializer element out of bounds of the struct");
+        }
+        if (!initConst(ty->members[idx].type, in->elements[0].value)) {
+            if (ty->members[idx].name->name == "") {
+               return error(in->elements[0].value, "Unable to initialize union member at index " + std::to_string(idx));
+            }
+            else {
+               return error(in->elements[0].value, "Unable to initialize union member " + ty->members[idx].name->name);
+            }
+        }
+        auto cs = std::static_pointer_cast<Value>(result);
+        csv.push_back(llvm::cast<llvm::Constant>(cs->llvm_value));
+        tsv.push_back(cs->type->llvm_type);
+        std::size_t size1 = ty->members[idx].type->size();
+        std::size_t size2 = ty->size() - size1;
+        if (size2 > 0) {
+            auto at = llvm::ArrayType::get(TheBuilder.getInt8Ty(), size2);
+            csv.push_back(llvm::Constant::getNullValue(at));
+            tsv.push_back(at);
+        }
+
+        t->llvm_type = llvm::StructType::get(TheContext, tsv, true);
+        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+        return success();
     }
 }

@@ -7,13 +7,17 @@
 
 #include <Pass.h>
 #include <Node.h>
-#include <Type.h>
 #include <TypeNode.h>
 #include <ExprNode.h>
+#include <Initializer.h>
 #include <Value.h>
 #include <Variable.h>
 #include <Function.h>
-#include <Initializer.h>
+#include <PrimitiveType.h>
+#include <PointerType.h>
+#include <ArrayType.h>
+#include <StructType.h>
+#include <UnionType.h>
 
 namespace avl {
 
@@ -58,6 +62,11 @@ namespace avl {
         bool initLocalStruct(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
         bool initLocalUnion(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
         bool initConst(const std::shared_ptr<Type>&, const std::shared_ptr<Node>&);
+        bool initPrimitiveConst(const std::shared_ptr<PrimitiveType>&, const std::shared_ptr<Node>&);
+        bool initPtrConst(const std::shared_ptr<PointerType>&, const std::shared_ptr<Node>&);
+        bool initArrayConst(const std::shared_ptr<ArrayType>&, const std::shared_ptr<Node>&);
+        bool initStructConst(const std::shared_ptr<StructType>&, const std::shared_ptr<Node>&);
+        bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Node>&);
 
         bool getFunction(const std::shared_ptr<Identifier>&);
 
