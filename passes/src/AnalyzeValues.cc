@@ -76,26 +76,14 @@ namespace avl {
         else if (expr->is == EXPR_ASSIGN) {
             return binary(std::static_pointer_cast<ExprNode>(node));
         }
+        else if (expr->is == EXPR_BINARY) {
+            return binary(std::static_pointer_cast<BinaryExprNode>(node));
+        }
         else if (expr->is == EXPR_CALL) {
             return call(std::static_pointer_cast<CallExprNode>(node));
         }
         else if (expr->is == EXPR_UNARY) {
             return unary(std::static_pointer_cast<UnaryExprNode>(node));
-        }
-        else if (expr->is == EXPR_BINARY) {
-            auto bin = std::static_pointer_cast<BinaryExprNode>(node);
-            if (bin->op == BINARYOP_RECAST) {
-                return recast(bin);
-            }
-            else if (bin->op == BINARYOP_MEMBER) {
-                return member(bin);
-            }
-            else if (bin->op == BINARYOP_ELEMENT) {
-                return element(bin);
-            }
-            else {
-                return binary(bin);
-            }
         }
 
         return error();
@@ -312,6 +300,15 @@ namespace avl {
         if (expr->is == EXPR_BINARY) {
             auto bin = std::static_pointer_cast<BinaryExprNode>(expr);
             op = bin->op;
+            if (op == BINARYOP_RECAST) {
+                return recast(bin);
+            }
+            else if (op == BINARYOP_MEMBER) {
+                return member(bin);
+            }
+            else if (op == BINARYOP_ELEMENT) {
+                return element(bin);
+            }
             opstr = ExprNode::binopstring(op);
             lhs_node = bin->lhs;
             rhs_node = bin->rhs;
