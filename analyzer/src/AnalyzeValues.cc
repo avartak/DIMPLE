@@ -222,11 +222,9 @@ namespace avl {
         if (!lhs->type->isStruct() && !lhs->type->isUnion()) {
             return error(binary, "Variable type for the member operation must be struct or union");
         }
-        // binary->rhs is guranteed to be an Identifier from parseExpr
         auto memident = static_cast<Identifier*>(binary->rhs.get());
-        auto mem = std::make_shared<StringLiteral>(memident->name);
         auto var = std::static_pointer_cast<Variable>(lhs);
-        result = BinaryOp::member(var, mem);
+        result = BinaryOp::member(var, memident->name);
         if (!result) {
             return error(binary, "No member called " + memident->name);
         }

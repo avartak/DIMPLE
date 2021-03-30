@@ -405,13 +405,12 @@ namespace avl {
         return ret;
     }
 
-    std::shared_ptr<Value> BinaryOp::member(const std::shared_ptr<Variable>& var, const std::shared_ptr<StringLiteral>& m) {
+    std::shared_ptr<Value> BinaryOp::member(const std::shared_ptr<Variable>& var, const std::string& name) {
         std::shared_ptr<Value> ret;
 
         if (!var->type->isStruct() && !var->type->isUnion()) {
             return ret;
         }
-        auto name = m->literal;
 
         if (var->type->isStruct()) {
             auto st = static_cast<StructType*>(var->type.get());

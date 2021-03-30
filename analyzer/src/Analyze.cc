@@ -38,7 +38,7 @@ namespace avl {
             if (types.find(name->name) != types.end()) {
                 continue;
             }
-            if (!getType(node, true) && hasErrors()) {
+            if (!getType(node, false) && hasErrors()) {
                 return error(name, "Unable to construct type representation " + name->name);
             }
         }

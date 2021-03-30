@@ -24,7 +24,7 @@ namespace avl {
             }
 
             if (types.find(n) != types.end()) {
-                if (types[n]->isComplete() || (types[n]->isPtr() && includeOpaquePtr)) {
+                if (types[n]->isComplete() || includeOpaquePtr) {
                     result = types[n];
                     return success();
                 }
@@ -129,15 +129,12 @@ namespace avl {
             auto ident = std::static_pointer_cast<Identifier>(ptnode);
             const auto& n = ident->name;
             if (types.find(n+".ptr") != types.end()) {
-                if (!includeOpaquePtr && types.find(n) == types.end()) {
-                    return error(ident, "Type " + n + " is incomplete");
-                }
                 auto points_to = types[n+".ptr"];
                 result = std::make_shared<PointerType>(points_to);
                 return success();
             }
         }
-        if (!getType(ptnode, includeOpaquePtr)) {
+        if (!getType(ptnode, true)) {
             return error(ptnode, "Unable to create pointee type");
         }
         auto points_to = std::static_pointer_cast<Type>(result);
