@@ -9,10 +9,6 @@
 #include <CodeBlock.h>
 #include <Globals.h>
 
-#define INSERT(b)           b->insert()
-#define JUMP(b)             do { if (!b) b = std::make_shared<CodeBlock>(); b->jump(); } while (false)
-#define BRANCH(b,a,c)       do { if (!b) b = std::make_shared<CodeBlock>(); if (!a) a = std::make_shared<CodeBlock>(); b->branch(c, a); } while (false)
-
 namespace avl {
 
     bool Analyzer::getFunction(const std::shared_ptr<Identifier>& ident) {
@@ -244,16 +240,16 @@ namespace avl {
 
         for (const auto& statement : block->body) {
             if (statement->is == STATEMENT_BREAK) {
-                if (!block->isInLoop()) {
+                if (!end) {
                     return error(statement, "\'break\' statement cannot be used in this block");
                 }
-                JUMP(end);
+                end->jump();
             }
             else if (statement->is == STATEMENT_CONTINUE) {
-                if (!block->isInLoop()) {
+                if (!start) {
                     return error(statement, "\'break\' statement cannot be used in this block");
                 }
-                JUMP(start);
+                start->jump();
             }
             else if (statement->is == STATEMENT_RETURN) {
                 if (!ret(std::static_pointer_cast<ReturnStatement>(statement))) {
@@ -314,8 +310,8 @@ namespace avl {
                 }
                 
                 auto ifBB = std::make_shared<CodeBlock>();
-                BRANCH(ifBB, nextBB, ex);
-                INSERT(ifBB);
+                ifBB->branch(ex, nextBB);
+                ifBB->insert();
             }
             
             auto newscope = std::make_shared<Scope>();
@@ -326,12 +322,12 @@ namespace avl {
             }
             currentFunction->resetLocals();
             
-            JUMP(mergeBB);
-            INSERT(nextBB);
+            mergeBB->jump();
+            nextBB->insert();
         }   
         
-        JUMP(mergeBB);
-        INSERT(mergeBB);
+        mergeBB->jump();
+        mergeBB->insert();
         return success();
     }
 
@@ -374,8 +370,8 @@ namespace avl {
         auto updtBB  = std::make_shared<CodeBlock>();
         auto mergeBB = std::make_shared<CodeBlock>();
 
-        JUMP(loopBB);
-        INSERT(loopBB);
+        loopBB->jump();
+        loopBB->insert();
         if (loopblock->condition) {
             if (!getValue(loopblock->condition)) {
                 return error(loopblock->condition, "Unable to evaluate the loop condition");
@@ -384,15 +380,15 @@ namespace avl {
             if (!ex->type->isBool()) {
                 return error(loopblock->condition, "Loop condition statement does not evaluate to a boolean");
             }
-            BRANCH(whileBB, mergeBB, ex);
-            INSERT(whileBB);
+            whileBB->branch(ex, mergeBB);
+            whileBB->insert();
         }
         if (!defineBlock(loopblock, loopBB, mergeBB)) {
             return error();
         }
 
-        JUMP(updtBB);
-        INSERT(updtBB);
+        updtBB->jump();
+        updtBB->insert();
         if (updt) {
             if (updt->is == STATEMENT_ASSIGN) {
                 auto assignstat = static_cast<AssignStatement*>(updt.get());
@@ -411,8 +407,8 @@ namespace avl {
             }
         }
 
-        JUMP(loopBB);
-        INSERT(mergeBB);
+        loopBB->jump();
+        mergeBB->insert();
 
         currentFunction->resetLocals();
         return success();

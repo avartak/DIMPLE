@@ -479,22 +479,22 @@ namespace avl {
 
         std::vector<llvm::Type*> tv;
         std::vector<llvm::Constant*> cv;
-        #define FILLNULL(n)  do { tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, n)); \
-                                  cv.push_back(llvm::Constant::getNullValue(tv.back())); \
-                                } while (false)
         for (std::size_t i = 0; i < csv.size(); i++) {
             if (i == 0 && csv[i].first > 0) {
-                FILLNULL(csv[i].first);
+                tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, csv[i].first));
+                cv.push_back(llvm::Constant::getNullValue(tv.back()));
             }
             cv.push_back(csv[i].second);
             tv.push_back(tsv[i].second);
             if (i < csv.size()-1) {
                 if (csv[i+1].first-1-csv[i].first > 0) {
-                    FILLNULL(csv[i+1].first-1-csv[i].first);
+                    tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, csv[i+1].first-1-csv[i].first));
+                    cv.push_back(llvm::Constant::getNullValue(tv.back()));
                 }
             }
             else if (csv[i].first < at->nelements-1) {
-                FILLNULL(at->nelements-1-csv[i].first);
+                tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, at->nelements-1-csv[i].first));
+                cv.push_back(llvm::Constant::getNullValue(tv.back()));
             }
         }
 

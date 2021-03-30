@@ -1,7 +1,7 @@
 #ifndef TYPEBASE_H
 #define TYPEBASE_H
 
-#include <string>
+#include <cstdint>
 
 namespace avl {
 
