@@ -19,7 +19,7 @@ namespace avl {
         name(nm),
         node(nd)
     {
-        loc.start = nm->loc.start;
+        loc = nm->loc;
         loc.end = nd->loc.end;
     }
 
