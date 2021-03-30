@@ -213,14 +213,14 @@ namespace avl {
 
         std::size_t n = 0;
 
-        if (!parseToken(it, TOKEN_START)) {
+        if (!parseToken(it, TOKEN_MAIN)) {
             return error();
         }
         if (!parseToken(it+1, TOKEN_DEFINE)) {
-            return error(tokens[it+1], "Expect \':=\' after \'start\'");
+            return error(tokens[it+1], "Expect \':=\' after \'main\'");
         }
         if (!parseToken(it+2, TOKEN_EXTERN)) {
-            return error(tokens[it+2], "Expect \'extern\' specifier for \'start\' after \':=\'");
+            return error(tokens[it+2], "Expect \'extern\' specifier for \'main\' after \':=\'");
         }
 
         std::shared_ptr<Identifier> name;

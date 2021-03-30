@@ -54,7 +54,7 @@ namespace avl {
             return error(ident, "Type of " + n + " is not completely defined");
         }
 
-        if (n == "start") {
+        if (n == "main") {
             auto ftype = static_cast<FunctionType*>(type.get());
             bool sigisgood = true;
             if (ftype->ret->is != TYPE_INT32) {
@@ -66,10 +66,10 @@ namespace avl {
             if (ftype->args[0].type->is != TYPE_INT32) {
                 sigisgood = false;
             } 
-            if (!ftype->args[0].type->isPtr()) {
+            if (!ftype->args[1].type->isPtr()) {
                 sigisgood = false;
             }
-            auto pt = static_cast<PointerType*>(ftype->args[0].type.get())->points_to;
+            auto pt = static_cast<PointerType*>(ftype->args[1].type.get())->points_to;
             if (!pt->isPtr()) {
                 sigisgood = false;
             }
@@ -78,7 +78,7 @@ namespace avl {
                 sigisgood = false;
             }
             if (!sigisgood) {
-                return error(ident, "Incorrect signature of \'start\' function");
+                return error(ident, "Incorrect signature of \'main\' function");
             }
         }
 

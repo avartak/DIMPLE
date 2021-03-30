@@ -34,7 +34,7 @@ namespace avl {
             }
 
             auto next_node = ast->representations[n]->node;
-            while (node->kind == NODE_IDENTIFIER) {
+            while (next_node->kind == NODE_IDENTIFIER) {
                 auto next_ident = std::static_pointer_cast<Identifier>(next_node);
                 const auto& nm = next_ident->name;
                 if (ast->representations.find(nm) == ast->representations.end()) {

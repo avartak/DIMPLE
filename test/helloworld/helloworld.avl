@@ -1,0 +1,56 @@
+/* 
+This program prints "Hello World!" to screen multiple times
+*/
+
+`` Include a header file
+include header.inc
+
+`` Representations
+char :: int8
+int  :: int64
+null :: 0 => char
+
+`` Declaration
+printChar : func(char)
+
+`` Function definition
+hello := func() {
+
+    s := %char{"Hello World!\n"};
+
+    i := int{0};
+
+    loop ; s[i] != (0 => char); i += 1 {
+        printChar(s[i]);
+    }
+
+    loop i = 0; s[i] != null; i += 1 {
+        printChar(s[i]);
+    }
+
+    i = 0;
+    loop s[i] != 0 => char {
+        printChar(s[i]);
+        i += 1;
+    }
+
+    i = 0;
+    loop {
+        if s[i] == 0 => char {
+            break;
+        }
+        printChar(s[i]);
+        i += 1;
+    }
+
+}
+
+`` The "main" function
+main := extern func(int32, %%char) -> int32 {
+
+    hello();
+
+    return 0 => int32;
+
+}
+

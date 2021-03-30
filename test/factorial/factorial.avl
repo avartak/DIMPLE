@@ -1,0 +1,28 @@
+char :: int8
+int  :: int64
+
+printInt : func(int)
+printChar : func(char)
+
+factorial := func(i : int) -> int {
+
+    if i < 0 {
+        return 0;
+    }
+    else if i == 0 {
+        return 1;
+    }
+    else {
+        return i * factorial(i-1);
+    }
+
+}
+
+main := extern func(int32, %%char) -> int32 {
+
+    printInt(factorial(5));
+    printChar('\n');
+
+    return 0 => int32;
+
+}

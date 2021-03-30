@@ -392,19 +392,12 @@ namespace avl {
         }
 
         auto ex = std::static_pointer_cast<Value>(result);
-        if (!ex->isConst()) {
-            return error(nd, "Global initializer not a constant");
-        }
-
-        if (!ex->type->isPtr()) {
-            return error(nd, "Initializer inconsistent with a pointer type");
-        }
-        auto ept = static_cast<PointerType*>(ex->type.get());
-        if (t->points_to->isUnknown() || ept->points_to->isUnknown()) {
-            ex = BinaryOp::recast(ex, t);
-        }
-        else if (*t != *ex->type) {
+        ex = BinaryOp::recastImplicit(ex, t);
+        if (!ex) {
             return error(nd, "Initializer has inconsistent type");
+        }
+        if (!ex->isConst()) {
+            return error(nd, "Initializer is not a constant");
         }
 
         result = std::make_shared<Value>(t, ex->llvm_value);

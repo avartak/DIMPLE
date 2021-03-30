@@ -107,7 +107,7 @@ namespace avl {
         RULE_REAL,
 
         RULE_IDENT,
-        RULE_START,
+        RULE_MAIN,
 
         RULE_BOOL,
         RULE_UINT8,

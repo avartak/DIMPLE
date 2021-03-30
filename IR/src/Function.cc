@@ -87,12 +87,7 @@ namespace avl {
 		    TheBuilder.CreateRet(retvar->val());
         }
 
-        std::vector<llvm::BasicBlock*> orphanBlocks;
-
         for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
-            if (&*iter != &fn->getEntryBlock() && !iter->hasNPredecessorsOrMore(1)) {
-                orphanBlocks.push_back(&*iter);
-            }
             if (iter->getTerminator() != nullptr) {
                 continue;
             }
@@ -108,16 +103,29 @@ namespace avl {
             }
         }
 
-        for (std::size_t i = 0; i < orphanBlocks.size(); i++) {
-            for (llvm::BasicBlock* succ : successors(orphanBlocks[i])) {
-                succ->removePredecessor(orphanBlocks[i]);
+        while (true) {
+            std::vector<llvm::BasicBlock*> orphans;
+            for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
+                if (&*iter == &fn->getEntryBlock() || iter->hasNPredecessorsOrMore(1)) {
+                    continue;
+                }
+                orphans.push_back(&*iter);
             }
-            while (!orphanBlocks[i]->empty()) {
-                auto& inst = orphanBlocks[i]->back();
-                inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
-                inst.eraseFromParent();
+            if (orphans.size() == 0) {
+                break;
             }
-            orphanBlocks[i]->eraseFromParent();
+            
+            for (auto orphan : orphans) {
+                for (llvm::BasicBlock* succ : successors(orphan)) {
+                    succ->removePredecessor(orphan);
+                }
+                while (!orphan->empty()) {
+                    auto& inst = orphan->back();
+                    inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
+                    inst.eraseFromParent();
+                }
+                orphan->eraseFromParent();
+            }
         }
 
         TheBuilder.SetInsertPoint(current_block);

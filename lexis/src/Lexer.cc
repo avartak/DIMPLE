@@ -44,8 +44,8 @@ namespace avl {
         { RULE_BIT_RIGHT,        ">>"       },
         { RULE_BIT_LEFT,         "<<"       },
 
-        { RULE_GREATER,          "<"        },
-        { RULE_LESSER,           ">"        },
+        { RULE_GREATER,          ">"        },
+        { RULE_LESSER,           "<"        },
         { RULE_GEQ,              ">="       },
         { RULE_LEQ,              "<="       },
         { RULE_EQUAL,            "=="       },
@@ -72,7 +72,7 @@ namespace avl {
     std::map<int, std::string> Lexer::keywords = {
         { RULE_INCLUDE,          "include"  },
 
-        { RULE_START,            "start"    },
+        { RULE_MAIN,             "main"     },
 
         { RULE_TRUE,             "true"     },
         { RULE_FALSE,            "false"    },
@@ -147,7 +147,7 @@ namespace avl {
                 case RULE_STRING           : return TOKEN_STRING;
 
                 case RULE_IDENT            : return TOKEN_IDENT;
-                case RULE_START            : return TOKEN_START;
+                case RULE_MAIN             : return TOKEN_MAIN;
 
                 case RULE_BOOL             : return TOKEN_BOOL;
                 case RULE_UINT8            : return TOKEN_UINT8;

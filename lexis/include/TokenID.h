@@ -21,7 +21,7 @@ namespace avl {
         TOKEN_STRING,
         
         TOKEN_IDENT,
-        TOKEN_START,
+        TOKEN_MAIN,
         
         TOKEN_BOOL,
         TOKEN_UINT8,

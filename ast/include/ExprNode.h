@@ -112,7 +112,7 @@ namespace avl {
         }
 
         inline bool isLiteralNode() {
-            return (is == EXPR_INT || EXPR_REAL || is == EXPR_BOOL || is == EXPR_CHAR || is == EXPR_STRING);
+            return (is == EXPR_INT || is == EXPR_REAL || is == EXPR_BOOL || is == EXPR_CHAR || is == EXPR_STRING);
         }
     };
 
