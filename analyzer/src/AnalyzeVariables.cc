@@ -78,7 +78,7 @@ namespace avl {
 
         else if (rval->kind == NODE_STATEMENT) {
             auto stat = static_cast<Statement*>(rval.get());
-            if (stat->is != STATEMENT_DEFINITION) {
+            if (stat->is != STATEMENT_DEFINE) {
                 return error();
             }
             auto defn = std::static_pointer_cast<DefineStatement>(rval);
@@ -118,7 +118,7 @@ namespace avl {
 
         if (rval->kind == NODE_STATEMENT) {
             auto stat = static_cast<Statement*>(rval.get());
-            if (stat->is != STATEMENT_DEFINITION) {
+            if (stat->is != STATEMENT_DEFINE) {
                 return error();
             }
             auto defn = std::static_pointer_cast<DefineStatement>(rval);

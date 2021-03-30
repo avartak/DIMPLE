@@ -272,7 +272,7 @@ namespace avl {
                     return error();
                 }
             }
-            else if (statement->is == STATEMENT_DEFINITION) {
+            else if (statement->is == STATEMENT_DEFINE) {
                 if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(statement))) {
                     return error();
                 }
@@ -347,7 +347,7 @@ namespace avl {
         auto loopblock = std::static_pointer_cast<CondBlockNode>(loop);
 
         if (init) {
-            if (init->is == STATEMENT_DEFINITION) {
+            if (init->is == STATEMENT_DEFINE) {
                 if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(init))) {
                     return error();
                 }

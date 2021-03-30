@@ -39,7 +39,7 @@ namespace avl {
     }
 
     DefineStatement::DefineStatement(uint16_t s, const std::shared_ptr<Identifier>& n, const std::shared_ptr<Node>& t, const std::shared_ptr<Node>& d):
-        Statement(STATEMENT_DEFINITION),
+        Statement(STATEMENT_DEFINE),
         storage(s),
         name(n),
         type(t),

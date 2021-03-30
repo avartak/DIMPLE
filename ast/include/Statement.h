@@ -14,7 +14,7 @@ namespace avl {
         STATEMENT_RETURN,
         STATEMENT_CALL,
         STATEMENT_ASSIGN,
-        STATEMENT_DEFINITION,
+        STATEMENT_DEFINE,
 
         BLOCK_COND,
         BLOCK_IF,
