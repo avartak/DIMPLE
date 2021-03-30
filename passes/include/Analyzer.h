@@ -46,6 +46,7 @@ namespace avl {
         bool getStructType(const std::shared_ptr<StructTypeNode>&, bool includeOpaquePtr);
         bool getUnionType(const std::shared_ptr<UnionTypeNode>&, bool includeOpaquePtr);
         bool getFunctionType(const std::shared_ptr<FunctionTypeNode>&, bool includeOpaquePtr);
+        bool useInArraySizeExpr(const std::shared_ptr<Node>&);
 
         bool getValue(const std::shared_ptr<Node>&);
         bool literal(const std::shared_ptr<ExprNode>&);

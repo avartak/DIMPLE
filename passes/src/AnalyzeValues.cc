@@ -77,7 +77,7 @@ namespace avl {
             return binary(std::static_pointer_cast<ExprNode>(node));
         }
         else if (expr->is == EXPR_BINARY) {
-            return binary(std::static_pointer_cast<BinaryExprNode>(node));
+            return binary(std::static_pointer_cast<ExprNode>(node));
         }
         else if (expr->is == EXPR_CALL) {
             return call(std::static_pointer_cast<CallExprNode>(node));
@@ -343,6 +343,10 @@ namespace avl {
         }
         auto rhs = std::static_pointer_cast<Value>(result);
 
+        if (*lhs->type != *rhs->type) {
+            return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
+        }
+
         if (op == BINARYOP_ADD        || 
             op == BINARYOP_SUBTRACT   || 
             op == BINARYOP_MULTIPLY   ||
@@ -350,9 +354,6 @@ namespace avl {
             op == ASSIGNOP_SUB_ASSIGN || 
             op == ASSIGNOP_MUL_ASSIGN) 
         {
-            if (*lhs->type != *rhs->type) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
-            }
             if (!lhs->type->isInt() && !lhs->type->isReal()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
             }
@@ -370,9 +371,6 @@ namespace avl {
                  op == ASSIGNOP_DIV_ASSIGN ||
                  op == ASSIGNOP_REM_ASSIGN) 
         {
-            if (*lhs->type != *rhs->type) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
-            }
             if (!lhs->type->isInt() && !lhs->type->isReal()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
             }
@@ -417,9 +415,6 @@ namespace avl {
                  op == ASSIGNOP_BIT_RIGHT_ASSIGN || 
                  op == ASSIGNOP_BIT_LEFT_ASSIGN) 
         {
-            if (*lhs->type != *rhs->type) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
-            }
             if (!lhs->type->isInt()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have integer type");
             }
@@ -437,15 +432,12 @@ namespace avl {
             }
         }
         else if (op == BINARYOP_LOGICAL_OR || op == BINARYOP_LOGICAL_AND) {
-            if (!lhs->type->isBool() || !rhs->type->isBool()) {
+            if (!lhs->type->isBool()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have boolean type");
             }
             result = (op == BINARYOP_LOGICAL_OR ? BinaryOp::logOr(lhs, rhs) : BinaryOp::logAnd(lhs, rhs));
         }
         else if (op == BINARYOP_EQUAL || op == BINARYOP_NOT_EQUAL) {
-            if (*lhs->type != *rhs->type) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
-            }
             if (!lhs->type->isPrimitive() && !lhs->type->isPtr()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have numerical or pointer type");
             }
@@ -454,9 +446,6 @@ namespace avl {
         else if (op == BINARYOP_GREATER || op == BINARYOP_LESSER ||
                  op == BINARYOP_GREATER_EQUAL || op == BINARYOP_LESSER_EQUAL) 
         {
-            if (*lhs->type != *rhs->type) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have the same type");
-            }
             if (!lhs->type->isInt() && !lhs->type->isReal() && !lhs->type->isPtr()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have integer, real or pointer type");
             }
@@ -505,4 +494,5 @@ namespace avl {
         return success();
         
     }
+
 }
