@@ -33,6 +33,7 @@ namespace avl {
         static std::shared_ptr<Value> element(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> member(const std::shared_ptr<Variable>&, const std::string&);
         static std::shared_ptr<Value> assign(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
+        static bool isValidDivision(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
 
     };
 

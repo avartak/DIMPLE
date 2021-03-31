@@ -56,23 +56,10 @@ namespace avl {
 
     std::shared_ptr<Value> BinaryOp::divide(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (*le->type != *re->type) {
+        if (!isValidDivision(le, re)) {
             return ret;
         }
-        if (le->type->isInt() && re->type->isInt()) {
-            if (re->isConst()) {
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (rc->getZExtValue() == 0) {
-                    return ret;
-				}
-            }
-			if (le->type->isSignedInt() && le->isConst() && re->isConst()) {
-                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
-                    return ret;
-				}
-            }
+        if (le->type->isInt()) {
             if (le->type->isUnsignedInt()) {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateUDiv(le->val(), re->val()));
             }
@@ -80,13 +67,7 @@ namespace avl {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateSDiv(le->val(), re->val()));
             }
         }
-        else if (le->type->isReal() && re->type->isReal()) {
-            if (re->isConst()) {
-                auto rc = llvm::cast<llvm::ConstantFP>(re->val());
-                if (rc->getValue().convertToDouble() == 0.0) {
-                    return ret;
-                }
-            }
+        else if (le->type->isReal()) {
             return std::make_shared<Value>(le->type, TheBuilder.CreateFDiv(le->val(), re->val()));
         }
         return ret;
@@ -94,23 +75,10 @@ namespace avl {
 
     std::shared_ptr<Value> BinaryOp::remainder(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (*le->type != *re->type) {
+        if (!isValidDivision(le, re)) {
             return ret;
         }
-        if (le->type->isInt() && re->type->isInt()) {
-            if (re->isConst()) {
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (rc->getZExtValue() == 0) {
-                    return ret;
-                }
-            }
-            if (le->type->isSignedInt() && le->isConst() && re->isConst()) {
-                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
-                    return ret;
-                }
-            }
+        if (le->type->isInt()) {
             if (le->type->isUnsignedInt()) {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateURem(le->val(), re->val()));
             }
@@ -118,13 +86,7 @@ namespace avl {
                 return std::make_shared<Value>(le->type, TheBuilder.CreateSRem(le->val(), re->val()));
             }
         }
-        else if (le->type->isReal() && re->type->isReal()) {
-            if (re->isConst()) {
-                auto rc = llvm::cast<llvm::ConstantFP>(re->val());
-                if (rc->getValue().convertToDouble() == 0.0) {
-                    return ret;
-                }
-            }
+        else if (le->type->isReal()) {
             return std::make_shared<Value>(le->type, TheBuilder.CreateFRem(le->val(), re->val()));
         }
         return ret;
@@ -597,4 +559,42 @@ namespace avl {
         return var;
 
     }
+
+    bool BinaryOp::isValidDivision(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
+
+        if (*le->type != *re->type) {
+            return false;
+        }
+
+        if (re->type->isInt()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (rc->getZExtValue() == 0) {
+                    return false;
+                }
+            }
+            if (re->type->isSignedInt() && re->isConst() && re->isConst()) {
+                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
+                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
+                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else if (re->type->isReal()) {
+            if (re->isConst()) {
+                auto rc = llvm::cast<llvm::ConstantFP>(re->val());
+                if (rc->getValue().convertToDouble() == 0.0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
 }
