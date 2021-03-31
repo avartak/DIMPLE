@@ -1,5 +1,3 @@
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/GlobalVariable.h>
 #include <Analyzer.h>
 #include <NameNode.h>
 #include <ExprNode.h>
@@ -169,7 +167,7 @@ namespace avl {
                 if (!index->isConstNonNegativeInt()) {
                     return error(ie.tag, "Index of the initalizer element must be a non-negative integer constant");
                 }
-                idx = llvm::cast<llvm::ConstantInt>(index->val())->getZExtValue();
+                idx = index->getUInt64ValueOrZero();
             }
             last_idx = idx;
             if (idx >= ty->nelements) {
@@ -222,7 +220,7 @@ namespace avl {
                     if (!iv->isConstNonNegativeInt()) {
                         return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
-                    idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+                    idx = iv->getUInt64ValueOrZero();
                 }
             }
             last_idx = idx;
@@ -278,7 +276,7 @@ namespace avl {
             if (!iv->isConstNonNegativeInt()) {
                 return error(in->elements[0].tag, "Union initializer index must be a non-negative integer constant");
             }
-            idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+            idx = iv->getUInt64ValueOrZero();
             if (idx >= ty->members.size()) {
                 return error(in, "Union initializer index is out of bounds of the union members set");
             }
@@ -393,7 +391,7 @@ namespace avl {
                 if (!index->isConstNonNegativeInt()) {
                     return error(ie.tag, "Index of the initalizer element must be a non-negative integer const");
                 }
-                idx = llvm::cast<llvm::ConstantInt>(index->val())->getZExtValue();
+                idx = index->getUInt64ValueOrZero();
             }
             last_idx = idx;
             if (idx >= at->nelements) {
@@ -451,7 +449,7 @@ namespace avl {
                     if (!iv->isConstNonNegativeInt()) {
                         return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
-                    idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+                    idx = iv->getUInt64ValueOrZero();
                 }
             }
             last_idx = idx;
@@ -514,7 +512,7 @@ namespace avl {
             if (!iv->isConstNonNegativeInt()) {
                 return error(in->elements[0].tag, "Union initializer index must be a non-negative integer constant");
             }
-            idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+            idx = iv->getUInt64ValueOrZero();
             if (idx >= ty->members.size()) {
                 return error(in, "Initializer element out of bounds of the union");
             }

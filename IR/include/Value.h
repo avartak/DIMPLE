@@ -67,8 +67,12 @@ namespace avl {
             return (llvm_value != nullptr) && llvm::isa<llvm::Constant>(llvm_value);
         }
 
+        inline bool isConstInt() const {
+            return isConst() && type->isInt();
+        }
+
         inline bool isConstNonNegativeInt() const {
-            return isConst() && type->isInt() && !llvm::cast<llvm::ConstantInt>(llvm_value)->isNegative();
+            return isConstInt() && !llvm::cast<llvm::ConstantInt>(llvm_value)->isNegative();
         }
 
         inline bool isVar() const {
@@ -81,6 +85,10 @@ namespace avl {
 
         inline bool isInstance() const {
             return isVar() || isFunction();
+        }
+
+        inline uint64_t getUInt64ValueOrZero() const {
+            return (isConstInt() ? llvm::cast<llvm::ConstantInt>(llvm_value)->getZExtValue() : 0);
         }
 
     };

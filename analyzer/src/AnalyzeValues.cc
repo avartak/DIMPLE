@@ -1,4 +1,3 @@
-#include <llvm/IR/Constants.h>
 #include <Analyzer.h>
 #include <Literal.h>
 #include <LiteralNode.h>
@@ -256,7 +255,7 @@ namespace avl {
             if (!rhs->isConstNonNegativeInt()) {
                 return error(binary, "Element index is not a non-negative integer constant");
             }
-            auto idx = llvm::cast<llvm::ConstantInt>(rhs->val())->getZExtValue();
+            auto idx = rhs->getUInt64ValueOrZero();
             if (lhs->type->isStruct()) {
                 auto st = static_cast<StructType*>(lhs->type.get());
                 if (idx >= st->members.size()) {
