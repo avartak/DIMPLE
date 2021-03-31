@@ -86,8 +86,11 @@ namespace avl {
             return initGlobal(var, def);
         }
 
-        if (!rval || rval->kind == NODE_NULLINIT) {
-            var->initGlobal(bool(rval));
+        var->define();
+        if (!rval) {
+        }
+        else if (rval->kind == NODE_NULLINIT) {
+            var->init();
         }
         else {
             if (!initConst(var->type, rval)) {
@@ -121,7 +124,8 @@ namespace avl {
             return initLocal(var, def);
         }
 
-        else if (rval->kind == NODE_NULLINIT) {
+        var->define();
+        if (rval->kind == NODE_NULLINIT) {
             if (static_cast<NullInit*>(rval.get())->zero) {
                 var->init();
             }

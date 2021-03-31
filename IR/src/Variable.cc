@@ -2,7 +2,6 @@
 #include <PointerType.h>
 #include <MemoryOp.h>
 #include <Globals.h>
-#include <Statement.h>
 
 namespace avl {
 
@@ -35,28 +34,37 @@ namespace avl {
     }
 
     void Variable::init() {
-        if (!type->moveDirectly()) {
-            MemoryOp::memset(this, 0);
+        if (isGlobal()) {
+            if (llvm_pointer != nullptr) {
+                llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
+            }
         }
         else {
-            TheBuilder.CreateStore(llvm::Constant::getNullValue(type->llvm_type), ptr());
+            if (!type->moveDirectly()) {
+                MemoryOp::memset(this, 0);
+            }
+            else {
+                TheBuilder.CreateStore(llvm::Constant::getNullValue(type->llvm_type), ptr());
+            }
         }
-    }
-
-    void Variable::initGlobal(bool zero) {
-
-        // Some checks could be helpful but not necessary
-        auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-        llvm::Constant* in = zero ? llvm::Constant::getNullValue(type->llvm_type) : nullptr;
-        llvm_pointer = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, in, name);
-        align();
     }
 
     void Variable::initGlobal(const std::shared_ptr<Value>& init) {
-        
-        // Some checks could be helpful but not necessary
-        auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-        llvm_pointer = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, llvm::cast<llvm::Constant>(init->val()), name);
+       
+        if (isGlobal() && llvm_pointer != nullptr && (*init->type == *type) && init->isConst()) {
+            llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::cast<llvm::Constant>(init->val()));
+        }
+    }
+
+    void Variable::define() {
+
+        if (isGlobal()) {
+            auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
+            llvm_pointer = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
+        }
+        else {
+            llvm_pointer = TheBuilder.CreateAlloca(type->llvm_type);
+        }
         align();
     }
 

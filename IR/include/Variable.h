@@ -2,6 +2,7 @@
 #define VARIABLE_H
 
 #include <Instance.h>
+#include <Statement.h>
 
 namespace avl {
 
@@ -14,9 +15,12 @@ namespace avl {
         virtual void init() override;
 
         void initGlobal(const std::shared_ptr<Value>&);
-        void initGlobal(bool);
+        void define();
         bool align();
 
+        inline bool isGlobal() {
+            return (storage == STORAGE_EXTERNAL || storage == STORAGE_INTERNAL);
+        }
     };
 
 }
