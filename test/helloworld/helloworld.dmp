@@ -3,7 +3,7 @@ This program prints "Hello World!" to screen multiple times
 */
 
 `` Include a header file
-include header.inc
+include include.dmp
 
 `` Representations
 char :: int8

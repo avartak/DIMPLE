@@ -11,8 +11,8 @@ printInt.o: printInt.c Makefile
 printChar.o: printChar.c Makefile
 	clang -c printChar.c
 
-factorial.o: factorial.avl Makefile
-	../../dimple factorial.avl factorial.o
+factorial.o: factorial.dmp Makefile
+	../../dimple factorial.dmp factorial.o
 
 factorial: printInt.o printChar.o factorial.o
 	clang -o factorial printInt.o printChar.o factorial.o

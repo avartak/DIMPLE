@@ -8,8 +8,8 @@ clean:
 printChar.o: printChar.c Makefile
 	clang -c printChar.c
 
-helloworld.o: helloworld.avl header.inc Makefile
-	../../dimple helloworld.avl helloworld.o
+helloworld.o: helloworld.dmp include.dmp Makefile
+	../../dimple helloworld.dmp helloworld.o
 
 hello: printChar.o helloworld.o
 	clang -o hello printChar.o helloworld.o
