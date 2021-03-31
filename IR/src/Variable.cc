@@ -35,9 +35,7 @@ namespace avl {
 
     void Variable::init() {
         if (isGlobal()) {
-            if (llvm_pointer != nullptr) {
-                llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
-            }
+            llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
         }
         else {
             if (!type->moveDirectly()) {
