@@ -54,7 +54,10 @@ namespace avl {
         }
 
         var = std::make_shared<Variable>(storage, n, type);
-        if (ast->declarations.find(n) == ast->declarations.end()) {
+        if (ast->declarations.find(n) != ast->declarations.end()) {
+            defn = std::make_shared<NullInit>(false);
+        }
+        else {
             defn = ast->definitions[n];
         }
         if (!initGlobal(var, defn)) {
@@ -87,10 +90,10 @@ namespace avl {
         }
 
         var->define();
-        if (!rval) {
-        }
-        else if (rval->kind == NODE_NULLINIT) {
-            var->init();
+        if (rval->kind == NODE_NULLINIT) {
+            if (static_cast<NullInit*>(rval.get())->zero) {
+                var->init();
+            }
         }
         else {
             if (!initConst(var->type, rval)) {
