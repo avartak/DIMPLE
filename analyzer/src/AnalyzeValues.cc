@@ -348,56 +348,35 @@ namespace avl {
         if (op == BINARYOP_ADD        || 
             op == BINARYOP_SUBTRACT   || 
             op == BINARYOP_MULTIPLY   ||
+            op == BINARYOP_DIVIDE     ||
+            op == BINARYOP_REMAINDER  ||
             op == ASSIGNOP_ADD_ASSIGN || 
             op == ASSIGNOP_SUB_ASSIGN || 
-            op == ASSIGNOP_MUL_ASSIGN) 
+            op == ASSIGNOP_MUL_ASSIGN || 
+            op == ASSIGNOP_DIV_ASSIGN || 
+            op == ASSIGNOP_REM_ASSIGN || 
+            op == ASSIGNOP_REM_ASSIGN) 
         {
             if (!lhs->type->isInt() && !lhs->type->isReal()) {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
             }
-            switch (op) {
-                case BINARYOP_ADD        : result = BinaryOp::add(lhs, rhs);      break;
-                case BINARYOP_SUBTRACT   : result = BinaryOp::subtract(lhs, rhs); break;
-                case BINARYOP_MULTIPLY   : result = BinaryOp::multiply(lhs, rhs); break;
-                case ASSIGNOP_ADD_ASSIGN : result = BinaryOp::add(lhs, rhs);      break;
-                case ASSIGNOP_SUB_ASSIGN : result = BinaryOp::subtract(lhs, rhs); break;
-                case ASSIGNOP_MUL_ASSIGN : result = BinaryOp::multiply(lhs, rhs); break;
-            }
-        }
-        else if (op == BINARYOP_DIVIDE     || 
-                 op == BINARYOP_REMAINDER  ||
-                 op == ASSIGNOP_DIV_ASSIGN ||
-                 op == ASSIGNOP_REM_ASSIGN) 
-        {
-            if (!lhs->type->isInt() && !lhs->type->isReal()) {
-                return error(expr, "Operands of \'" + opstr + "\' operation must have integer or real type");
-            }
-            if (lhs->type->isInt()) {
-                if (rhs->isConst()) {
-                    auto rc = llvm::cast<llvm::ConstantInt>(rhs->val());
-                    if (rc->getZExtValue() == 0) {
-                        return error(expr, "Divisor of \'" + opstr + "\' operation is zero");
-                    }
-                }
-                if (lhs->type->isSignedInt() && lhs->isConst() && rhs->isConst()) {
-                    auto lc = llvm::cast<llvm::ConstantInt>(lhs->val());
-                    auto rc = llvm::cast<llvm::ConstantInt>(rhs->val());
-                    if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
-                        return error(expr, "\'" + opstr + "\' operation has signed overflow");
-                    }
-                }
-            }
-            else {
-                if (rhs->isConst()) {
-                    auto rc = llvm::cast<llvm::ConstantFP>(rhs->val());
-                    if (rc->getValue().convertToDouble() == 0.0) {
-                        return error(expr, "Divisor of \'" + opstr + "\' operation is zero");
-                    }
+            if (op == BINARYOP_DIVIDE     || op == BINARYOP_REMAINDER  || 
+                op == ASSIGNOP_DIV_ASSIGN || op == ASSIGNOP_REM_ASSIGN) 
+            {
+                switch (BinaryOp::checkValidDivision(lhs, rhs)) {
+                    case UB_DIV_ZERO     : return error(expr, "Divisor of \'" + opstr + "\' operation is zero");
+                    case UB_DIV_OVERFLOW : return error(expr, "\'" + opstr + "\' operation has signed overflow");
                 }
             }
             switch (op) {
+                case BINARYOP_ADD        : result = BinaryOp::add(lhs, rhs);       break;
+                case BINARYOP_SUBTRACT   : result = BinaryOp::subtract(lhs, rhs);  break;
+                case BINARYOP_MULTIPLY   : result = BinaryOp::multiply(lhs, rhs);  break;
                 case BINARYOP_DIVIDE     : result = BinaryOp::divide(lhs, rhs);    break;
                 case BINARYOP_REMAINDER  : result = BinaryOp::remainder(lhs, rhs); break;
+                case ASSIGNOP_ADD_ASSIGN : result = BinaryOp::add(lhs, rhs);       break;
+                case ASSIGNOP_SUB_ASSIGN : result = BinaryOp::subtract(lhs, rhs);  break;
+                case ASSIGNOP_MUL_ASSIGN : result = BinaryOp::multiply(lhs, rhs);  break;
                 case ASSIGNOP_DIV_ASSIGN : result = BinaryOp::divide(lhs, rhs);    break;
                 case ASSIGNOP_REM_ASSIGN : result = BinaryOp::remainder(lhs, rhs); break;
             }

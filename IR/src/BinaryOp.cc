@@ -56,7 +56,10 @@ namespace avl {
 
     std::shared_ptr<Value> BinaryOp::divide(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (!isValidDivision(le, re)) {
+        if (*le->type != *re->type) {
+            return ret;
+        }
+        if (checkValidDivision(le, re) != UB_NONE) {
             return ret;
         }
         if (le->type->isInt()) {
@@ -75,7 +78,10 @@ namespace avl {
 
     std::shared_ptr<Value> BinaryOp::remainder(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;
-        if (!isValidDivision(le, re)) {
+        if (*le->type != *re->type) {
+            return ret;
+        }
+        if (checkValidDivision(le, re) != UB_NONE) {
             return ret;
         }
         if (le->type->isInt()) {
@@ -560,40 +566,32 @@ namespace avl {
 
     }
 
-    bool BinaryOp::isValidDivision(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
-
-        if (*le->type != *re->type) {
-            return false;
-        }
+    uint16_t BinaryOp::checkValidDivision(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
 
         if (re->type->isInt()) {
             if (re->isConst()) {
                 auto rc = llvm::cast<llvm::ConstantInt>(re->val());
                 if (rc->getZExtValue() == 0) {
-                    return false;
+                    return UB_DIV_ZERO;
                 }
             }
             if (re->type->isSignedInt() && re->isConst() && re->isConst()) {
                 auto lc = llvm::cast<llvm::ConstantInt>(le->val());
                 auto rc = llvm::cast<llvm::ConstantInt>(re->val());
                 if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
-                    return false;
+                    return UB_DIV_OVERFLOW;
                 }
             }
-            return true;
         }
         else if (re->type->isReal()) {
             if (re->isConst()) {
                 auto rc = llvm::cast<llvm::ConstantFP>(re->val());
                 if (rc->getValue().convertToDouble() == 0.0) {
-                    return false;
+                    return UB_DIV_ZERO;
                 }
             }
-            return true;
         }
-        else {
-            return false;
-        }
+        return UB_NONE;
 
     }
 

@@ -8,6 +8,14 @@
 
 namespace avl {
 
+    enum UB_ID {
+
+        UB_NONE,
+        UB_DIV_ZERO,
+        UB_DIV_OVERFLOW
+
+    };
+
     struct BinaryOp {
 
         static std::shared_ptr<Value> recast(const std::shared_ptr<Value>&, const std::shared_ptr<Type>&);
@@ -33,7 +41,7 @@ namespace avl {
         static std::shared_ptr<Value> element(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> member(const std::shared_ptr<Variable>&, const std::string&);
         static std::shared_ptr<Value> assign(const std::shared_ptr<Variable>&, const std::shared_ptr<Value>&);
-        static bool isValidDivision(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
+        static uint16_t checkValidDivision(const std::shared_ptr<Value>&, const std::shared_ptr<Value>&);
 
     };
 
