@@ -71,12 +71,7 @@ namespace avl {
 
     bool Analyzer::initGlobal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
-        if (!rval) {
-            auto linkage = (var->storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-            var->llvm_pointer = new llvm::GlobalVariable(*TheModule, var->type->llvm_type, false, linkage, nullptr, var->name);
-        }
-
-        else if (rval->kind == NODE_STATEMENT) {
+        if (rval->kind == NODE_STATEMENT) {
             auto stat = static_cast<Statement*>(rval.get());
             if (stat->is != STATEMENT_DEFINE) {
                 return error();
@@ -95,21 +90,19 @@ namespace avl {
             return initGlobal(var, def);
         }
 
-        else if (rval->kind == NODE_NULLINIT) {
-            auto nullinit = llvm::Constant::getNullValue(var->type->llvm_type);
-            auto linkage = (var->storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-            var->llvm_pointer = new llvm::GlobalVariable(*TheModule, var->type->llvm_type, false, linkage, nullinit, var->name);
+        auto linkage = (var->storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
+        llvm::Constant* in;
+        if (!rval || rval->kind == NODE_NULLINIT) {
+            in = (!rval ? nullptr : llvm::Constant::getNullValue(var->type->llvm_type));
         }
-
         else {
             if (!initConst(var->type, rval)) {
                 return error();
             }
-            auto in = static_cast<Value*>(result.get());
-            auto linkage = (var->storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-            var->llvm_pointer = new llvm::GlobalVariable(*TheModule, in->type->llvm_type, false, linkage, llvm::cast<llvm::Constant>(in->llvm_value), var->name);
+            in = llvm::cast<llvm::Constant>(static_cast<Value*>(result.get())->val());
         }
 
+        var->llvm_pointer = new llvm::GlobalVariable(*TheModule, var->type->llvm_type, false, linkage, in, var->name);
         result = var;
         return success();
     }
@@ -136,14 +129,8 @@ namespace avl {
         }
 
         else if (rval->kind == NODE_NULLINIT) {
-            auto nullinit = static_cast<NullInit*>(rval.get());
-            if (nullinit->zero) {
-                if (!var->type->moveDirectly()) {
-                    MemoryOp::memset(var, 0);
-                }
-                else {
-                    TheBuilder.CreateStore(llvm::Constant::getNullValue(var->type->llvm_type), var->ptr());
-                }
+            if (static_cast<NullInit*>(rval.get())->zero) {
+                var->init();
             }
             result = var;
             return success();

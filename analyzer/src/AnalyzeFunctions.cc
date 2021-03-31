@@ -1,4 +1,3 @@
-#include <llvm/IR/Value.h>
 #include <Analyzer.h>
 #include <FunctionType.h>
 #include <VoidType.h>
@@ -107,7 +106,7 @@ namespace avl {
             if (!ft->ret->isVoid()) {
                 return error(defn->name, "Function with a non-void return type cannot have an empty body");
             }
-            TheBuilder.CreateRetVoid();
+            FunctionOp::ret(currentFunction, nullptr);
             return success();
         }
         else {
@@ -183,7 +182,7 @@ namespace avl {
         }
 
         if (ft->ret->isVoid()) {
-            TheBuilder.CreateRetVoid();
+            FunctionOp::ret(currentFunction, nullptr);
             return success();
         }
 

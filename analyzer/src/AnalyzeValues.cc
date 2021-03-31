@@ -253,14 +253,10 @@ namespace avl {
             return error(binary, "Element index is not an integer");
         }
         if (lhs->type->isStruct() || lhs->type->isUnion()) {
-            if (!rhs->isConst()) {
-                return error(binary, "Element index is not an integer constant");
+            if (!rhs->isConstNonNegativeInt()) {
+                return error(binary, "Element index is not a non-negative integer constant");
             }
-            auto ci = llvm::cast<llvm::ConstantInt>(rhs->val());
-            if (ci->isNegative()) {
-                return error(binary, "Element index cannot be negative");
-            }
-            auto idx = ci->getZExtValue();
+            auto idx = llvm::cast<llvm::ConstantInt>(rhs->val())->getZExtValue();
             if (lhs->type->isStruct()) {
                 auto st = static_cast<StructType*>(lhs->type.get());
                 if (idx >= st->members.size()) {

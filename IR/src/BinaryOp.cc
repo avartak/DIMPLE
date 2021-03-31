@@ -315,14 +315,10 @@ namespace avl {
         }
 
         if (var->type->isStruct() || var->type->isUnion()) {
-            if (!i->isConst()) {
+            if (!i->isConstNonNegativeInt()) {
                 return ret;
             }
-            auto ci = llvm::cast<llvm::ConstantInt>(i->val());
-            if (ci->isNegative()) {
-                return ret;
-            }
-            auto idx = ci->getZExtValue();
+            auto idx = llvm::cast<llvm::ConstantInt>(i->val())->getZExtValue();
 
             if (var->type->isStruct()) {
                 auto st = static_cast<StructType*>(var->type.get());

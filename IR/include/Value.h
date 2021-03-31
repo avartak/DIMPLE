@@ -5,7 +5,7 @@
 #include <Entity.h>
 #include <Type.h>
 #include <llvm/IR/Value.h>
-#include <llvm/IR/Constant.h>
+#include <llvm/IR/Constants.h>
 
 namespace avl {
 
@@ -65,6 +65,10 @@ namespace avl {
 
         inline bool isConst() const {
             return (llvm_value != nullptr) && llvm::isa<llvm::Constant>(llvm_value);
+        }
+
+        inline bool isConstNonNegativeInt() const {
+            return isConst() && type->isInt() && !llvm::cast<llvm::ConstantInt>(llvm_value)->isNegative();
         }
 
         inline bool isVar() const {
