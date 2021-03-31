@@ -157,5 +157,13 @@ namespace avl {
 		return true;
     }
 
+    std::shared_ptr<Variable> FunctionOp::createLocalVar(const std::string& name, const std::shared_ptr<Type>& type) {
+
+        auto var = std::make_shared<Variable>(STORAGE_LOCAL, name, type);
+        var->llvm_pointer = TheBuilder.CreateAlloca(var->type->llvm_type);
+        var->align();
+        return var;
+
+    }
 }
 

@@ -13,6 +13,8 @@ namespace avl {
         virtual llvm::Value* ptr() const override;
         virtual void init() override;
 
+        void initGlobal(const std::shared_ptr<Value>&);
+        void initGlobal(bool);
         bool align();
 
     };

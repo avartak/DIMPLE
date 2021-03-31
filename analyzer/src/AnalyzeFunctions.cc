@@ -223,9 +223,7 @@ namespace avl {
         if (!type->isComplete()) {
             return error(definition->type, "Variable type is not completely defined");
         }
-        auto var = std::make_shared<Variable>(STORAGE_LOCAL, n, type);
-        var->llvm_pointer = TheBuilder.CreateAlloca(var->type->llvm_type);
-        var->align();
+        auto var = FunctionOp::createLocalVar(n, type);
         if (!initLocal(var, definition)) {
             return error(definition->name, "Unable to initialize variable " + n);
         }

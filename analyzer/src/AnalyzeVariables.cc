@@ -1,6 +1,5 @@
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/GlobalVariable.h>
-#include <llvm/IR/DerivedTypes.h>
 #include <Analyzer.h>
 #include <NameNode.h>
 #include <ExprNode.h>
@@ -63,7 +62,6 @@ namespace avl {
         if (!initGlobal(var, defn)) {
             return error();
         }
-        var->align();
         gst->variables[n] = var;
         result = var;
         return success();
@@ -90,19 +88,16 @@ namespace avl {
             return initGlobal(var, def);
         }
 
-        auto linkage = (var->storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-        llvm::Constant* in;
         if (!rval || rval->kind == NODE_NULLINIT) {
-            in = (!rval ? nullptr : llvm::Constant::getNullValue(var->type->llvm_type));
+            var->initGlobal(bool(rval));
         }
         else {
             if (!initConst(var->type, rval)) {
                 return error();
             }
-            in = llvm::cast<llvm::Constant>(static_cast<Value*>(result.get())->val());
+            var->initGlobal(std::static_pointer_cast<Value>(result));
         }
 
-        var->llvm_pointer = new llvm::GlobalVariable(*TheModule, var->type->llvm_type, false, linkage, in, var->name);
         result = var;
         return success();
     }
