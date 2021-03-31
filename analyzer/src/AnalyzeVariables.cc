@@ -171,14 +171,10 @@ namespace avl {
                     return error(ie.tag, "Unable to get the index of the initalizer element");
                 }
                 auto index = static_cast<Value*>(result.get());
-                if (!index->type->isInt()) {
-                    return error(ie.tag, "Index of the initalizer element must be an integer");
+                if (!index->isConstNonNegativeInt()) {
+                    return error(ie.tag, "Index of the initalizer element must be a non-negative integer constant");
                 }
-                auto ci = llvm::cast<llvm::ConstantInt>(index->llvm_value);
-                if (ci->isNegative()) {
-                    return error(ie.tag, "Index of the initalizer element is negative");
-                }
-                idx = ci->getZExtValue();
+                idx = llvm::cast<llvm::ConstantInt>(index->val())->getZExtValue();
             }
             last_idx = idx;
             if (idx >= ty->nelements) {
@@ -225,26 +221,19 @@ namespace avl {
                 }
                 else {
                     if (!getValue(ie.tag)) {
-                        return error("Unable to obtain struct initializer index as a compile-time constant");
+                        return error("Unable to obtain struct initializer index");
                     }
                     auto iv = static_cast<Value*>(result.get());
-                    if (!iv->type->isInt()) {
-                        return error(ie.tag, "Struct initializer index is not an integer");
+                    if (!iv->isConstNonNegativeInt()) {
+                        return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
-                    if (!iv->isConst()) {
-                        return error(ie.tag, "Struct initializer index is not a compile-time constant");
+                    idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+                    if (idx >= ty->members.size()) {
+                        return error(&ie, "Initializer element out of bounds of the struct");
                     }
-                    auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
-                    if (ci->isNegative()) {
-                        return error(ie.tag, "Struct initializer index is negative");
-                    }
-                    idx = ci->getZExtValue();
                 }
             }
             last_idx = idx;
-            if (idx >= ty->members.size()) {
-                return error(&ie, "Initializer element out of bounds of the struct");
-            }
 
             const auto& ele = std::make_shared<IntLiteral>(idx);
             const auto& val = BinaryOp::element(var, ele);
@@ -288,20 +277,13 @@ namespace avl {
         }
         else {
             if (!getValue(in->elements[0].tag)) {
-                return error(in->elements[0].tag, "Unable to obtain union initializer index as a compile-time constant");
+                return error(in->elements[0].tag, "Unable to obtain union initializer index");
             }
             auto iv = static_cast<Value*>(result.get());
-            if (!iv->type->isInt()) {
-                return error(in->elements[0].tag, "Union initializer index is not an integer");
+            if (!iv->isConstNonNegativeInt()) {
+                return error(in->elements[0].tag, "Union initializer index must be a non-negative integer constant");
             }
-            if (!iv->isConst()) {
-                return error(in->elements[0].tag, "Union initializer index is not a compile-time constant");
-            }
-            auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
-            if (ci->isNegative()) {
-                return error(in->elements[0].tag, "Union initializer index is negative");
-            }
-            idx = ci->getZExtValue();
+            idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
             if (idx >= ty->members.size()) {
                 return error(in, "Union initializer index is out of bounds of the union members set");
             }
@@ -416,14 +398,10 @@ namespace avl {
                     return error(ie.tag, "Unable to get the index of the initalizer element");
                 }
                 auto index = static_cast<Value*>(result.get());
-                if (!index->type->isInt()) {
-                    return error(ie.tag, "Index of the initalizer element must be an integer");
+                if (!index->isConstNonNegativeInt()) {
+                    return error(ie.tag, "Index of the initalizer element must be a non-negative integer const");
                 }
-                auto ci = llvm::cast<llvm::ConstantInt>(index->llvm_value);
-                if (ci->isNegative()) {
-                    return error(ie.tag, "Index of the initalizer element is negative");
-                }
-                idx = ci->getZExtValue();
+                idx = llvm::cast<llvm::ConstantInt>(index->val())->getZExtValue();
             }
             last_idx = idx;
             if (idx >= at->nelements) {
@@ -525,23 +503,16 @@ namespace avl {
                         return error(ie.tag, "Unable to obtain struct initializer index as a compile-time constant");
                     }
                     auto iv = static_cast<Value*>(result.get());
-                    if (!iv->type->isInt()) {
-                        return error(ie.tag, "Struct initializer index is not an integer");
+                    if (!iv->isConstNonNegativeInt()) {
+                        return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
-                    if (!iv->isConst()) {
-                        return error(ie.tag, "Struct initializer index is not a compile-time constant");
+                    idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+                    if (idx >= ty->members.size()) {
+                        return error(&ie, "Initializer element out of bounds of the struct");
                     }
-                    auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
-                    if (ci->isNegative()) {
-                        return error(ie.tag, "Struct initializer index is negative");
-                    }
-                    idx = ci->getZExtValue();
                 }
             }
             last_idx = idx;
-            if (idx >= ty->members.size()) {
-                return error(&ie, "Initializer element out of bounds of the struct");
-            }
             if (!initConst(ty->members[idx].type, ie.value)) {
                 if (ty->members[idx].name->name == "") {
                    return error(ie.value, "Unable to initialize struct member at index " + std::to_string(idx));
@@ -598,24 +569,17 @@ namespace avl {
                 return error(in->elements[0].tag, "Unable to obtain union initializer index as a compile-time constant");
             }
             auto iv = static_cast<Value*>(result.get());
-            if (!iv->type->isInt()) {
-                return error(in->elements[0].tag, "Union initializer index is not an integer");
+            if (!iv->isConstNonNegativeInt()) {
+                return error(in->elements[0].tag, "Union initializer index must be a non-negative integer constant");
             }
-            if (!iv->isConst()) {
-                return error(in->elements[0].tag, "Union initializer index is not a compile-time constant");
+            idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
+            if (idx >= ty->members.size()) {
+                return error(in, "Initializer element out of bounds of the union");
             }
-            auto ci = llvm::cast<llvm::ConstantInt>(iv->val());
-            if (ci->isNegative()) {
-                return error(in->elements[0].tag, "Union initializer index is negative");
-            }
-            idx = ci->getZExtValue();
         }
 
         std::vector<llvm::Constant*> csv;
         std::vector<llvm::Type*> tsv;
-        if (idx >= ty->members.size()) {
-            return error(in, "Initializer element out of bounds of the struct");
-        }
         if (!initConst(ty->members[idx].type, in->elements[0].value)) {
             if (ty->members[idx].name->name == "") {
                return error(in->elements[0].value, "Unable to initialize union member at index " + std::to_string(idx));
