@@ -87,4 +87,17 @@ namespace avl {
         return st;
     }
 
+    std::shared_ptr<Value> StructType::initConst(const std::shared_ptr<StructType>& t, const std::vector<std::shared_ptr<Value> >& cv) {
+
+        std::vector<llvm::Type*> tsv;
+        std::vector<llvm::Constant*> csv;
+        for (auto c : cv) {
+            tsv.push_back(c->type->llvm_type);
+            csv.push_back(llvm::cast<llvm::Constant>(c->llvm_value));
+        }
+
+        t->llvm_type = llvm::StructType::get(TheContext, tsv, t->isPacked());
+        return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+    }
+
 }

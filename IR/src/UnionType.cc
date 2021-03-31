@@ -81,4 +81,24 @@ namespace avl {
         ut->complete = complete;
         return ut;
     }
+
+    std::shared_ptr<Value> UnionType::initConst(const std::shared_ptr<UnionType>& t, const std::shared_ptr<Value>& cv) {
+
+        std::vector<llvm::Constant*> csv;
+        std::vector<llvm::Type*> tsv;
+
+        csv.push_back(llvm::cast<llvm::Constant>(cv->llvm_value));
+        tsv.push_back(cv->type->llvm_type);
+        std::size_t size1 = cv->type->size();
+        std::size_t size2 = t->size() - size1;
+        if (size2 > 0) {
+            auto at = llvm::ArrayType::get(TheBuilder.getInt8Ty(), size2);
+            csv.push_back(llvm::Constant::getNullValue(at));
+            tsv.push_back(at);
+        }
+
+        t->llvm_type = llvm::StructType::get(TheContext, tsv, true);
+        return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+    }
+
 }

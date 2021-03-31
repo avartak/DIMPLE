@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <Type.h>
+#include <Value.h>
 #include <NameType.h>
 
 namespace avl {
@@ -23,6 +24,9 @@ namespace avl {
         inline bool isPacked() const {
             return (flags & 1) > 0;
         }
+
+        static std::shared_ptr<Value> initConst(const std::shared_ptr<StructType>&, const std::vector<std::shared_ptr<Value> >&);
+
     };
 
 }

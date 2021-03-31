@@ -228,12 +228,12 @@ namespace avl {
                         return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
                     idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
-                    if (idx >= ty->members.size()) {
-                        return error(&ie, "Initializer element out of bounds of the struct");
-                    }
                 }
             }
             last_idx = idx;
+            if (idx >= ty->members.size()) {
+                return error(&ie, "Initializer element out of bounds of the struct");
+            }
 
             const auto& ele = std::make_shared<IntLiteral>(idx);
             const auto& val = BinaryOp::element(var, ele);
@@ -375,7 +375,7 @@ namespace avl {
 
     bool Analyzer::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Node>& nd) {
 
-        auto t = ty->clone();
+        auto t = std::static_pointer_cast<ArrayType>(ty->clone());
 
         if (nd->kind != NODE_INITIALIZER) {
             return error(nd, "Unable to construct array initializer");
@@ -384,10 +384,7 @@ namespace avl {
         auto at = static_cast<ArrayType*>(t.get());
 
         std::size_t last_idx = -1;
-        std::map<std::size_t, llvm::Constant*> cmap;
-        std::map<std::size_t, llvm::Type*> tmap;
-        std::vector<std::pair<std::size_t, llvm::Constant*> > csv;
-        std::vector<std::pair<std::size_t, llvm::Type*> > tsv;
+        std::map<std::size_t, std::shared_ptr<Value> > cmap;
         for (const auto& ie : in->elements) {
             auto idx = last_idx + 1;
             if (ie.is != INIT_UNTAGGED) {
@@ -410,61 +407,16 @@ namespace avl {
             if (!initConst(at->array_of, ie.value)) {
                 return error(ie.value, "Unable to initialize array element at index " + std::to_string(idx));
             }
-            auto cs = std::static_pointer_cast<Value>(result);
-            cmap[idx] = llvm::cast<llvm::Constant>(cs->val());
-            tmap[idx] = cs->type->llvm_type;
-        }
-        for (auto icmap : cmap) {
-            csv.push_back(icmap);
-        }
-        for (auto itmap : tmap) {
-            tsv.push_back(itmap);
+            cmap[idx] = std::static_pointer_cast<Value>(result);
         }
 
-        struct {
-            bool operator()(std::pair<std::size_t, llvm::Constant*> a, std::pair<std::size_t, llvm::Constant*> b) const {
-                return a.first < b.first;
-            }
-        } csorter;
-        struct {
-            bool operator()(std::pair<std::size_t, llvm::Type*> a, std::pair<std::size_t, llvm::Type*> b) const {
-                return a.first < b.first;
-            }
-        } tsorter;
-
-        std::sort(csv.begin(), csv.end(), csorter);
-        std::sort(tsv.begin(), tsv.end(), tsorter);
-
-        std::vector<llvm::Type*> tv;
-        std::vector<llvm::Constant*> cv;
-        for (std::size_t i = 0; i < csv.size(); i++) {
-            if (i == 0 && csv[i].first > 0) {
-                tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, csv[i].first));
-                cv.push_back(llvm::Constant::getNullValue(tv.back()));
-            }
-            cv.push_back(csv[i].second);
-            tv.push_back(tsv[i].second);
-            if (i < csv.size()-1) {
-                if (csv[i+1].first-1-csv[i].first > 0) {
-                    tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, csv[i+1].first-1-csv[i].first));
-                    cv.push_back(llvm::Constant::getNullValue(tv.back()));
-                }
-            }
-            else if (csv[i].first < at->nelements-1) {
-                tv.push_back(llvm::ArrayType::get(at->array_of->llvm_type, at->nelements-1-csv[i].first));
-                cv.push_back(llvm::Constant::getNullValue(tv.back()));
-            }
-        }
-
-        t->llvm_type = llvm::StructType::get(TheContext, tv, true);
-        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), cv));
+        result = ArrayType::initConst(t, cmap);
         return success();
-
     }
 
     bool Analyzer::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Node>& nd) {
 
-        auto t = ty->clone();
+        auto t = std::static_pointer_cast<StructType>(ty->clone());
 
         if (nd->kind != NODE_INITIALIZER) {
             return error(nd, "Unable to construct initializer");
@@ -472,11 +424,9 @@ namespace avl {
         auto in = static_cast<const Initializer*>(nd.get());
 
         std::size_t last_idx = -1;
-        std::vector<llvm::Constant*> csv;
-        std::vector<llvm::Type*> tsv;
+        std::vector<std::shared_ptr<Value> > cv;
         for (auto im : ty->members) {
-            tsv.push_back(im.type->llvm_type);
-            csv.push_back(llvm::Constant::getNullValue(im.type->llvm_type));
+            cv.push_back(std::make_shared<Value>(im.type, llvm::Constant::getNullValue(im.type->llvm_type)));
         }
         for (const auto& ie : in->elements) {
             auto idx = last_idx + 1;
@@ -507,12 +457,12 @@ namespace avl {
                         return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                     }
                     idx = llvm::cast<llvm::ConstantInt>(iv->val())->getZExtValue();
-                    if (idx >= ty->members.size()) {
-                        return error(&ie, "Initializer element out of bounds of the struct");
-                    }
                 }
             }
             last_idx = idx;
+            if (idx >= ty->members.size()) {
+                return error(&ie, "Initializer element out of bounds of the struct");
+            }
             if (!initConst(ty->members[idx].type, ie.value)) {
                 if (ty->members[idx].name->name == "") {
                    return error(ie.value, "Unable to initialize struct member at index " + std::to_string(idx));
@@ -521,19 +471,16 @@ namespace avl {
                    return error(ie.value, "Unable to initialize struct member " + ty->members[idx].name->name);
                 }
             }
-            auto cs = std::static_pointer_cast<Value>(result);
-            csv[idx] = llvm::cast<llvm::Constant>(cs->llvm_value);
-            tsv[idx] = cs->type->llvm_type;
+            cv[idx] = std::static_pointer_cast<Value>(result);
         }
-        t->llvm_type = llvm::StructType::get(TheContext, tsv, ty->isPacked());
-
-        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+        result = StructType::initConst(t, cv);
         return success();
     }
 
     bool Analyzer::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Node>& nd) {
 
-        auto t = ty->clone();
+        auto t = std::static_pointer_cast<UnionType>(ty->clone());
+
 
         if (nd->kind != NODE_INITIALIZER) {
             return error(nd, "Unable to construct initializer");
@@ -578,8 +525,6 @@ namespace avl {
             }
         }
 
-        std::vector<llvm::Constant*> csv;
-        std::vector<llvm::Type*> tsv;
         if (!initConst(ty->members[idx].type, in->elements[0].value)) {
             if (ty->members[idx].name->name == "") {
                return error(in->elements[0].value, "Unable to initialize union member at index " + std::to_string(idx));
@@ -588,19 +533,7 @@ namespace avl {
                return error(in->elements[0].value, "Unable to initialize union member " + ty->members[idx].name->name);
             }
         }
-        auto cs = std::static_pointer_cast<Value>(result);
-        csv.push_back(llvm::cast<llvm::Constant>(cs->llvm_value));
-        tsv.push_back(cs->type->llvm_type);
-        std::size_t size1 = ty->members[idx].type->size();
-        std::size_t size2 = ty->size() - size1;
-        if (size2 > 0) {
-            auto at = llvm::ArrayType::get(TheBuilder.getInt8Ty(), size2);
-            csv.push_back(llvm::Constant::getNullValue(at));
-            tsv.push_back(at);
-        }
-
-        t->llvm_type = llvm::StructType::get(TheContext, tsv, true);
-        result = std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
+        result = UnionType::initConst(t, std::static_pointer_cast<Value>(result));
         return success();
     }
 }

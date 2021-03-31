@@ -1,5 +1,6 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <ArrayType.h>
+#include <Globals.h>
 
 namespace avl {
 
@@ -53,5 +54,45 @@ namespace avl {
         return at;
     }
 
+    std::shared_ptr<Value> ArrayType::initConst(const std::shared_ptr<ArrayType>& t, const std::map<std::size_t, std::shared_ptr<Value> >& cmap) {
+
+        std::vector<std::pair<std::size_t, std::shared_ptr<Value> > > cvec;
+
+        for (const auto& icmap : cmap) {
+            cvec.push_back(icmap);
+        }
+
+        struct {
+            bool operator()(std::pair<std::size_t, std::shared_ptr<Value> > a, std::pair<std::size_t, std::shared_ptr<Value> > b) const {
+                return a.first < b.first;
+            }
+        } sorter;
+
+        std::sort(cvec.begin(), cvec.end(), sorter);
+
+        std::vector<llvm::Type*> tv;
+        std::vector<llvm::Constant*> cv;
+        for (std::size_t i = 0; i < cvec.size(); i++) {
+            if (i == 0 && cvec[i].first > 0) {
+                tv.push_back(llvm::ArrayType::get(t->array_of->llvm_type, cvec[i].first));
+                cv.push_back(llvm::Constant::getNullValue(tv.back()));
+            }
+            tv.push_back(cvec[i].second->type->llvm_type);
+            cv.push_back(llvm::cast<llvm::Constant>(cvec[i].second->llvm_value));
+            if (i < cvec.size()-1) {
+                if (cvec[i+1].first-1-cvec[i].first > 0) {
+                    tv.push_back(llvm::ArrayType::get(t->array_of->llvm_type, cvec[i+1].first-1-cvec[i].first));
+                    cv.push_back(llvm::Constant::getNullValue(tv.back()));
+                }
+            }
+            else if (cvec[i].first < t->nelements-1) {
+                tv.push_back(llvm::ArrayType::get(t->array_of->llvm_type, t->nelements-1-cvec[i].first));
+                cv.push_back(llvm::Constant::getNullValue(tv.back()));
+            }
+        }
+
+        t->llvm_type = llvm::StructType::get(TheContext, tv, true);
+        return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), cv));
+    }
 }
 
