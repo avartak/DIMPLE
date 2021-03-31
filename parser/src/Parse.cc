@@ -7,8 +7,8 @@
   
 namespace avl {
 
-    Parser::Parser(const std::shared_ptr<AST>& tree):
-        Pass(tree)
+    Parser::Parser(const std::shared_ptr<InputManager>& in, const std::shared_ptr<AST>& tree):
+        Pass(in, tree, nullptr)
     {
     }
 
@@ -30,12 +30,12 @@ namespace avl {
     }
 
     std::shared_ptr<Token> Parser::scan() {
-        const auto& scanner = TheInput->currentInputFile->scanner;
+        const auto& scanner = input->currentInputFile->scanner;
         auto type = scanner->lex();
         auto str = scanner->str;
         Coordinate start(scanner->start_line, scanner->start_column);
         Coordinate end(scanner->end_line, scanner->end_column);
-        Location loc(TheInput->currentInputFile->index, start, end);
+        Location loc(input->currentInputFile->index, start, end);
 
         return std::make_shared<Token>(type, str, loc);
     }

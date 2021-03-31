@@ -2,8 +2,8 @@
 
 namespace avl {
 
-    Analyzer::Analyzer(const std::shared_ptr<AST>& tree):
-        Pass(tree)
+    Analyzer::Analyzer(const std::shared_ptr<AST>& tree, const std::shared_ptr<GST>& sym):
+        Pass(nullptr, tree, sym)
     {
     }
 
@@ -35,7 +35,7 @@ namespace avl {
         for (const auto& trep : ast->representations) {
             const auto& name = trep.second->name;
             const auto& node = trep.second->node;
-            if (types.find(name->name) != types.end()) {
+            if (gst->types.find(name->name) != gst->types.end()) {
                 continue;
             }
             if (!getType(node, false) && hasErrors()) {
@@ -49,7 +49,7 @@ namespace avl {
         for (const auto& trep : ast->representations) {
             const auto& name = trep.second->name;
             const auto& node = trep.second->node;
-            if (constants.find(name->name) != constants.end()) {
+            if (gst->constants.find(name->name) != gst->constants.end()) {
                 continue;
             }
             if (!getValue(node) && hasErrors()) {
@@ -63,7 +63,7 @@ namespace avl {
 
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (variables.find(name->name) != variables.end()) {
+            if (gst->variables.find(name->name) != gst->variables.end()) {
                 continue;
             }
             if (!getGlobalVar(name) && hasErrors()) {
@@ -73,7 +73,7 @@ namespace avl {
 
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (variables.find(name->name) != variables.end()) {
+            if (gst->variables.find(name->name) != gst->variables.end()) {
                 continue;
             }
             if (!getGlobalVar(name) && hasErrors()) {
@@ -89,7 +89,7 @@ namespace avl {
 
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (functions.find(name->name) != functions.end()) {
+            if (gst->functions.find(name->name) != gst->functions.end()) {
                 continue;
             }
             if (!getFunction(name) && hasErrors()) {
@@ -99,7 +99,7 @@ namespace avl {
 
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (functions.find(name->name) != functions.end()) {
+            if (gst->functions.find(name->name) != gst->functions.end()) {
                 continue;
             }
             if (!getFunction(name) && hasErrors()) {

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 #include <Instance.h>
-#include <Scope.h>
+#include <LST.h>
 #include <Variable.h>
 
 namespace avl {
@@ -13,7 +13,7 @@ namespace avl {
 
     struct Function : public Instance {
 
-        std::shared_ptr<Scope> scope;
+        std::shared_ptr<LST> lst;
         std::vector<std::shared_ptr<Variable> > args;
         std::shared_ptr<Variable> retvar;
         std::shared_ptr<CodeBlock> retblock;

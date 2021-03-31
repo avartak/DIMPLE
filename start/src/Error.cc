@@ -15,12 +15,12 @@ namespace avl {
     {
     }
 
-    std::string Error::print() const {
+    std::string Error::print(const InputManager* in) const {
 
         std::stringstream out;
         out << "[AVL error]";
-        if (location.filename() != "") {
-            out << " " << location.filename();
+        if (location.filename(in) != "") {
+            out << " " << location.filename(in);
             if (location.start.line > 0) {
                 out << ":" << location.start.line << ":" << location.start.column;
                 if (location.end.line > location.start.line) {

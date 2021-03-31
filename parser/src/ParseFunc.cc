@@ -259,7 +259,7 @@ namespace avl {
         if (b->vars.find(vdef->name->name) != b->vars.end()) {
             std::stringstream err;
             err << "Redefinition of " << vname << ". " << "Previous occurence at ";
-            err << b->vars[vname]->loc.filename() << ":" << b->vars[vname]->loc.start.line;
+            err << b->vars[vname]->loc.filename(input.get()) << ":" << b->vars[vname]->loc.start.line;
             return error(vdef->name, err.str());
         }
         b->vars[vname] = vdef->name;

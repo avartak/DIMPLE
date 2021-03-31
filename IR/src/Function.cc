@@ -9,7 +9,7 @@ namespace avl {
 
     Function::Function(int s, const std::string& n, const std::shared_ptr<Type>& t):
         Instance(VALUE_FUNC, s, n, t),
-        scope(std::make_shared<Scope>())
+        lst(std::make_shared<LST>())
     {
         auto ft = static_cast<FunctionType*>(type.get());
         auto linkage = (s == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
@@ -65,13 +65,13 @@ namespace avl {
                 var->llvm_pointer = fn->getArg(idx);
             }
             args.push_back(var);
-            scope->vars[ft->args[i].name->name] = var;
+            lst->variables[ft->args[i].name->name] = var;
         }
 	}
 
     void Function::resetLocals() {
-        if (scope->prev) {
-            scope = scope->prev;
+        if (lst->prev) {
+            lst = lst->prev;
         }
     }
 

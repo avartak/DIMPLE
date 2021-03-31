@@ -30,8 +30,11 @@ namespace avl {
     {
     }
 
-    std::string Location::filename() const {
-        return TheInput->getFileName(file_index);
+    std::string Location::filename(const InputManager* in) const {
+        if (in == nullptr) {
+            return "";
+        }
+        return in->getFileName(file_index);
     }
 
 }

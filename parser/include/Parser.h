@@ -19,7 +19,7 @@ namespace avl {
         std::vector<std::shared_ptr<Token> > tokens;
         std::size_t nParsed;
 
-        Parser(const std::shared_ptr<AST>&);
+        Parser(const std::shared_ptr<InputManager>& in, const std::shared_ptr<AST>&);
    
         virtual void fail() override; 
         virtual bool run() override;

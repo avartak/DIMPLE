@@ -70,20 +70,20 @@ namespace avl {
             filename.erase(filename.end()-1);
         }
 
-        if (TheInput->isActive(filename)) {
+        if (input->isActive(filename)) {
             return error(tokens[it+n], "Circular inclusion of " + filename);
         }
-        if (TheInput->isProcessed(filename)) {
+        if (input->isProcessed(filename)) {
             return success(n);
         }
-        TheInput->set(filename);
-        if (!TheInput->isValid()) {
+        input->set(filename);
+        if (!input->isValid()) {
             return error(tokens[it+n], "Unable to open file " + filename);
         }
         if (!run()) {
             return error();
         }
-        TheInput->reset();
+        input->reset();
 
         n++;
         return success(n);
@@ -277,7 +277,7 @@ namespace avl {
         if (prev) {
             std::stringstream err;
             err << "Redefinition of " << nm << ". ";
-            err << "Previous occurence at " << prev->loc.filename() << ":" << prev->loc.start.line;
+            err << "Previous occurence at " << prev->loc.filename(input.get()) << ":" << prev->loc.start.line;
             return error(tokens[it], err.str());
         }
         return true;

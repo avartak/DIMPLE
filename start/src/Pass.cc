@@ -4,8 +4,10 @@
 namespace avl {
 
     template<typename T>
-    Pass<T>::Pass(const std::shared_ptr<AST>& tree):
-        ast(tree)
+    Pass<T>::Pass(const std::shared_ptr<InputManager>& in, const std::shared_ptr<AST>& tree, const std::shared_ptr<GST>& sym):
+        input(in),
+        ast(tree),
+        gst(sym)
     {
     }
 
@@ -68,7 +70,7 @@ namespace avl {
     std::string Pass<T>::errorPrintout() {
         std::string err;
         for (std::size_t i = errors.size(); i > 0; i--) {
-            err += errors[i-1].print();
+            err += errors[i-1].print(input.get());
         }
         return err;
     }

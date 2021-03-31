@@ -14,7 +14,7 @@ namespace avl {
         Error(const std::string&);
         Error(const Location&, const std::string&);
 
-        std::string print() const;
+        std::string print(const InputManager* in) const;
     };
 
 }

@@ -129,7 +129,7 @@ namespace avl {
         else {
 		    v = retval->val();
         }
-		if (!func->scope->prev) {
+		if (!func->lst->prev) {
 			if (func->retvar) {
 				TheBuilder.CreateStore(v, func->retvar->ptr());
                 func->retblock->jump();

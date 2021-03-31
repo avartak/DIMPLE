@@ -23,9 +23,9 @@ namespace avl {
                 return error(ident, "Identifier " + n + " is not a representation");
             }
 
-            if (types.find(n) != types.end()) {
-                if (types[n]->isComplete() || includeOpaquePtr) {
-                    result = types[n];
+            if (gst->types.find(n) != gst->types.end()) {
+                if (gst->types[n]->isComplete() || includeOpaquePtr) {
+                    result = gst->types[n];
                     return success();
                 }
                 else {
@@ -48,25 +48,25 @@ namespace avl {
 
             auto tnode = std::static_pointer_cast<TypeNode>(next_node);
             if (tnode->isPrimitive()) {
-                types[n] = std::make_shared<PrimitiveType>(tnode->is);
+                gst->types[n] = std::make_shared<PrimitiveType>(tnode->is);
             }
             else if (tnode->isUnknown()) {
-                types[n] = std::make_shared<UnknownType>();
+                gst->types[n] = std::make_shared<UnknownType>();
             }
             else if (tnode->isStruct()) {
-                types[n] = std::make_shared<StructType>(n, static_cast<StructTypeNode*>(tnode.get())->isPacked());
+                gst->types[n] = std::make_shared<StructType>(n, static_cast<StructTypeNode*>(tnode.get())->isPacked());
             }
             else if (tnode->isUnion()) {
-                types[n] = std::make_shared<UnionType>(n);
+                gst->types[n] = std::make_shared<UnionType>(n);
             }
             else if (tnode->isPtr()) {
-                types[n] = std::make_shared<PointerType>(n);
+                gst->types[n] = std::make_shared<PointerType>(n);
             }
             else if (tnode->isArray()) {
-                types[n] = std::make_shared<ArrayType>(n);
+                gst->types[n] = std::make_shared<ArrayType>(n);
             }
             else if (tnode->isFunction()) {
-                types[n+".ptr"] = std::make_shared<PointerType>(n);
+                gst->types[n+".ptr"] = std::make_shared<PointerType>(n);
             }
 
             if (!getType(ast->representations[n]->node, includeOpaquePtr)) {
@@ -74,14 +74,14 @@ namespace avl {
             }
             auto ty = std::static_pointer_cast<Type>(result);
             if (ty->isFunction()) {
-                types[n] = ty;
-                types[n+".ptr"]->construct(std::make_shared<PointerType>(types[n]));
+                gst->types[n] = ty;
+                gst->types[n+".ptr"]->construct(std::make_shared<PointerType>(gst->types[n]));
             }
             else {
-                types[n]->construct(ty);
+                gst->types[n]->construct(ty);
             }
 
-            result = types[n];
+            result = gst->types[n];
             return success();
         }
 
@@ -128,8 +128,8 @@ namespace avl {
         if (ptnode->kind == NODE_IDENTIFIER) {
             auto ident = std::static_pointer_cast<Identifier>(ptnode);
             const auto& n = ident->name;
-            if (types.find(n+".ptr") != types.end()) {
-                auto points_to = types[n+".ptr"];
+            if (gst->types.find(n+".ptr") != gst->types.end()) {
+                auto points_to = gst->types[n+".ptr"];
                 result = std::make_shared<PointerType>(points_to);
                 return success();
             }

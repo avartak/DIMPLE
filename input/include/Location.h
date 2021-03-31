@@ -14,6 +14,7 @@ in a source file. It carries the following information
 #include <cstdint>
 #include <string>
 #include <Coordinate.h>
+#include <InputManager.h>
 
 namespace avl {
 
@@ -28,7 +29,7 @@ namespace avl {
         Location(uint16_t, const Coordinate&);
         Location(uint16_t, const Coordinate&, const Coordinate&);
 
-        std::string filename() const;
+        std::string filename(const InputManager*) const;
 
     };
 

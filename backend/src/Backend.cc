@@ -12,7 +12,7 @@
 namespace avl {
 
     Backend::Backend(const std::string& src, const std::string& out): 
-        Pass(nullptr),
+        Pass(nullptr, nullptr, nullptr),
         srcfile(src),
         outfile(out)
     {

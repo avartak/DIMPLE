@@ -17,12 +17,12 @@ namespace avl {
 
         const auto& n = ident->name;
 
-        if (variables.find(n) != variables.end()) {
-            if (!variables.find(n)->second) {
+        if (gst->variables.find(n) != gst->variables.end()) {
+            if (!gst->variables.find(n)->second) {
                 return error("Unable to completely define variable " + n);
             }
  
-            result = variables[n];
+            result = gst->variables[n];
             return success();
         }
 
@@ -64,7 +64,7 @@ namespace avl {
             return error();
         }
         var->align();
-        variables[n] = var;
+        gst->variables[n] = var;
         result = var;
         return success();
     }

@@ -11,6 +11,7 @@
 #include <ExprNode.h>
 #include <Initializer.h>
 #include <BlockNode.h>
+#include <GST.h>
 #include <Value.h>
 #include <Variable.h>
 #include <Function.h>
@@ -24,13 +25,15 @@ namespace avl {
 
     struct Analyzer : public Pass<Entity> {
 
+        /*
         std::map<std::string, std::shared_ptr<Type> > types;
         std::map<std::string, std::shared_ptr<Value> > constants;
         std::map<std::string, std::shared_ptr<Variable> > variables;
         std::map<std::string, std::shared_ptr<Function> > functions;
+        */
         std::shared_ptr<Function> currentFunction;
 
-        Analyzer(const std::shared_ptr<AST>&);
+        Analyzer(const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
 
         virtual void fail() override; 
         virtual bool run() override;

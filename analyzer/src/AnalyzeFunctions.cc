@@ -15,12 +15,12 @@ namespace avl {
 
         const auto& n = ident->name;
 
-        if (variables.find(n) != variables.end()) {
-            if (!variables.find(n)->second) {
+        if (gst->variables.find(n) != gst->variables.end()) {
+            if (!gst->variables.find(n)->second) {
                 return error("Unable to completely define variable " + n);
             }
 
-            result = variables[n];
+            result = gst->variables[n];
             return success();
         }
 
@@ -84,8 +84,8 @@ namespace avl {
 
         if (ast->definitions.find(n) != ast->definitions.end()) {
             storage = ast->definitions[n]->storage;
-            functions[n] = std::make_shared<Function>(storage, n, type);
-            currentFunction = functions[n];
+            gst->functions[n] = std::make_shared<Function>(storage, n, type);
+            currentFunction = gst->functions[n];
             currentFunction->init();
             if (!defineCurrentFunction(ast->definitions[n])) {
                 return error(ast->definitions[n]->name, "Unable to define function " + n);
@@ -93,10 +93,10 @@ namespace avl {
             currentFunction.reset();
         }
         else {
-            functions[n] = std::make_shared<Function>(storage, n, type);
+            gst->functions[n] = std::make_shared<Function>(storage, n, type);
         }
 
-        result = functions[n];
+        result = gst->functions[n];
         return success();
     }
 
@@ -210,7 +210,7 @@ namespace avl {
                 return error(definition, "Cannot define variable with argument name " + n);
             }
         }
-        if (currentFunction->scope->vars.find(n) != currentFunction->scope->vars.find(n)) {
+        if (currentFunction->lst->variables.find(n) != currentFunction->lst->variables.find(n)) {
             return error(definition, "Cannot redefine variable with name " + n);
         }
 
@@ -231,7 +231,7 @@ namespace avl {
             return error(definition->name, "Unable to initialize variable " + n);
         }
 
-        currentFunction->scope->vars[n] = var;
+        currentFunction->lst->variables[n] = var;
         result = var;
         return success();
     }
@@ -314,9 +314,9 @@ namespace avl {
                 ifBB->insert();
             }
             
-            auto newscope = std::make_shared<Scope>();
-            newscope->prev = currentFunction->scope;
-            currentFunction->scope = newscope;
+            auto newlst = std::make_shared<LST>();
+            newlst->prev = currentFunction->lst;
+            currentFunction->lst = newlst;
             if (!defineBlock(ifblock, start, end)) {
                 return error();
             }
@@ -333,9 +333,9 @@ namespace avl {
 
     bool Analyzer::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
 
-        auto newscope = std::make_shared<Scope>();
-        newscope->prev = currentFunction->scope;
-        currentFunction->scope = newscope;
+        auto newlst = std::make_shared<LST>();
+        newlst->prev = currentFunction->lst;
+        currentFunction->lst = newlst;
 
         const auto& init = block->body[0];
         const auto& loop = block->body[1];
