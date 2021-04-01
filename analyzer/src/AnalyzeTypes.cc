@@ -124,8 +124,7 @@ namespace avl {
             auto ident = std::static_pointer_cast<Identifier>(ptnode);
             const auto& n = ident->name;
             if (gst->types.find(n+".ptr") != gst->types.end()) {
-                auto points_to = gst->types[n+".ptr"];
-                result = std::make_shared<PointerType>(points_to);
+                result = gst->types[n+".ptr"];
                 return success();
             }
         }
@@ -215,7 +214,7 @@ namespace avl {
             }
             args.push_back(NameType(a.name, std::static_pointer_cast<Type>(result)));
         }
-        if (!getType(ftnode->ret, true)) {
+        if (!getType(ftnode->ret, includeOpaquePtr)) {
             return error(ftnode->ret, "Unable to create function return type");
         }
         auto ret = std::static_pointer_cast<Type>(result);

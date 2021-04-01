@@ -135,7 +135,7 @@ namespace avl {
             gst->variables[n] = std::shared_ptr<Variable>();
         }
 
-        if (!getType(tnode, false)) {
+        if (!getType(tnode)) {
             return error(ident, "Unable to determine type of " + n);
         }
         auto type = std::static_pointer_cast<Type>(result);
@@ -185,7 +185,7 @@ namespace avl {
                 if (hasErrors()) {
                     return error();
                 }
-                if (!getType(un->exp, false)) {
+                if (!getType(un->exp)) {
                     return error(un, "Unable to evaluate the operand of the size operation");
                 }
                 istype = true;
@@ -250,7 +250,7 @@ namespace avl {
     }
 
     bool Analyzer::recast(const std::shared_ptr<BinaryExprNode>& binary) {
-        if (!getType(binary->rhs, false)) {
+        if (!getType(binary->rhs)) {
             return error(binary, "Unable to obtain recast type");
         }
         auto ty = std::static_pointer_cast<Type>(result);

@@ -35,7 +35,7 @@ namespace avl {
         bool createRepresentations();
         bool createGlobals();
 
-        bool getType(const std::shared_ptr<Node>&, bool includeOpaquePtr);
+        bool getType(const std::shared_ptr<Node>&, bool includeOpaquePtr = false);
         bool getPtrType(const std::shared_ptr<PointerTypeNode>&, bool includeOpaquePtr);
         bool getArrayType(const std::shared_ptr<ArrayTypeNode>&, bool includeOpaquePtr);
         bool getStructType(const std::shared_ptr<StructTypeNode>&, bool includeOpaquePtr);

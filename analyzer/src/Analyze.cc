@@ -39,7 +39,7 @@ namespace avl {
             if (gst->constants.find(name->name) != gst->constants.end()) {
                 continue;
             }
-            if (getType(node, false)) {
+            if (getType(node)) {
                 continue;
             }
             if (hasErrors()) {

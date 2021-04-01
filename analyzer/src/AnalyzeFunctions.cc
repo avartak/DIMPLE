@@ -174,7 +174,7 @@ namespace avl {
             return error(definition->name, "\'" + n + "\' is also defined as a representation");
         }
 
-        if (!getType(definition->type, false)) {
+        if (!getType(definition->type)) {
             return error(definition->name, "Unable to determine type of variable " + n);
         }
         auto type = std::static_pointer_cast<Type>(result);
