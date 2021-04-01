@@ -172,6 +172,9 @@ namespace avl {
         for (std::size_t i = 0; i < stnode->members->set.size(); i++) {
             const NameNode& m = stnode->members->set[i];
             if (!getType(m.node, includeOpaquePtr)) {
+                if (m.name && ast->representations.find(m.name->name) != ast->representations.end()) {
+                    return error(m.name, "\'" + m.name->name + "\' is also defined as a representation");
+                }
                 std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
                 return error(&m, "Unable to create struct member " + memid);
             }
@@ -187,6 +190,9 @@ namespace avl {
         for (std::size_t i = 0; i < utnode->members->set.size(); i++) {
             const NameNode& m = utnode->members->set[i];
             if (!getType(m.node, includeOpaquePtr)) {
+                if (m.name && ast->representations.find(m.name->name) != ast->representations.end()) {
+                    return error(m.name, "\'" + m.name->name + "\' is also defined as a representation");
+                }
                 std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
                 return error(&m, "Unable to create union member " + memid);
             }
@@ -201,6 +207,9 @@ namespace avl {
         std::vector<NameType> args;
         for (std::size_t i = 0; i < ftnode->args->set.size(); i++) {
             const NameNode& a = ftnode->args->set[i];
+            if (ast->representations.find(a.name->name) != ast->representations.end()) {
+                return error(a.name, "\'" + a.name->name + "\' is also defined as a representation");
+            }
             if (!getType(a.node, includeOpaquePtr)) {
                 return error(&a, "Unable to create function argument " + a.name->name);
             }

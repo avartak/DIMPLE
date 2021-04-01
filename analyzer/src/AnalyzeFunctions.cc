@@ -213,11 +213,14 @@ namespace avl {
         auto ft = static_cast<FunctionType*>(currentFunction->type.get());
         for (std::size_t i = 0; i < ft->args.size(); i++) {
             if (ft->args[i].name && ft->args[i].name->name == n) {
-                return error(definition, "Cannot define variable with argument name " + n);
+                return error(definition->name, "Cannot define variable with argument name " + n);
             }
         }
         if (currentFunction->lst->variables.find(n) != currentFunction->lst->variables.find(n)) {
-            return error(definition, "Cannot redefine variable with name " + n);
+            return error(definition->name, "Cannot redefine variable with name " + n);
+        }
+        if (ast->representations.find(n) != ast->representations.end()) {
+            return error(definition->name, "\'" + n + "\' is also defined as a representation");
         }
 
         if (!getType(definition->type, false)) {
