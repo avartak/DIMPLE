@@ -14,22 +14,17 @@ namespace avl {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
             if (gst->constants.find(n) != gst->constants.end()) {
-                if (!gst->constants.find(n)->second) {
+                if (!gst->constants[n]) {
                     return error(ident, "Cannot create a complete representation of " + n);
                 }
                 result = gst->constants[n];
             }
             else if (ast->representations.find(n) != ast->representations.end()) {
-                auto next_node = ast->representations[n]->node;
-                while (next_node->kind == NODE_IDENTIFIER) {
-                    auto next_ident = std::static_pointer_cast<Identifier>(next_node);
-                    const auto& nm = next_ident->name;
-                    if (ast->representations.find(nm) == ast->representations.end()) {
-                        return error(next_ident, "Identifier " + nm + " is not a representation");
-                    }
-                    next_node = ast->representations[nm]->node;                
+                auto nsnode = ast->getNonSynonymRepNode(ident);
+                if (nsnode->kind == NODE_IDENTIFIER) {
+                    return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
                 }
-                if (next_node->kind != NODE_EXPRNODE) {
+                if (nsnode->kind != NODE_EXPRNODE) {
                     return error();
                 }
                 gst->constants[n] = std::shared_ptr<Value>();
@@ -40,12 +35,6 @@ namespace avl {
             }
             else if (currentFunction && currentFunction->lst->isDefined(n)) {
                 result = currentFunction->lst->getVariable(n);
-            }
-            else if (gst->variables.find(n) != gst->variables.end()) {
-                result = gst->variables[n];
-            }
-            else if (gst->functions.find(n) != gst->functions.end()) {
-                result = gst->functions[n];
             }
             else if (ast->declarations.find(n) != ast->declarations.end() ||
                      ast->definitions.find(n) != ast->definitions.end()) 

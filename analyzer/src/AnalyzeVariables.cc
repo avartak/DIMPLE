@@ -15,10 +15,9 @@ namespace avl {
         const auto& n = ident->name;
 
         if (gst->variables.find(n) != gst->variables.end()) {
-            if (!gst->variables.find(n)->second) {
+            if (!gst->variables[n]) {
                 return error("Unable to completely define variable " + n);
             }
- 
             result = gst->variables[n];
             return success();
         }
@@ -42,13 +41,25 @@ namespace avl {
             storage = ast->definitions[n]->storage; 
         }
 
+        auto tynode = tnode;
+        if (tynode->kind == NODE_IDENTIFIER) {
+            tynode = ast->getNonSynonymRepNode(std::static_pointer_cast<Identifier>(tnode));
+        }
+        if (tynode->kind == NODE_IDENTIFIER) {
+            return error(tynode, "\'" + static_cast<Identifier*>(tynode.get())->name + "\' is not a representation");
+        }
+        if (tynode->kind != NODE_TYPENODE) {
+            return error(tnode, "\'" +  static_cast<Identifier*>(tnode.get())->name + "\' is not a type");
+        }
+        if (static_cast<TypeNode*>(tynode.get())->isFunction()) {
+            return error();
+        }
+
+        gst->variables[n] = std::shared_ptr<Variable>();
         if (!getType(tnode, false)) {
             return error(ident, "Unable to determine type of " + n);
         }
         auto type = std::static_pointer_cast<Type>(result);
-        if (type->isFunction()) {
-            return error();
-        }
         if (!type->isComplete()) {
             return error(ident, "Type of " + n + " is not completely defined");
         }
@@ -63,8 +74,7 @@ namespace avl {
         if (!initGlobal(var, defn)) {
             return error();
         }
-        gst->variables[n] = var;
-        result = var;
+        result = gst->variables[n] = var;
         return success();
     }
 
@@ -209,7 +219,7 @@ namespace avl {
                     auto ident = static_cast<const Identifier*>(ie.tag.get());
                     bool found = false;
                     for (std::size_t j = 0; j < ty->members.size(); j++) {
-                        if (ty->members[j].name->name == ident->name) {
+                        if (ty->members[j].name && ty->members[j].name->name == ident->name) {
                             idx = j;
                             found = true;
                             break;
@@ -265,7 +275,7 @@ namespace avl {
             auto ident = static_cast<const Identifier*>(in->elements[0].tag.get());
             bool found = false;
             for (std::size_t j = 0; j < ty->members.size(); j++) {
-                if (ty->members[j].name->name == ident->name) {
+                if (ty->members[j].name && ty->members[j].name->name == ident->name) {
                     idx = j;
                     found = true;
                     break;
@@ -438,7 +448,7 @@ namespace avl {
                     auto ident = static_cast<const Identifier*>(ie.tag.get());
                     bool found = false;
                     for (std::size_t j = 0; j < ty->members.size(); j++) {
-                        if (ty->members[j].name->name == ident->name) {
+                        if (ty->members[j].name && ty->members[j].name->name == ident->name) {
                             idx = j;
                             found = true;
                             break;
@@ -464,12 +474,8 @@ namespace avl {
                 return error(&ie, "Initializer element out of bounds of the struct");
             }
             if (!initConst(ty->members[idx].type, ie.value)) {
-                if (ty->members[idx].name->name == "") {
-                   return error(ie.value, "Unable to initialize struct member at index " + std::to_string(idx));
-                }
-                else {
-                   return error(ie.value, "Unable to initialize struct member " + ty->members[idx].name->name);
-                }
+                std::string memid = (ty->members[idx].name ? ty->members[idx].name->name : "at index " + std::to_string(idx+1));
+                return error(ie.value, "Unable to initialize struct member " + memid);
             }
             cv[idx] = std::static_pointer_cast<Value>(result);
         }
@@ -501,7 +507,7 @@ namespace avl {
             auto ident = static_cast<const Identifier*>(in->elements[0].tag.get());
             bool found = false;
             for (std::size_t j = 0; j < ty->members.size(); j++) {
-                if (ty->members[j].name->name == ident->name) {
+                if (ty->members[j].name && ty->members[j].name->name == ident->name) {
                     idx = j;
                     found = true;
                     break;
@@ -526,12 +532,8 @@ namespace avl {
         }
 
         if (!initConst(ty->members[idx].type, in->elements[0].value)) {
-            if (ty->members[idx].name->name == "") {
-               return error(in->elements[0].value, "Unable to initialize union member at index " + std::to_string(idx));
-            }
-            else {
-               return error(in->elements[0].value, "Unable to initialize union member " + ty->members[idx].name->name);
-            }
+            std::string memid = (ty->members[idx].name ? ty->members[idx].name->name : "at index " + std::to_string(idx+1));
+            return error(in->elements[0].value, "Unable to initialize union member " + memid);
         }
         result = UnionType::initConst(t, std::static_pointer_cast<Value>(result));
         return success();

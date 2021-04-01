@@ -14,12 +14,11 @@ namespace avl {
 
         const auto& n = ident->name;
 
-        if (gst->variables.find(n) != gst->variables.end()) {
-            if (!gst->variables.find(n)->second) {
+        if (gst->functions.find(n) != gst->functions.end()) {
+            if (!gst->functions[n]) {
                 return error("Unable to completely define variable " + n);
             }
-
-            result = gst->variables[n];
+            result = gst->functions[n];
             return success();
         }
 
@@ -29,10 +28,9 @@ namespace avl {
             return error();
         }
 
-        std::shared_ptr<Variable> var;
         std::shared_ptr<Node> tnode;
         std::shared_ptr<Node> defn;
-        uint16_t storage = STORAGE_EXTERNAL;
+        uint16_t storage = (ast->definitions.find(n) != ast->definitions.end() ? ast->definitions[n]->storage : STORAGE_EXTERNAL);
 
         if (ast->declarations.find(n) != ast->declarations.end()) {
             tnode = ast->declarations[n]->node;
@@ -42,13 +40,25 @@ namespace avl {
             storage = ast->definitions[n]->storage;
         }
 
+        auto tynode = tnode;
+        if (tynode->kind == NODE_IDENTIFIER) {
+            tynode = ast->getNonSynonymRepNode(std::static_pointer_cast<Identifier>(tnode));
+        }
+        if (tynode->kind == NODE_IDENTIFIER) {
+            return error(tynode, "\'" + static_cast<Identifier*>(tynode.get())->name + "\' is not a representation");
+        }
+        if (tynode->kind != NODE_TYPENODE) {
+            return error(tnode, "\'" +  static_cast<Identifier*>(tnode.get())->name + "\' is not a type");
+        }
+        if (!static_cast<TypeNode*>(tynode.get())->isFunction()) {
+            return error();
+        }
+
+        gst->functions[n] = std::shared_ptr<Function>();
         if (!getType(tnode, false)) {
             return error(ident, "Unable to determine type of " + n);
         }
         auto type = std::static_pointer_cast<Type>(result);
-        if (!type->isFunction()) {
-            return error();
-        }
         if (!type->isComplete()) {
             return error(ident, "Type of " + n + " is not completely defined");
         }
@@ -81,18 +91,15 @@ namespace avl {
             }
         }
 
+        gst->functions[n] = std::make_shared<Function>(storage, n, type);
         if (ast->definitions.find(n) != ast->definitions.end()) {
-            storage = ast->definitions[n]->storage;
-            gst->functions[n] = std::make_shared<Function>(storage, n, type);
             currentFunction = gst->functions[n];
             currentFunction->init();
             if (!defineCurrentFunction(ast->definitions[n])) {
                 return error(ast->definitions[n]->name, "Unable to define function " + n);
             }
+            gst->functions[n] = currentFunction;
             currentFunction.reset();
-        }
-        else {
-            gst->functions[n] = std::make_shared<Function>(storage, n, type);
         }
 
         result = gst->functions[n];
@@ -152,9 +159,9 @@ namespace avl {
         }
 
         std::vector<std::shared_ptr<Value> > argvals;
-        for (const auto& arg : args) {
-            if (!getValue(arg)) {
-                return error(arg, "Unable to construct function argument");
+        for (std::size_t i = 0; i < args.size(); i++) {
+            if (!getValue(args[i])) {
+                return error(args[i], "Unable to construct function argument " + std::to_string(i+1));
             }
             argvals.push_back(std::static_pointer_cast<Value>(result));
         }
@@ -244,7 +251,7 @@ namespace avl {
             }
             else if (statement->is == STATEMENT_CONTINUE) {
                 if (!start) {
-                    return error(statement, "\'break\' statement cannot be used in this block");
+                    return error(statement, "\'continue\' statement cannot be used in this block");
                 }
                 start->jump();
             }

@@ -33,20 +33,15 @@ namespace avl {
                 }
             }
 
-            auto next_node = ast->representations[n]->node;
-            while (next_node->kind == NODE_IDENTIFIER) {
-                auto next_ident = std::static_pointer_cast<Identifier>(next_node);
-                const auto& nm = next_ident->name;
-                if (ast->representations.find(nm) == ast->representations.end()) {
-                    return error(next_ident, "Identifier " + nm + " is not a representation");
-                }
-                next_node = ast->representations[nm]->node;
+            auto nsnode = ast->getNonSynonymRepNode(ident);
+            if (nsnode->kind == NODE_IDENTIFIER) {
+                return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
             }
-            if (next_node->kind != NODE_TYPENODE) {
+            if (nsnode->kind != NODE_TYPENODE) {
                 return error();
             }
+            auto tnode = std::static_pointer_cast<TypeNode>(nsnode);
 
-            auto tnode = std::static_pointer_cast<TypeNode>(next_node);
             if (tnode->isPrimitive()) {
                 gst->types[n] = std::make_shared<PrimitiveType>(tnode->is);
             }
@@ -177,16 +172,8 @@ namespace avl {
         for (std::size_t i = 0; i < stnode->members->set.size(); i++) {
             const NameNode& m = stnode->members->set[i];
             if (!getType(m.node, includeOpaquePtr)) {
-                std::stringstream ss;
-                ss << "Unable to create struct member ";
-                if (m.name->name != "") {
-                    ss << m.name->name;
-                }
-                else {
-                    ss << "at index " << i;
-                }
-                return error(&m, ss.str());
-
+                std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
+                return error(&m, "Unable to create struct member " + memid);
             }
             members.push_back(NameType(m.name, std::static_pointer_cast<Type>(result)));
         }
@@ -200,16 +187,8 @@ namespace avl {
         for (std::size_t i = 0; i < utnode->members->set.size(); i++) {
             const NameNode& m = utnode->members->set[i];
             if (!getType(m.node, includeOpaquePtr)) {
-                std::stringstream ss;
-                ss << "Unable to create union member ";
-                if (m.name->name != "") {
-                    ss << m.name->name;
-                }
-                else {
-                    ss << "at index " << i;
-                }
-                return error(&m, ss.str());
-
+                std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
+                return error(&m, "Unable to create union member " + memid);
             }
             members.push_back(NameType(m.name, std::static_pointer_cast<Type>(result)));
         }
@@ -223,16 +202,7 @@ namespace avl {
         for (std::size_t i = 0; i < ftnode->args->set.size(); i++) {
             const NameNode& a = ftnode->args->set[i];
             if (!getType(a.node, includeOpaquePtr)) {
-                std::stringstream ss;
-                ss << "Unable to create function argument ";
-                if (a.name->name != "") {
-                    ss << a.name->name;
-                }
-                else {
-                    ss << "at index " << i;
-                }
-                return error(&a, ss.str());
-
+                return error(&a, "Unable to create function argument " + a.name->name);
             }
             args.push_back(NameType(a.name, std::static_pointer_cast<Type>(result)));
         }
