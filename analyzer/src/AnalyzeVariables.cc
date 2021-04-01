@@ -121,7 +121,7 @@ namespace avl {
     bool Analyzer::initLocalArray(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
 	    std::size_t idx = -1;
         for (const auto& ie : in->elements) { 
-            if (!getCompoundTypeIndex(var->type, ie, idx)) {
+            if (!getArrayTypeIndex(std::static_pointer_cast<ArrayType>(var->type), ie, idx)) {
                 return error();
             }
             const auto& ele = std::make_shared<IntLiteral>(idx);
@@ -141,7 +141,7 @@ namespace avl {
     bool Analyzer::initLocalStruct(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
         std::size_t idx = -1;
         for (const auto& ie : in->elements) {
-            if (!getCompoundTypeIndex(var->type, ie, idx)) {
+            if (!getStructTypeIndex(std::static_pointer_cast<StructType>(var->type), ie, idx)) {
                 return error();
             }
             const auto& ele = std::make_shared<IntLiteral>(idx);
@@ -164,7 +164,7 @@ namespace avl {
             return error(in, "Union initializer with more than one element");
         }
         std::size_t idx = -1;
-        if (!getCompoundTypeIndex(var->type, in->elements[0], idx)) {
+        if (!getUnionTypeIndex(std::static_pointer_cast<UnionType>(var->type), in->elements[0], idx)) {
             return error();
         }
         const auto& ele = std::make_shared<IntLiteral>(idx);
@@ -263,7 +263,7 @@ namespace avl {
         std::size_t idx = -1;
         std::map<std::size_t, std::shared_ptr<Value> > cmap;
         for (const auto& ie : in->elements) {
-            if (!getCompoundTypeIndex(ty, ie, idx)) {
+            if (!getArrayTypeIndex(ty, ie, idx)) {
                 return error();
             }
             if (!initConst(t->array_of, ie.value)) {
@@ -291,7 +291,7 @@ namespace avl {
             cv.push_back(std::make_shared<Value>(im.type, llvm::Constant::getNullValue(im.type->llvm_type)));
         }
         for (const auto& ie : in->elements) {
-            if (!getCompoundTypeIndex(ty, ie, idx)) {
+            if (!getStructTypeIndex(ty, ie, idx)) {
                 return error();
             }
             if (!initConst(ty->members[idx].type, ie.value)) {
@@ -318,7 +318,7 @@ namespace avl {
         }
         std::size_t idx = -1;
 
-        if (!getCompoundTypeIndex(ty, in->elements[0], idx)) {
+        if (!getUnionTypeIndex(ty, in->elements[0], idx)) {
             return error();
         }
 
@@ -330,38 +330,8 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getCompoundTypeIndex(const std::shared_ptr<Type>& type, const InitElement& ie, std::size_t& last_idx) {
-
+    bool Analyzer::getArrayTypeIndex(const std::shared_ptr<ArrayType>& t, const InitElement& ie, std::size_t& last_idx) {
         auto idx = last_idx + 1;
-
-        if (type->isArray()) {
-            auto t = std::static_pointer_cast<ArrayType>(type);
-            if (!getArrayTypeIndex(t, ie, idx)) {
-                return error();
-            }
-        }
-        else if (type->isStruct()) {
-            auto t = std::static_pointer_cast<StructType>(type);
-            if (!getStructTypeIndex(t, ie, idx)) {
-                return error();
-            }
-        }
-        else if (type->isUnion()) {
-            auto t = std::static_pointer_cast<UnionType>(type);
-            if (!getUnionTypeIndex(t, ie, idx)) {
-                return error();
-            }
-        }
-        else {
-            return error();
-        }
-
-        last_idx = idx;
-        return success();
-
-    }
-
-    bool Analyzer::getArrayTypeIndex(const std::shared_ptr<ArrayType>& t, const InitElement& ie, std::size_t& idx) {
         if (ie.is != INIT_UNTAGGED) {
             if (ie.is == INIT_LABELED) {
                 return error(&ie, "Labeled initializer for array type");
@@ -378,10 +348,12 @@ namespace avl {
         if (idx >= t->nelements) {
             return error(&ie, "Array initializer element at index " + std::to_string(idx) + " is out of bounds for array of size " + std::to_string(t->nelements));
         }
+        last_idx = idx;
         return success();
     }
 
-    bool Analyzer::getStructTypeIndex(const std::shared_ptr<StructType>& t, const InitElement& ie, std::size_t& idx) {
+    bool Analyzer::getStructTypeIndex(const std::shared_ptr<StructType>& t, const InitElement& ie, std::size_t& last_idx) {
+        auto idx = last_idx + 1;
         if (ie.is != INIT_UNTAGGED) {
             if (ie.is == INIT_LABELED) {
                 if (ie.tag->kind != NODE_IDENTIFIER) {
@@ -414,10 +386,12 @@ namespace avl {
         if (idx >= t->members.size()) {
             return error(&ie, "Initializer element out of bounds of the struct");
         }
+        last_idx = idx;
         return success();
     }
 
-    bool Analyzer::getUnionTypeIndex(const std::shared_ptr<UnionType>& t, const InitElement& ie, std::size_t& idx) {
+    bool Analyzer::getUnionTypeIndex(const std::shared_ptr<UnionType>& t, const InitElement& ie, std::size_t& last_idx) {
+        auto idx = last_idx;
         if (ie.is == INIT_UNTAGGED) {
             return error(ie, "Union initializer cannot be untagged");
         }
@@ -451,6 +425,7 @@ namespace avl {
                 return error(ie, "Initializer element out of bounds of the union");
             }
         }
+        last_idx = idx;
         return success();
     }
 }

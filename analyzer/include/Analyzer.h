@@ -66,7 +66,6 @@ namespace avl {
         bool initArrayConst(const std::shared_ptr<ArrayType>&, const std::shared_ptr<Node>&);
         bool initStructConst(const std::shared_ptr<StructType>&, const std::shared_ptr<Node>&);
         bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Node>&);
-        bool getCompoundTypeIndex(const std::shared_ptr<Type>&, const InitElement&, std::size_t&);
         bool getArrayTypeIndex(const std::shared_ptr<ArrayType>&, const InitElement&, std::size_t&);
         bool getStructTypeIndex(const std::shared_ptr<StructType>&, const InitElement&, std::size_t&);
         bool getUnionTypeIndex(const std::shared_ptr<UnionType>&, const InitElement&, std::size_t&);
