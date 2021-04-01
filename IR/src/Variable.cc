@@ -48,14 +48,12 @@ namespace avl {
     }
 
     void Variable::initGlobal(const std::shared_ptr<Value>& init) {
-       
         if (isGlobal() && llvm_pointer != nullptr && (*init->type == *type) && init->isConst()) {
             llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::cast<llvm::Constant>(init->val()));
         }
     }
 
     void Variable::define() {
-
         if (isGlobal()) {
             auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
             llvm_pointer = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
