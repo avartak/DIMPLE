@@ -13,25 +13,8 @@ namespace avl {
         if (node->kind == NODE_IDENTIFIER) {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
-            if (gst->constants.find(n) != gst->constants.end()) {
-                if (!gst->constants[n]) {
-                    return error(ident, "Cannot create a complete representation of " + n);
-                }
-                result = gst->constants[n];
-            }
-            else if (ast->representations.find(n) != ast->representations.end()) {
-                auto nsnode = ast->getNonSynonymRepNode(ident);
-                if (nsnode->kind == NODE_IDENTIFIER) {
-                    return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
-                }
-                if (nsnode->kind != NODE_EXPRNODE) {
-                    return error();
-                }
-                gst->constants[n] = std::shared_ptr<Value>();
-                if (!getValue(ast->representations[n]->node)) {
-                    return error();
-                }
-                result = gst->constants[n] = std::static_pointer_cast<Value>(result);
+            if (ast->representations.find(n) != ast->representations.end()) {
+                return getConstRep(ident);
             }
             else if (currentFunction && currentFunction->lst->isDefined(n)) {
                 result = currentFunction->lst->getVariable(n);
@@ -39,13 +22,7 @@ namespace avl {
             else if (ast->declarations.find(n) != ast->declarations.end() ||
                      ast->definitions.find(n) != ast->definitions.end()) 
             {
-                if (getGlobalVar(ident)) {
-                    return success();
-                }
-                if (hasErrors()) {
-                    return error(ident, "Unable to create global instance " + n);
-                }
-                return getFunction(ident);
+                return getGlobalInstance(ident);
             }
             else {
                 return error(ident, "Unable to decipher idenitifer " + n);
@@ -76,6 +53,102 @@ namespace avl {
 
         return error();
 
+    }
+
+    bool Analyzer::getConstRep(const std::shared_ptr<Identifier>& ident) {
+
+        auto n = ident->name;
+        if (gst->constants.find(n) != gst->constants.end()) {
+            if (!gst->constants[n]) {
+                return error(ident, "Cannot create a complete representation of " + n);
+            }
+            result = gst->constants[n];
+        }
+        else if (ast->representations.find(n) != ast->representations.end()) {
+            auto nsnode = ast->getNonSynonymRepNode(ident);
+            if (nsnode->kind == NODE_IDENTIFIER) {
+                return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
+            }
+            if (nsnode->kind != NODE_EXPRNODE) {
+                return error();
+            }
+            gst->constants[n] = std::shared_ptr<Value>();
+            if (!getValue(ast->representations[n]->node)) {
+                return error();
+            }
+            result = gst->constants[n] = std::static_pointer_cast<Value>(result);
+            return success();
+        }
+        return error();
+    }
+
+    bool Analyzer::getGlobalInstance(const std::shared_ptr<Identifier>& ident) {
+
+        const auto& n = ident->name;
+
+        if (gst->functions.find(n) != gst->functions.end()) {
+            if (!gst->functions[n]) {
+                return error("Unable to completely define function " + n);
+            }
+            result = gst->functions[n];
+            return success();
+        }
+        else if (gst->variables.find(n) != gst->variables.end()) {
+            if (!gst->variables[n]) {
+                return error("Unable to completely define variable " + n);
+            }
+            result = gst->variables[n];
+            return success();
+        }
+
+        if (ast->declarations.find(n) == ast->declarations.end() &&
+            ast->definitions.find(n) == ast->definitions.end())
+        {
+            return error();
+        }
+
+        std::shared_ptr<Node> tnode;
+        uint16_t storage = (ast->definitions.find(n) != ast->definitions.end() ? ast->definitions[n]->storage : STORAGE_EXTERNAL);
+
+        if (ast->declarations.find(n) != ast->declarations.end()) {
+            tnode = ast->declarations[n]->node;
+        }
+        else {
+            tnode = ast->definitions[n]->type;
+            storage = ast->definitions[n]->storage;
+        }
+
+        auto tynode = tnode;
+        if (tynode->kind == NODE_IDENTIFIER) {
+            tynode = ast->getNonSynonymRepNode(std::static_pointer_cast<Identifier>(tnode));
+        }
+        if (tynode->kind == NODE_IDENTIFIER) {
+            return error(tynode, "\'" + static_cast<Identifier*>(tynode.get())->name + "\' is not a representation");
+        }
+        if (tynode->kind != NODE_TYPENODE) {
+            return error(tnode, "\'" +  static_cast<Identifier*>(tnode.get())->name + "\' is not a type");
+        }
+        if (static_cast<TypeNode*>(tynode.get())->isFunction()) {
+            gst->functions[n] = std::shared_ptr<Function>();
+        }
+        else {
+            gst->variables[n] = std::shared_ptr<Variable>();
+        }
+
+        if (!getType(tnode, false)) {
+            return error(ident, "Unable to determine type of " + n);
+        }
+        auto type = std::static_pointer_cast<Type>(result);
+        if (!type->isComplete()) {
+            return error(ident, "Type of " + n + " is not completely defined");
+        }
+
+        if (type->isFunction()) {
+            return getFunction(ident, storage, type);
+        }
+        else {
+            return getGlobalVar(ident, storage, type);
+        }
     }
 
     bool Analyzer::literal(const std::shared_ptr<ExprNode>& expr) {

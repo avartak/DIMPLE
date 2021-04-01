@@ -33,8 +33,7 @@ namespace avl {
         virtual bool run() override;
 
         bool createRepresentations();
-        bool createVariables();
-        bool createFunctions();
+        bool createGlobals();
 
         bool getType(const std::shared_ptr<Node>&, bool includeOpaquePtr);
         bool getPtrType(const std::shared_ptr<PointerTypeNode>&, bool includeOpaquePtr);
@@ -45,6 +44,8 @@ namespace avl {
         bool useInArraySizeExpr(const std::shared_ptr<Node>&);
 
         bool getValue(const std::shared_ptr<Node>&);
+        bool getConstRep(const std::shared_ptr<Identifier>&);
+        bool getGlobalInstance(const std::shared_ptr<Identifier>&);
         bool literal(const std::shared_ptr<ExprNode>&);
         bool unary(const std::shared_ptr<UnaryExprNode>&);
         bool recast(const std::shared_ptr<BinaryExprNode>&);
@@ -53,7 +54,7 @@ namespace avl {
         bool binary(const std::shared_ptr<ExprNode>&);
         bool assign(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
 
-        bool getGlobalVar(const std::shared_ptr<Identifier>&);
+        bool getGlobalVar(const std::shared_ptr<Identifier>&, uint16_t, const std::shared_ptr<Type>&);
         bool initGlobal(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
         bool initLocal(const std::shared_ptr<Variable>&, const std::shared_ptr<Node>&);
         bool initLocalArray(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
@@ -66,7 +67,7 @@ namespace avl {
         bool initStructConst(const std::shared_ptr<StructType>&, const std::shared_ptr<Node>&);
         bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Node>&);
 
-        bool getFunction(const std::shared_ptr<Identifier>&);
+        bool getFunction(const std::shared_ptr<Identifier>&, uint16_t, const std::shared_ptr<Type>&);
         bool defineCurrentFunction(const std::shared_ptr<DefineStatement>&);
         bool defineLocalVar(const std::shared_ptr<DefineStatement>&);
         bool defineBlock(const std::shared_ptr<BlockNode>&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);

@@ -17,10 +17,7 @@ namespace avl {
         if (!createRepresentations()) {
             return false;
         }
-        if (!createVariables()) {
-            return false;
-        }
-        if (!createFunctions()) {
+        if (!createGlobals()) {
             return false;
         }
         return true;
@@ -56,38 +53,18 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::createVariables() {
+    bool Analyzer::createGlobals() {
 
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (!getGlobalVar(name) && hasErrors()) {
+            if (!getGlobalInstance(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
         }
 
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (!getGlobalVar(name) && hasErrors()) {
-                return error(name, "Unable to construct global " + name->name);
-            }
-        }
-
-        return success();
-
-    }
-
-    bool Analyzer::createFunctions() {
-
-        for (const auto& decl : ast->declarations) {
-            const auto& name = decl.second->name;
-            if (!getFunction(name) && hasErrors()) {
-                return error(name, "Unable to construct global " + name->name);
-            }
-        }
-
-        for (const auto& defn : ast->definitions) {
-            const auto& name = defn.second->name;
-            if (!getFunction(name) && hasErrors()) {
+            if (!getGlobalInstance(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
         }

@@ -10,59 +10,11 @@
 
 namespace avl {
 
-    bool Analyzer::getGlobalVar(const std::shared_ptr<Identifier>& ident) {
+    bool Analyzer::getGlobalVar(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
 
         const auto& n = ident->name;
 
-        if (gst->variables.find(n) != gst->variables.end()) {
-            if (!gst->variables[n]) {
-                return error("Unable to completely define variable " + n);
-            }
-            result = gst->variables[n];
-            return success();
-        }
-
-        if (ast->declarations.find(n) == ast->declarations.end() &&
-            ast->definitions.find(n) == ast->definitions.end()) 
-        {
-            return error();
-        }
-
-        std::shared_ptr<Node> tnode;
         std::shared_ptr<Node> defn;
-        uint16_t storage = STORAGE_EXTERNAL;
-
-        if (ast->declarations.find(n) != ast->declarations.end()) {
-            tnode = ast->declarations[n]->node;
-        }
-        else {
-            tnode = ast->definitions[n]->type;
-            storage = ast->definitions[n]->storage; 
-        }
-
-        auto tynode = tnode;
-        if (tynode->kind == NODE_IDENTIFIER) {
-            tynode = ast->getNonSynonymRepNode(std::static_pointer_cast<Identifier>(tnode));
-        }
-        if (tynode->kind == NODE_IDENTIFIER) {
-            return error(tynode, "\'" + static_cast<Identifier*>(tynode.get())->name + "\' is not a representation");
-        }
-        if (tynode->kind != NODE_TYPENODE) {
-            return error(tnode, "\'" +  static_cast<Identifier*>(tnode.get())->name + "\' is not a type");
-        }
-        if (static_cast<TypeNode*>(tynode.get())->isFunction()) {
-            return error();
-        }
-
-        gst->variables[n] = std::shared_ptr<Variable>();
-        if (!getType(tnode, false)) {
-            return error(ident, "Unable to determine type of " + n);
-        }
-        auto type = std::static_pointer_cast<Type>(result);
-        if (!type->isComplete()) {
-            return error(ident, "Type of " + n + " is not completely defined");
-        }
-
         auto var = std::make_shared<Variable>(storage, n, type);
         if (ast->declarations.find(n) != ast->declarations.end()) {
             defn = std::make_shared<NullInit>(false);
