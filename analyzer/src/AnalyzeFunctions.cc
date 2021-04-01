@@ -16,7 +16,7 @@ namespace avl {
 
         if (gst->functions.find(n) != gst->functions.end()) {
             if (!gst->functions[n]) {
-                return error("Unable to completely define variable " + n);
+                return error("Unable to completely define function " + n);
             }
             result = gst->functions[n];
             return success();
