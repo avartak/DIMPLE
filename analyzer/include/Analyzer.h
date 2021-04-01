@@ -25,12 +25,6 @@ namespace avl {
 
     struct Analyzer : public Pass<Entity> {
 
-        /*
-        std::map<std::string, std::shared_ptr<Type> > types;
-        std::map<std::string, std::shared_ptr<Value> > constants;
-        std::map<std::string, std::shared_ptr<Variable> > variables;
-        std::map<std::string, std::shared_ptr<Function> > functions;
-        */
         std::shared_ptr<Function> currentFunction;
 
         Analyzer(const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
@@ -38,8 +32,7 @@ namespace avl {
         virtual void fail() override; 
         virtual bool run() override;
 
-        bool createTypeReps();
-        bool createConstReps();
+        bool createRepresentations();
         bool createVariables();
         bool createFunctions();
 

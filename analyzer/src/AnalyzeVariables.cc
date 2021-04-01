@@ -28,7 +28,6 @@ namespace avl {
             return error();
         }
 
-        std::shared_ptr<Variable> var;
         std::shared_ptr<Node> tnode;
         std::shared_ptr<Node> defn;
         uint16_t storage = STORAGE_EXTERNAL;
@@ -64,7 +63,7 @@ namespace avl {
             return error(ident, "Type of " + n + " is not completely defined");
         }
 
-        var = std::make_shared<Variable>(storage, n, type);
+        auto var = std::make_shared<Variable>(storage, n, type);
         if (ast->declarations.find(n) != ast->declarations.end()) {
             defn = std::make_shared<NullInit>(false);
         }

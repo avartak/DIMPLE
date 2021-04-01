@@ -14,11 +14,7 @@ namespace avl {
     }
 
     bool Analyzer::run() {
-
-        if (!createTypeReps()) {
-            return false;
-        }
-        if (!createConstReps()) {
+        if (!createRepresentations()) {
             return false;
         }
         if (!createVariables()) {
@@ -28,33 +24,34 @@ namespace avl {
             return false;
         }
         return true;
-
     }
 
-    bool Analyzer::createTypeReps() {
-        for (const auto& trep : ast->representations) {
-            const auto& name = trep.second->name;
-            const auto& node = trep.second->node;
+    bool Analyzer::createRepresentations() {
+        for (const auto& rep : ast->representations) {
+            const auto& name = rep.second->name;
+            const auto& node = rep.second->node;
+
+            auto nsnode = ast->getNonSynonymRepNode(name);
+            if (nsnode->kind == NODE_IDENTIFIER) {
+                auto ident = static_cast<Identifier*>(nsnode.get());
+                return error(nsnode, ident->name + " is not a representation");
+            }
             if (gst->types.find(name->name) != gst->types.end()) {
                 continue;
             }
-            if (!getType(node, false) && hasErrors()) {
-                return error(name, "Unable to construct type representation " + name->name);
-            }
-        }
-        return success();
-    }
-
-    bool Analyzer::createConstReps() {
-        for (const auto& trep : ast->representations) {
-            const auto& name = trep.second->name;
-            const auto& node = trep.second->node;
             if (gst->constants.find(name->name) != gst->constants.end()) {
                 continue;
             }
-            if (!getValue(node) && hasErrors()) {
-                return error(name, "Unable to construct constant representation " + name->name);
+            if (getType(node, false)) {
+                continue;
             }
+            if (hasErrors()) {
+                return error(name, "Unable to construct type representation " + name->name);
+            }
+            if (getValue(node)) {
+                continue;
+            }
+            return error(name, "Unable to construct constant representation " + name->name);
         }
         return success();
     }
@@ -63,9 +60,6 @@ namespace avl {
 
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (gst->variables.find(name->name) != gst->variables.end()) {
-                continue;
-            }
             if (!getGlobalVar(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
@@ -73,9 +67,6 @@ namespace avl {
 
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (gst->variables.find(name->name) != gst->variables.end()) {
-                continue;
-            }
             if (!getGlobalVar(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
@@ -89,9 +80,6 @@ namespace avl {
 
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (gst->functions.find(name->name) != gst->functions.end()) {
-                continue;
-            }
             if (!getFunction(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
@@ -99,9 +87,6 @@ namespace avl {
 
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (gst->functions.find(name->name) != gst->functions.end()) {
-                continue;
-            }
             if (!getFunction(name) && hasErrors()) {
                 return error(name, "Unable to construct global " + name->name);
             }
