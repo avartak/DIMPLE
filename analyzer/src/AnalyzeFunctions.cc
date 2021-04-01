@@ -268,7 +268,7 @@ namespace avl {
                 }
                 
                 auto ifBB = std::make_shared<CodeBlock>();
-                ifBB->branch(ex, nextBB);
+                ifBB->branch(ex, (i != block->body.size()-1 ? nextBB : mergeBB));
                 ifBB->insert();
             }
             
@@ -281,10 +281,11 @@ namespace avl {
             currentFunction->resetLocals();
             
             mergeBB->jump();
-            nextBB->insert();
+            if (i != block->body.size()-1) {
+                nextBB->insert();
+            }
         }   
         
-        mergeBB->jump();
         mergeBB->insert();
         return success();
     }
