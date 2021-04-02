@@ -19,10 +19,6 @@ namespace avl {
             auto ident = std::static_pointer_cast<Identifier>(node);
             const auto& n = ident->name;
 
-            if (ast->representations.find(n) == ast->representations.end()) {
-                return error(ident, "Identifier " + n + " is not a representation");
-            }
-
             if (gst->types.find(n) != gst->types.end()) {
                 if (gst->types[n]->isComplete() || includeOpaquePtr) {
                     result = gst->types[n];
@@ -33,10 +29,10 @@ namespace avl {
                 }
             }
 
-            auto nsnode = ast->getNonSynonymRepNode(ident);
-            if (nsnode->kind == NODE_IDENTIFIER) {
-                return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
+            if (ast->representations.find(n) == ast->representations.end()) {
+                return error();
             }
+            auto nsnode = ast->getNonSynonymRepNode(ident);
             if (nsnode->kind != NODE_TYPENODE) {
                 return error();
             }

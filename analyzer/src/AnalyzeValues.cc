@@ -66,11 +66,7 @@ namespace avl {
             return success();
         }
         else if (ast->representations.find(n) != ast->representations.end()) {
-            auto nsnode = ast->getNonSynonymRepNode(ident);
-            if (nsnode->kind == NODE_IDENTIFIER) {
-                return error(nsnode, "\'" + static_cast<Identifier*>(nsnode.get())->name + "\' is not a representation");
-            }
-            if (nsnode->kind != NODE_EXPRNODE) {
+            if (ast->getNonSynonymRepNode(ident)->kind != NODE_EXPRNODE) {
                 return error();
             }
             gst->constants[n] = std::shared_ptr<Value>();
