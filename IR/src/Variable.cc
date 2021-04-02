@@ -18,15 +18,17 @@ namespace avl {
     }
 
     llvm::Value* Variable::ptr() const {
-        if (llvm::isa<llvm::GlobalVariable>(llvm_pointer)) {
+        auto t = std::make_shared<PointerType>(type);
+        if (llvm_pointer == nullptr) {
+            return llvm_pointer;
+        }
+        else if (llvm::isa<llvm::GlobalVariable>(llvm_pointer)) {
             if (llvm::cast<llvm::GlobalVariable>(llvm_pointer)->getType()->getElementType() != type->llvm_type) {
-                auto t = std::make_shared<PointerType>(type);
                 return TheBuilder.CreateBitCast(llvm_pointer, t->llvm_type);
             }
         }
         else if (llvm::isa<llvm::AllocaInst>(llvm_pointer)) {
             if (llvm::cast<llvm::AllocaInst>(llvm_pointer)->getType()->getElementType() != type->llvm_type) {
-                auto t = std::make_shared<PointerType>(type);
                 return TheBuilder.CreateBitCast(llvm_pointer, t->llvm_type);
             }
         }
@@ -66,11 +68,9 @@ namespace avl {
 
     bool Variable::align() {
         std::size_t al = type->alignment();
-        
         if (al == 0 || llvm_pointer == nullptr) {
             return false;
         }
-        
         if (llvm::isa<llvm::AllocaInst>(llvm_pointer)) {
             auto v = llvm::cast<llvm::AllocaInst>(llvm_pointer);
             v->setAlignment(llvm::Align(al));
@@ -79,8 +79,6 @@ namespace avl {
             auto v = llvm::cast<llvm::GlobalVariable>(llvm_pointer);
             v->setAlignment(llvm::Align(al));
         }
-        
         return true;
 	}
-
 }
