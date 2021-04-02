@@ -6,6 +6,7 @@
 #include <PointerType.h>
 #include <StructType.h>
 #include <UnionType.h>
+#include <CodeBlock.h>
 
 namespace avl {
 
@@ -388,6 +389,49 @@ namespace avl {
             if (op == ASSIGNOP_ASSIGN) {
                 return assign(std::static_pointer_cast<Variable>(lhs), rhs_node);
             }
+        }
+
+        if ((op == BINARYOP_LOGICAL_OR || op == BINARYOP_LOGICAL_AND) && currentFunction) {
+  
+            if (!lhs->type->isBool()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have boolean type");
+            }
+
+            if (op == BINARYOP_LOGICAL_AND && lhs->getUInt64ValueOrZero() == 0) {
+                result = std::make_shared<BoolLiteral>(false);
+                return success();
+            }
+            if (op == BINARYOP_LOGICAL_OR  && lhs->getUInt64ValueOrZero() != 0) {
+                result = std::make_shared<BoolLiteral>(true);
+                return success();
+            }
+
+            auto res = std::make_shared<Variable>(STORAGE_LOCAL, "", std::make_shared<PrimitiveType>(TYPE_BOOL));
+            res->define();
+            BinaryOp::assign(res, lhs);
+
+            auto lres = (op == BINARYOP_LOGICAL_OR ? UnaryOp::isTrue(lhs) : UnaryOp::isFalse(lhs));
+
+            auto ifBB    = std::make_shared<CodeBlock>();
+            auto mergeBB = std::make_shared<CodeBlock>();
+
+            mergeBB->branch(lres, ifBB);
+            ifBB->insert();
+
+            if (!getValue(rhs_node)) {
+                return error(rhs_node, "Unable to evaluate the right side of the expression");
+            }
+            auto rhs = std::static_pointer_cast<Value>(result);
+            if (!rhs->type->isBool()) {
+                return error(expr, "Operands of \'" + opstr + "\' operation must have boolean type");
+            }
+            BinaryOp::assign(res, rhs);
+
+            mergeBB->jump();
+            mergeBB->insert();
+
+            result = res;
+            return success();
         }
 
         if (!getValue(rhs_node)) {

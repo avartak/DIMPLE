@@ -16,6 +16,8 @@ namespace avl {
         static std::shared_ptr<Value> size(const std::shared_ptr<Type>&);
         static std::shared_ptr<Value> address(const std::shared_ptr<Value>&);
         static std::shared_ptr<Value> dereference(const std::shared_ptr<Value>&);
+        static std::shared_ptr<Value> isTrue(const std::shared_ptr<Value>&);
+        static std::shared_ptr<Value> isFalse(const std::shared_ptr<Value>&);
 
     };
 

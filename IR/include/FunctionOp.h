@@ -4,6 +4,7 @@
 #include <memory>
 #include <Function.h>
 #include <Variable.h>
+#include <CodeBlock.h>
 
 namespace avl {
 

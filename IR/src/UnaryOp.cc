@@ -104,5 +104,19 @@ namespace avl {
         }
  
         return ue;
-    }    
+    }
+
+    std::shared_ptr<Value> UnaryOp::isTrue(const std::shared_ptr<Value>& e) {
+        std::shared_ptr<Value> ue;
+        if (!e->type->isBool()) {
+            return ue;
+        }
+        auto zero = llvm::ConstantInt::get(e->type->llvm_type, 0);
+        return std::make_shared<Value>(e->type, TheBuilder.CreateICmpNE(zero, e->val()));
+    }
+
+    std::shared_ptr<Value> UnaryOp::isFalse(const std::shared_ptr<Value>& e) {
+        return logicalNot(e);
+    }
+
 }
