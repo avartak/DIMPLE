@@ -44,7 +44,7 @@ namespace avl {
         bool useInArraySizeExpr(const std::shared_ptr<Node>&);
 
         bool getValue(const std::shared_ptr<Node>&);
-        bool getConstRep(const std::shared_ptr<Identifier>&);
+        bool getConst(const std::shared_ptr<Identifier>&);
         bool getGlobalInstance(const std::shared_ptr<Identifier>&);
         bool literal(const std::shared_ptr<ExprNode>&);
         bool unary(const std::shared_ptr<UnaryExprNode>&);
