@@ -71,6 +71,10 @@ namespace avl {
             return isConst() && type->isInt();
         }
 
+        inline bool isConstBool() const {
+            return isConst() && type->isBool();
+        }
+
         inline bool isConstNonNegativeInt() const {
             return isConstInt() && !llvm::cast<llvm::ConstantInt>(llvm_value)->isNegative();
         }
@@ -88,7 +92,7 @@ namespace avl {
         }
 
         inline uint64_t getUInt64ValueOrZero() const {
-            return (isConstInt() ? llvm::cast<llvm::ConstantInt>(llvm_value)->getZExtValue() : 0);
+            return ( (isConstInt() || isConstBool()) ? llvm::cast<llvm::ConstantInt>(llvm_value)->getZExtValue() : 0);
         }
 
     };

@@ -397,13 +397,15 @@ namespace avl {
                 return error(expr, "Operands of \'" + opstr + "\' operation must have boolean type");
             }
 
-            if (op == BINARYOP_LOGICAL_AND && lhs->getUInt64ValueOrZero() == 0) {
-                result = std::make_shared<BoolLiteral>(false);
-                return success();
-            }
-            if (op == BINARYOP_LOGICAL_OR  && lhs->getUInt64ValueOrZero() != 0) {
-                result = std::make_shared<BoolLiteral>(true);
-                return success();
+            if (lhs->isConst()) {
+                if (op == BINARYOP_LOGICAL_AND && lhs->getUInt64ValueOrZero() == 0) {
+                    result = std::make_shared<BoolLiteral>(false);
+                    return success();
+                }
+                if (op == BINARYOP_LOGICAL_OR  && lhs->getUInt64ValueOrZero() != 0) {
+                    result = std::make_shared<BoolLiteral>(true);
+                    return success();
+                }
             }
 
             auto res = std::make_shared<Variable>(STORAGE_LOCAL, "", std::make_shared<PrimitiveType>(TYPE_BOOL));
