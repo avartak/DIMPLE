@@ -25,7 +25,7 @@ namespace avl {
                 auto ident = static_cast<Identifier*>(nsnode.get());
                 return error(nsnode, ident->name + " is not a representation");
             }
-            if (getType(name) || getConst(name)) {
+            if (getTypeRep(name) || getConstRep(name)) {
                 continue;
             }
             return error(name, "Unable to construct representation " + name->name);

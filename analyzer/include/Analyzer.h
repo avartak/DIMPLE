@@ -36,6 +36,7 @@ namespace avl {
         bool createGlobals();
 
         bool getType(const std::shared_ptr<Node>&, bool includeOpaquePtr = false);
+        bool getTypeRep(const std::shared_ptr<Identifier>&, bool includeOpaquePtr = false);
         bool getPtrType(const std::shared_ptr<PointerTypeNode>&, bool includeOpaquePtr);
         bool getArrayType(const std::shared_ptr<ArrayTypeNode>&, bool includeOpaquePtr);
         bool getStructType(const std::shared_ptr<StructTypeNode>&, bool includeOpaquePtr);
@@ -44,7 +45,7 @@ namespace avl {
         bool useInArraySizeExpr(const std::shared_ptr<Node>&);
 
         bool getValue(const std::shared_ptr<Node>&);
-        bool getConst(const std::shared_ptr<Identifier>&);
+        bool getConstRep(const std::shared_ptr<Identifier>&);
         bool getGlobalInstance(const std::shared_ptr<Identifier>&);
         bool literal(const std::shared_ptr<ExprNode>&);
         bool unary(const std::shared_ptr<UnaryExprNode>&);

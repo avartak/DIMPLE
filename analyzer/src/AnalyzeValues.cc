@@ -14,7 +14,7 @@ namespace avl {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
             if (ast->representations.find(n) != ast->representations.end()) {
-                return getConst(ident);
+                return getConstRep(ident);
             }
             else if (currentFunction && currentFunction->lst->isDefined(n)) {
                 result = currentFunction->lst->getVariable(n);
@@ -55,7 +55,7 @@ namespace avl {
 
     }
 
-    bool Analyzer::getConst(const std::shared_ptr<Identifier>& ident) {
+    bool Analyzer::getConstRep(const std::shared_ptr<Identifier>& ident) {
 
         auto n = ident->name;
         if (gst->constants.find(n) != gst->constants.end()) {
