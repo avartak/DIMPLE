@@ -63,6 +63,7 @@ namespace avl {
                 return error(ident, "Cannot create a complete representation of " + n);
             }
             result = gst->constants[n];
+            return success();
         }
         else if (ast->representations.find(n) != ast->representations.end()) {
             auto nsnode = ast->getNonSynonymRepNode(ident);

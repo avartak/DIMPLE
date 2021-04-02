@@ -8,19 +8,11 @@ namespace avl {
     }
 
     void Analyzer::fail() {
-        if (result) {
-            result.reset();
-        }
+        result.reset();
     }
 
     bool Analyzer::run() {
-        if (!createRepresentations()) {
-            return false;
-        }
-        if (!createGlobals()) {
-            return false;
-        }
-        return true;
+        return createRepresentations() && createGlobals();
     }
 
     bool Analyzer::createRepresentations() {
@@ -33,19 +25,13 @@ namespace avl {
                 auto ident = static_cast<Identifier*>(nsnode.get());
                 return error(nsnode, ident->name + " is not a representation");
             }
-            if (gst->types.find(name->name) != gst->types.end()) {
-                continue;
-            }
-            if (gst->constants.find(name->name) != gst->constants.end()) {
-                continue;
-            }
-            if (getType(node)) {
+            if (getType(name)) {
                 continue;
             }
             if (hasErrors()) {
                 return error(name, "Unable to construct type representation " + name->name);
             }
-            if (getValue(node)) {
+            if (getValue(name)) {
                 continue;
             }
             return error(name, "Unable to construct constant representation " + name->name);
@@ -54,23 +40,19 @@ namespace avl {
     }
 
     bool Analyzer::createGlobals() {
-
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
-            if (!getGlobalInstance(name) && hasErrors()) {
+            if (!getGlobalInstance(name)) {
                 return error(name, "Unable to construct global " + name->name);
             }
         }
-
         for (const auto& defn : ast->definitions) {
             const auto& name = defn.second->name;
-            if (!getGlobalInstance(name) && hasErrors()) {
+            if (!getGlobalInstance(name)) {
                 return error(name, "Unable to construct global " + name->name);
             }
         }
-
         return success();
-
     }
 
 }
