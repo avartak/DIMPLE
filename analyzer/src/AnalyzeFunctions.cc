@@ -68,17 +68,7 @@ namespace avl {
             return success();
         }
         else {
-            auto funcblock = std::static_pointer_cast<FuncBlockNode>(defn->def);
-            for (const auto& statement : funcblock->body) {
-                if (statement->is == STATEMENT_BREAK) {
-                    return error(statement, "\'break\' statement is not allowed in this block");
-                }
-                else if (statement->is == STATEMENT_CONTINUE) {
-                    return error(statement, "\'continue\' statement is not allowed in this block");
-                }
-            }
-
-            if (!defineBlock(funcblock)) {
+            if (!defineBlock(std::static_pointer_cast<FuncBlockNode>(defn->def))) {
                 return error(defn->name, "Unable to define \'" + defn->name->name + "\'");
             }
             if (!currentFunction->checkTerminations()) {
