@@ -3,6 +3,7 @@
 #include <FunctionType.h>
 #include <PrimitiveType.h>
 #include <Statement.h>
+#include <CodeBlock.h>
 #include <Globals.h>
 
 namespace avl {
