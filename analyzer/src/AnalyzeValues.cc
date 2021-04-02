@@ -34,15 +34,15 @@ namespace avl {
             return error();
         }
 
-        auto expr = static_cast<ExprNode*>(node.get());
+        auto expr = std::static_pointer_cast<ExprNode>(node);
         if (expr->isLiteralNode()) {
-            return literal(std::static_pointer_cast<ExprNode>(node));
+            return literal(expr);
         }
         else if (expr->is == EXPR_ASSIGN) {
-            return binary(std::static_pointer_cast<ExprNode>(node));
+            return binary(expr);
         }
         else if (expr->is == EXPR_BINARY) {
-            return binary(std::static_pointer_cast<ExprNode>(node));
+            return binary(expr);
         }
         else if (expr->is == EXPR_CALL) {
             return call(std::static_pointer_cast<CallExprNode>(node));
