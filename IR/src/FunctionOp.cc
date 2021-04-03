@@ -97,26 +97,26 @@ namespace avl {
         if (retval && ft->ret->isVoid()) {
             return false;
         }
-
-		if (ft->ret->isVoid()) {
-			TheBuilder.CreateRetVoid();
+        
+        if (ft->ret->isVoid()) {
+        	TheBuilder.CreateRetVoid();
             return true;
-		}
-
+        }
+        
         if (*retval->type != *ft->ret) {
             return false;
         }
-
-		llvm::Function* fn = llvm::cast<llvm::Function>(func->llvm_pointer);
-
-		if (!ft->ret->retDirectly()) {
-			if (!BinaryOp::assign(func->retvar, retval)) {
+        
+        llvm::Function* fn = llvm::cast<llvm::Function>(func->llvm_pointer);
+        
+        if (!ft->ret->retDirectly()) {
+            if (!BinaryOp::assign(func->retvar, retval)) {
                 return false;
             }
-			TheBuilder.CreateRetVoid();
-		    return true;
-		}
-		
+            TheBuilder.CreateRetVoid();
+            return true;
+        }
+        
         llvm::Value* v;
         if (ft->ret->isCompound()) {
             if (retval->is != VALUE_VAR) {
@@ -127,34 +127,34 @@ namespace avl {
             v = TheBuilder.CreateAlignedLoad(TheBuilder.getInt64Ty(), ptr, llvm::MaybeAlign(8));
         }
         else {
-		    v = retval->val();
+            v = retval->val();
         }
-		if (!func->lst->prev) {
-			if (func->retvar) {
-				TheBuilder.CreateStore(v, func->retvar->ptr());
+        if (!func->lst->prev) {
+            if (func->retvar) {
+                TheBuilder.CreateStore(v, func->retvar->ptr());
                 func->retblock->jump();
                 func->retblock->insert();
-				TheBuilder.CreateRet(func->retvar->val());
-			}
-			else {
+                TheBuilder.CreateRet(func->retvar->val());
+            }
+            else {
                 TheBuilder.CreateRet(v);
             }
-		}
-		else {
-			if (!func->retvar) {
+        }
+        else {
+            if (!func->retvar) {
                 auto ty = ft->ret->isCompound() ? std::make_shared<PrimitiveType>(TYPE_UINT64) : ft->ret;
                 func->retvar = std::make_shared<Variable>(STORAGE_LOCAL, "", ty);
                 func->retblock = std::make_shared<CodeBlock>();
-				auto current_insert_pt = TheBuilder.saveIP();
-				TheBuilder.SetInsertPoint(fn->getEntryBlock().getFirstNonPHIOrDbgOrLifetime());
-				func->retvar->llvm_pointer = TheBuilder.CreateAlloca(func->retvar->type->llvm_type);
-				func->retvar->align();
-				TheBuilder.restoreIP(current_insert_pt);
-			}
-			TheBuilder.CreateStore(v, func->retvar->llvm_pointer);
+                auto current_insert_pt = TheBuilder.saveIP();
+                TheBuilder.SetInsertPoint(fn->getEntryBlock().getFirstNonPHIOrDbgOrLifetime());
+                func->retvar->llvm_pointer = TheBuilder.CreateAlloca(func->retvar->type->llvm_type);
+                func->retvar->align();
+                TheBuilder.restoreIP(current_insert_pt);
+            }
+            TheBuilder.CreateStore(v, func->retvar->llvm_pointer);
             func->retblock->jump();
-		}
-		return true;
+        }
+        return true;
     }
 
 }
