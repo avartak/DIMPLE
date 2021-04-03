@@ -99,7 +99,7 @@ namespace avl {
         }
         
         if (ft->ret->isVoid()) {
-        	TheBuilder.CreateRetVoid();
+            TheBuilder.CreateRetVoid();
             return true;
         }
         
