@@ -114,7 +114,7 @@ namespace avl {
     }
 
     bool Analyzer::initLocalArray(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
-	    std::size_t idx = -1;
+        std::size_t idx = -1;
         for (const auto& ie : in->elements) { 
             if (!getArrayTypeIndex(std::static_pointer_cast<ArrayType>(var->type), ie, idx)) {
                 return error();
