@@ -62,11 +62,10 @@ namespace avl {
         bool initLocalStruct(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
         bool initLocalUnion(const std::shared_ptr<Variable>&, const std::shared_ptr<Initializer>&);
         bool initConst(const std::shared_ptr<Type>&, const std::shared_ptr<Node>&);
-        bool initPrimitiveConst(const std::shared_ptr<PrimitiveType>&, const std::shared_ptr<Node>&);
-        bool initPtrConst(const std::shared_ptr<PointerType>&, const std::shared_ptr<Node>&);
-        bool initArrayConst(const std::shared_ptr<ArrayType>&, const std::shared_ptr<Node>&);
-        bool initStructConst(const std::shared_ptr<StructType>&, const std::shared_ptr<Node>&);
-        bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Node>&);
+        bool initSimpleConst(const std::shared_ptr<Type>&, const std::shared_ptr<Node>&);
+        bool initArrayConst(const std::shared_ptr<ArrayType>&, const std::shared_ptr<Initializer>&);
+        bool initStructConst(const std::shared_ptr<StructType>&, const std::shared_ptr<Initializer>&);
+        bool initUnionConst(const std::shared_ptr<UnionType>&, const std::shared_ptr<Initializer>&);
         bool getArrayTypeIndex(const std::shared_ptr<ArrayType>&, const InitElement&, std::size_t&);
         bool getStructTypeIndex(const std::shared_ptr<StructType>&, const InitElement&, std::size_t&);
         bool getUnionTypeIndex(const std::shared_ptr<UnionType>&, const InitElement&, std::size_t&);

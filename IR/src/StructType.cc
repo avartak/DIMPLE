@@ -87,8 +87,17 @@ namespace avl {
         return st;
     }
 
-    std::shared_ptr<Value> StructType::initConst(const std::shared_ptr<StructType>& t, const std::vector<std::shared_ptr<Value> >& cv) {
+    std::shared_ptr<Value> StructType::initConst(const std::shared_ptr<StructType>& t, const std::map<std::size_t, std::shared_ptr<Value> >& cmap) {
 
+        std::vector<std::shared_ptr<Value> > cv;
+        for (std::size_t i = 0; i < t->members.size(); i++) {
+            if (cmap.find(i) == cmap.end()) {
+                cv.push_back(std::make_shared<Value>(t->members[i].type, llvm::Constant::getNullValue(t->members[i].type->llvm_type)));
+            }
+            else {
+                cv.push_back(cmap.find(i)->second);
+            }
+        }
         std::vector<llvm::Type*> tsv;
         std::vector<llvm::Constant*> csv;
         for (auto c : cv) {

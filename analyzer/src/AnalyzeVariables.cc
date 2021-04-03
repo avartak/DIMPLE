@@ -62,7 +62,6 @@ namespace avl {
             }
             var->initGlobal(std::static_pointer_cast<Value>(result));
         }
-
         result = var;
         return success();
     }
@@ -96,8 +95,10 @@ namespace avl {
             result = var;
             return success();
         }
-
         else if (rval->kind == NODE_INITIALIZER) {
+            if (!var->type->isCompound()) {
+                return error(rval, "Only compound types can be initialized using an initializer");
+            }
             auto in = std::static_pointer_cast<Initializer>(rval);
             if (var->type->isArray()) {
                 return initLocalArray(var, in);
@@ -105,14 +106,8 @@ namespace avl {
             else if (var->type->isStruct()) {
                 return initLocalStruct(var, in);
             }
-            else if (var->type->isUnion()) {
-                return initLocalUnion(var, in);
-            }
-            else {
-                return error(rval, "Only compound types can be initialized using an initializer");
-            }
+            return initLocalUnion(var, in);
         }
-
         else {
             return assign(var, rval);
         }
@@ -182,83 +177,53 @@ namespace avl {
 
     bool Analyzer::initConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
 
-        if (ty->isPrimitive()) {
-            return initPrimitiveConst(std::static_pointer_cast<PrimitiveType>(ty), nd);
+        if (ty->isCompound()) {
+            if (nd->kind != NODE_INITIALIZER) {
+                return error(nd, "Initializer needed for compound type");
+            }
+            auto in = std::static_pointer_cast<Initializer>(nd);
+            if (ty->isArray()) {
+                return initArrayConst(std::static_pointer_cast<ArrayType>(ty), in);
+            }
+            else if (ty->isStruct()) {
+                return initStructConst(std::static_pointer_cast<StructType>(ty), in);
+            }
+            return initUnionConst(std::static_pointer_cast<UnionType>(ty), in);
         }
-        else if (ty->isPtr()) {
-            return initPtrConst(std::static_pointer_cast<PointerType>(ty), nd);
-        }
-        else if (ty->isArray()) {
-            return initArrayConst(std::static_pointer_cast<ArrayType>(ty), nd);
-        }
-        else if (ty->isStruct()) {
-            return initStructConst(std::static_pointer_cast<StructType>(ty), nd);
-        }
-        else if (ty->isUnion()) {
-            return initUnionConst(std::static_pointer_cast<UnionType>(ty), nd);
-        }
-
-        return error(nd, "Failed to construct initializer; type is unrecognizable"); // This should never happen
-
-    }
-
-    bool Analyzer::initPrimitiveConst(const std::shared_ptr<PrimitiveType>& ty, const std::shared_ptr<Node>& nd) {
 
         if (nd->kind == NODE_INITIALIZER) {
             return error(nd, "Only compound types can be initialized using an initializer");
         }
-        else {
-            if (!getValue(nd)) {
-                return error(nd, "Unable to construct initializer");
-            }
-        }
-
-        auto ex = std::static_pointer_cast<Value>(result);
-        if (!ex->isConst()) {
-            return error(nd, "Global initializer is not a constant");
-        }
-        else if (*ty != *ex->type) {
-            return error(nd, "Initializer has inconsistent type");
-        }
-
-        result = std::make_shared<Value>(ty, ex->llvm_value);
-        return success();
+        return initSimpleConst(ty, nd);
     }
 
-    bool Analyzer::initPtrConst(const std::shared_ptr<PointerType>& ty, const std::shared_ptr<Node>& nd) {
+    bool Analyzer::initSimpleConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
 
-        auto t = std::make_shared<PointerType>(ty->points_to);
-
-        if (nd->kind == NODE_INITIALIZER) {
-            return error(nd, "Only compound types can be initialized using an initializer");
+        if (!getValue(nd)) {
+            return error(nd, "Unable to obtain initial value");
         }
-        else {
-            if (!getValue(nd)) {
-                return error(nd, "Unable to construct initializer");
-            }
+
+        auto t = ty;
+        if (ty->isPtr()) {
+            t = std::make_shared<PointerType>(static_cast<PointerType*>(ty.get())->points_to);
         }
 
         auto ex = std::static_pointer_cast<Value>(result);
         ex = BinaryOp::recastImplicit(ex, t);
         if (!ex) {
-            return error(nd, "Initializer has inconsistent type");
+            return error(nd, "Initial value has inconsistent type");
         }
         if (!ex->isConst()) {
-            return error(nd, "Initializer is not a constant");
+            return error(nd, "Initial value is not a constant");
         }
 
-        result = std::make_shared<Value>(t, ex->llvm_value);
+        result = ex;
         return success();
     }
 
-    bool Analyzer::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Node>& nd) {
+    bool Analyzer::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<ArrayType>(ty->clone());
-
-        if (nd->kind != NODE_INITIALIZER) {
-            return error(nd, "Unable to construct array initializer");
-        }
-        auto in = static_cast<const Initializer*>(nd.get());
 
         std::size_t idx = -1;
         std::map<std::size_t, std::shared_ptr<Value> > cmap;
@@ -276,20 +241,12 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Node>& nd) {
+    bool Analyzer::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<StructType>(ty->clone());
 
-        if (nd->kind != NODE_INITIALIZER) {
-            return error(nd, "Unable to construct initializer");
-        }
-        auto in = static_cast<const Initializer*>(nd.get());
-
         std::size_t idx = -1;
-        std::vector<std::shared_ptr<Value> > cv;
-        for (auto im : ty->members) {
-            cv.push_back(std::make_shared<Value>(im.type, llvm::Constant::getNullValue(im.type->llvm_type)));
-        }
+        std::map<std::size_t, std::shared_ptr<Value> > cmap;
         for (const auto& ie : in->elements) {
             if (!getStructTypeIndex(ty, ie, idx)) {
                 return error();
@@ -298,23 +255,18 @@ namespace avl {
                 std::string memid = (ty->members[idx].name ? ty->members[idx].name->name : "at index " + std::to_string(idx+1));
                 return error(ie.value, "Unable to initialize struct member " + memid);
             }
-            cv[idx] = std::static_pointer_cast<Value>(result);
+            cmap[idx] = std::static_pointer_cast<Value>(result);
         }
-        result = StructType::initConst(t, cv);
+        result = StructType::initConst(t, cmap);
         return success();
     }
 
-    bool Analyzer::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Node>& nd) {
+    bool Analyzer::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<UnionType>(ty->clone());
 
-        if (nd->kind != NODE_INITIALIZER) {
-            return error(nd, "Unable to construct initializer");
-        }
-        auto in = static_cast<const Initializer*>(nd.get());
-
         if (in->elements.size() > 1) {
-            return error(nd, "Union initializer with more than one element");
+            return error(in, "Union initializer with more than one element");
         }
         std::size_t idx = -1;
 

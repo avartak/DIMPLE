@@ -2,6 +2,7 @@
 #define STRUCTTYPE_H
 
 #include <vector>
+#include <map>
 #include <string>
 #include <Type.h>
 #include <Value.h>
@@ -25,7 +26,7 @@ namespace avl {
             return (flags & 1) > 0;
         }
 
-        static std::shared_ptr<Value> initConst(const std::shared_ptr<StructType>&, const std::vector<std::shared_ptr<Value> >&);
+        static std::shared_ptr<Value> initConst(const std::shared_ptr<StructType>&, const std::map<std::size_t, std::shared_ptr<Value> >&);
 
     };
 
