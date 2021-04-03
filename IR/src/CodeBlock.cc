@@ -26,9 +26,7 @@ namespace avl {
     }
     
     void CodeBlock::branch(const std::shared_ptr<Value>& ex, const std::shared_ptr<CodeBlock>& yes, const std::shared_ptr<CodeBlock>& no) {
-        if (TheBuilder.GetInsertBlock()->getTerminator() == nullptr) {
-            TheBuilder.CreateCondBr(ex->val(), yes->block, no->block); 
-        }
+        TheBuilder.CreateCondBr(ex->val(), yes->block, no->block); 
     }
 
 }
