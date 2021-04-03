@@ -132,8 +132,8 @@ namespace avl {
         if (!func->lst->prev) {
             if (func->retvar) {
                 TheBuilder.CreateStore(v, func->retvar->ptr());
-                func->retblock->jump();
-                func->retblock->insert();
+                CodeBlock::jump(func->retblock);
+                CodeBlock::insert(func->retblock);
                 TheBuilder.CreateRet(func->retvar->val());
             }
             else {
@@ -152,7 +152,7 @@ namespace avl {
                 TheBuilder.restoreIP(current_insert_pt);
             }
             TheBuilder.CreateStore(v, func->retvar->llvm_pointer);
-            func->retblock->jump();
+            CodeBlock::jump(func->retblock);
         }
         return true;
     }

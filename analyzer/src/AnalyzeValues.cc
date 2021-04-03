@@ -274,8 +274,10 @@ namespace avl {
         if (lhs->is != VALUE_VAR) {
             return error(binary, "Need a variable to perform the element operation");
         }
-        if (!lhs->type->isCompound()) {
-            return error(binary, "Attempting to perform element operation on a non-compound type");
+        if (lhs->type->isPrimitive() || lhs->type->isUnknown() ||
+            lhs->type->isFunction()  || lhs->type->isVoid())
+        {
+            return error(binary, "Attempting to perform element operation on this type");
         }
         if (!rhs->type->isInt()) {
             return error(binary, "Element index is not an integer");
@@ -371,8 +373,8 @@ namespace avl {
             auto ifBB    = std::make_shared<CodeBlock>();
             auto mergeBB = std::make_shared<CodeBlock>();
 
-            mergeBB->branch(lres, ifBB);
-            ifBB->insert();
+            CodeBlock::branch(lres, mergeBB, ifBB);
+            CodeBlock::insert(ifBB);
 
             if (!getValue(rhs_node)) {
                 return error(rhs_node, "Unable to evaluate the right side of the expression");
@@ -383,8 +385,8 @@ namespace avl {
             }
             BinaryOp::assign(res, rhs);
 
-            mergeBB->jump();
-            mergeBB->insert();
+            CodeBlock::jump(mergeBB);
+            CodeBlock::insert(mergeBB);
 
             result = res;
             return success();

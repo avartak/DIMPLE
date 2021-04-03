@@ -16,10 +16,9 @@ namespace avl {
         CodeBlock(llvm::BasicBlock*);
         CodeBlock(const Function&);
         
-        void insert(const std::shared_ptr<CodeBlock>&);
-        void insert();
-        void jump();
-        void branch(const std::shared_ptr<Value>&, const std::shared_ptr<CodeBlock>&);					
+        static void insert(const std::shared_ptr<CodeBlock>&);
+        static void jump(const std::shared_ptr<CodeBlock>&);
+        static void branch(const std::shared_ptr<Value>&, const std::shared_ptr<CodeBlock>&, const std::shared_ptr<CodeBlock>&);					
     	
     };
 

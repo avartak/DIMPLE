@@ -82,7 +82,7 @@ namespace avl {
 		bool status = true;
 
         if (retvar && retblock && retblock->block->getParent() == nullptr) {
-            retblock->insert();
+            CodeBlock::insert(retblock);
 		    TheBuilder.CreateRet(retvar->val());
         }
 
