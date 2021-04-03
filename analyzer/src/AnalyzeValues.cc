@@ -14,16 +14,14 @@ namespace avl {
         if (node->kind == NODE_IDENTIFIER) {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
-            if (ast->representations.find(n) != ast->representations.end()) {
-                return getConstRep(ident);
-            }
-            else if (currentFunction && currentFunction->lst->isDefined(n)) {
+            if (currentFunction && currentFunction->lst->isDefined(n)) {
                 result = currentFunction->lst->getVariable(n);
             }
-            else if (ast->declarations.find(n) != ast->declarations.end() ||
+            else if (ast->representations.find(n) != ast->representations.end() ||
+                     ast->declarations.find(n) != ast->declarations.end() ||
                      ast->definitions.find(n) != ast->definitions.end()) 
             {
-                return getGlobalInstance(ident);
+                return getConstRep(ident) || getGlobalInstance(ident);
             }
             else {
                 return error(ident, "Unable to decipher idenitifer " + n);

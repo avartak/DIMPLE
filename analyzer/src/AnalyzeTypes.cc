@@ -27,31 +27,15 @@ namespace avl {
             result = std::make_shared<PrimitiveType>(tnode->is);
             return success();
         }
-        else if (tnode->isUnknown()) {
-            result = std::make_shared<UnknownType>();
-            return success();
-        }
-        else if (tnode->isVoid()) {
-            result = std::make_shared<VoidType>();
-            return success();
-        }
-        else if (tnode->isPtr()) {
-            return getPtrType(std::static_pointer_cast<PointerTypeNode>(tnode), includeOpaquePtr);
-        }
-        else if (tnode->isArray()) {
-            return getArrayType(std::static_pointer_cast<ArrayTypeNode>(tnode), includeOpaquePtr);
-        }
-        else if (tnode->isStruct()) {
-            return getStructType(std::static_pointer_cast<StructTypeNode>(tnode), includeOpaquePtr);
-        }
-        else if (tnode->isUnion()) {
-            return getUnionType(std::static_pointer_cast<UnionTypeNode>(tnode), includeOpaquePtr);
-        }
-        else if (tnode->isFunction()) {
-            return getFunctionType(std::static_pointer_cast<FunctionTypeNode>(tnode), includeOpaquePtr);
-        }
-        else {
-           return error(tnode, "Unable to decipher type");
+        switch (tnode->is) {
+            case TYPE_UNKNOWN  : result = std::make_shared<UnknownType>(); return success();
+            case TYPE_VOID     : result = std::make_shared<VoidType>(); return success();
+            case TYPE_POINTER  : return getPtrType(std::static_pointer_cast<PointerTypeNode>(tnode), includeOpaquePtr);
+            case TYPE_ARRAY    : return getArrayType(std::static_pointer_cast<ArrayTypeNode>(tnode), includeOpaquePtr);
+            case TYPE_STRUCT   : return getStructType(std::static_pointer_cast<StructTypeNode>(tnode), includeOpaquePtr);
+            case TYPE_UNION    : return getUnionType(std::static_pointer_cast<UnionTypeNode>(tnode), includeOpaquePtr);
+            case TYPE_FUNCTION : return getFunctionType(std::static_pointer_cast<FunctionTypeNode>(tnode), includeOpaquePtr);
+            default            : return error(tnode, "Unable to decipher type"); 
         }
     }
 
@@ -81,23 +65,15 @@ namespace avl {
         if (tnode->isPrimitive()) {
             gst->types[n] = std::make_shared<PrimitiveType>(tnode->is);
         }
-        else if (tnode->isUnknown()) {
-            gst->types[n] = std::make_shared<UnknownType>();
-        }
-        else if (tnode->isStruct()) {
-            gst->types[n] = std::make_shared<StructType>(n, static_cast<StructTypeNode*>(tnode.get())->isPacked());
-        }
-        else if (tnode->isUnion()) {
-            gst->types[n] = std::make_shared<UnionType>(n);
-        }
-        else if (tnode->isPtr()) {
-            gst->types[n] = std::make_shared<PointerType>(n);
-        }
-        else if (tnode->isArray()) {
-            gst->types[n] = std::make_shared<ArrayType>(n);
-        }
-        else if (tnode->isFunction()) {
-            gst->types[n+".ptr"] = std::make_shared<PointerType>(n);
+        else {
+            switch (tnode->is) {
+                case TYPE_POINTER  : gst->types[n] = std::make_shared<PointerType>(n); break;
+                case TYPE_ARRAY    : gst->types[n] = std::make_shared<ArrayType>(n); break;
+                case TYPE_STRUCT   : gst->types[n] = std::make_shared<StructType>(n, static_cast<StructTypeNode*>(tnode.get())->isPacked()); break;
+                case TYPE_UNION    : gst->types[n] = std::make_shared<UnionType>(n); break;
+                case TYPE_FUNCTION : gst->types[n+".ptr"] = std::make_shared<PointerType>(n); break;
+                default            : return error(tnode, "Unable to decipher type");
+            }
         }
 
         if (!getType(ast->representations[n]->node, includeOpaquePtr)) {
