@@ -10,7 +10,7 @@ DIMPLE supports simple primitive data types (integers, floating point variables)
 
 ## Representation
 
-A unique feature of DIMPLE__representation__. A representation _stands for_ a type or a compile-time constant expression. For example,
+A unique feature of DIMPLE is a _representation_. A representation _stands for_ a type or a compile-time constant expression. For example,
 
 ```
 C :: 2 + 3;
