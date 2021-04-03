@@ -183,50 +183,39 @@ namespace avl {
         }
         auto val = std::static_pointer_cast<Value>(result);
 
+        std::string err = "";
         if (un->op == UNARYOP_ADDRESS) {
             result = UnaryOp::address(val);
-            if (!val->isInstance() && !(val->type->isInt() && val->isConst())) {
-                return error(un, "Operand of address operation is neither an instance nor a constant integer");
-            }
+            err = "Operand of address operation is neither an instance nor a constant integer";
         }
         else if (un->op == UNARYOP_PLUS) {
             result = UnaryOp::plus(val);
-            if (!result) {
-                return error(un, "Operand of \'+\' operator is non-numerical");
-            }
+            err = "Operand of \'+\' operator is non-numerical";
         }
         else if (un->op == UNARYOP_NEGATE) {
             result = UnaryOp::negate(val);
-            if (!result) {
-                return error(un, "Operand of \'-\' operator is non-numerical");
-            }
+            err = "Operand of \'-\' operator is non-numerical";
         }
         else if (un->op == UNARYOP_COMPLEMENT) {
             result = UnaryOp::complement(val);
-            if (!result) {
-                return error(un, "Operand of \'~\' operator is not an integer");
-            }
+            err = "Operand of \'~\' operator is not an integer";
         }
         else if (un->op == UNARYOP_NOT) {
             result = UnaryOp::logicalNot(val);
-            if (!result) {
-                return error(un, "Operand of \'!\' operator is not a boolean");
-            }
+            err = "Operand of \'!\' operator is not a boolean";
         }
         else if (un->op == UNARYOP_DEREFERENCE) {
             if (!val->type->isPtr()) {
                 return error(un, "Attempting to dereference a non-pointer");
             }
             result = UnaryOp::dereference(val);
-            if (!result) {
-                return error(un, "Cannot dereference pointer to unknown/incomplete type");
-            }
+            err = "Cannot dereference pointer to unknown/incomplete type";
         }
         else {
             return error();
         }
 
-        return success();
+        return (result ? success() : error(un, err));
     }
 
     bool Analyzer::recast(const std::shared_ptr<BinaryExprNode>& binary) {
