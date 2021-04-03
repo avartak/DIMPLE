@@ -6,7 +6,7 @@ You can read more about DIMPLE on the [wiki page](https://github.com/avartak/DIM
 
 # Some Features
 
-DIMPLE supports simple primitive data types (integers, floating point variables), pointers as well as certain compound types such as structs, unions and arrays. The DIMPLE syntax shares some similarities with C, but is different in many ways. 
+DIMPLE supports simple primitive data types (integers, floating point variables), pointers as well as certain compound types such as structs, unions and arrays. The DIMPLE syntax shares many similarities with C, but is different in some ways. 
 
 ## Representation
 
