@@ -274,10 +274,8 @@ namespace avl {
         if (lhs->is != VALUE_VAR) {
             return error(binary, "Need a variable to perform the element operation");
         }
-        if (lhs->type->isPrimitive() || lhs->type->isUnknown() ||
-            lhs->type->isFunction()  || lhs->type->isVoid())
-        {
-            return error(binary, "Attempting to perform element operation on this type");
+        if (!lhs->type->isCompound()) {
+            return error(binary, "Attempting to perform element operation on a non-compound type");
         }
         if (!rhs->type->isInt()) {
             return error(binary, "Element index is not an integer");
@@ -324,14 +322,10 @@ namespace avl {
         if (expr->is == EXPR_BINARY) {
             auto bin = std::static_pointer_cast<BinaryExprNode>(expr);
             op = bin->op;
-            if (op == BINARYOP_RECAST) {
-                return recast(bin);
-            }
-            else if (op == BINARYOP_MEMBER) {
-                return member(bin);
-            }
-            else if (op == BINARYOP_ELEMENT) {
-                return element(bin);
+            switch (op) {
+                case BINARYOP_RECAST  : return recast(bin);
+                case BINARYOP_MEMBER  : return member(bin);
+                case BINARYOP_ELEMENT : return element(bin);
             }
             opstr = ExprNode::binopstring(op);
             lhs_node = bin->lhs;
