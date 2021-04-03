@@ -180,7 +180,7 @@ namespace avl {
                 if (parseToken(it+n, TOKEN_ROUND_CLOSE)) {
                     break;
                 }
-                if (!parseExpr(it+n)) { // parseRvalue here would allow initializers as function arguments
+                if (!parseExpr(it+n)) {
                     return error(tokens[it+n], "Failed to parse argument");
                 }
                 n += nParsed;
@@ -226,7 +226,7 @@ namespace avl {
         if (isAssigner(it+n)) {
             int op = ExprNode::assopFromToken(tokens[it+n]->is);
             n++;
-            if (!parseExpr(it+n)) { // parseRvalue here would allow initializers in assignment 
+            if (!parseExpr(it+n)) {
                 return error(tokens[it+n], "Failed to parse expression after " + tokens[it+n-1]->str);
             }
             n += nParsed;

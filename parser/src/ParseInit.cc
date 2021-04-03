@@ -4,17 +4,13 @@
   
 namespace avl {
 
-    bool Parser::parseRvalue(std::size_t it) {
-        return parseExpr(it) || parseInit(it);
-    }
-
     bool Parser::parseUntaggedInitSet(std::size_t it) {
 
         std::size_t n = 0;
 
         std::vector<InitElement> iev;
         while (true) {
-            if (!parseRvalue(it+n)) {
+            if (!parseExpr(it+n) && !parseInit(it+n)) {
                 if (iev.size() == 0) {
                     return error();
                 }
@@ -75,7 +71,7 @@ namespace avl {
             }
             n++;
 
-            if (!parseRvalue(it+n)) {
+            if (!parseExpr(it+n) && !parseInit(it+n)) {
                 return error(tokens[it+n], "Failed to parse tagged rvalue in initializer set");
             }
             n += nParsed;

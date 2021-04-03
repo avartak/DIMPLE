@@ -16,7 +16,7 @@ namespace avl {
             parseRepresentation(it) ||
             parseDeclaration(it) ||
             parseDefinition(it) ||
-            parseStart(it))
+            parseMain(it))
         {
             tokens.erase(tokens.begin()+it, tokens.begin()+it+nParsed);
             return parseProg(it);
@@ -209,7 +209,7 @@ namespace avl {
         return success(n);
     }
 
-    bool Parser::parseStart(std::size_t it) {
+    bool Parser::parseMain(std::size_t it) {
 
         std::size_t n = 0;
 

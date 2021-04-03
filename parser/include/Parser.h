@@ -43,7 +43,7 @@ namespace avl {
         bool parseRepresentation(std::size_t);
         bool parseDeclaration(std::size_t);
         bool parseDefinition(std::size_t);
-        bool parseStart(std::size_t);
+        bool parseMain(std::size_t);
 
         bool parseType(std::size_t);
         bool parseDataType(std::size_t);
@@ -56,7 +56,6 @@ namespace avl {
         bool parseNameNodeSet(std::size_t);
 
         bool parseInit(std::size_t);
-        bool parseRvalue(std::size_t);
         bool parseUntaggedInitSet(std::size_t);
         bool parseTaggedInitSet(std::size_t);
 
