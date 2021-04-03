@@ -36,24 +36,13 @@ namespace avl {
         }
 
         auto expr = std::static_pointer_cast<ExprNode>(node);
-        if (expr->isLiteralNode()) {
-            return literal(expr);
+        switch (expr->is) {
+            case EXPR_ASSIGN : return binary(expr);
+            case EXPR_BINARY : return binary(expr);
+            case EXPR_CALL   : return call(std::static_pointer_cast<CallExprNode>(node));
+            case EXPR_UNARY  : return unary(std::static_pointer_cast<UnaryExprNode>(node));
+            default          : return literal(expr);
         }
-        else if (expr->is == EXPR_ASSIGN) {
-            return binary(expr);
-        }
-        else if (expr->is == EXPR_BINARY) {
-            return binary(expr);
-        }
-        else if (expr->is == EXPR_CALL) {
-            return call(std::static_pointer_cast<CallExprNode>(node));
-        }
-        else if (expr->is == EXPR_UNARY) {
-            return unary(std::static_pointer_cast<UnaryExprNode>(node));
-        }
-
-        return error();
-
     }
 
     bool Analyzer::getConstRep(const std::shared_ptr<Identifier>& ident) {
