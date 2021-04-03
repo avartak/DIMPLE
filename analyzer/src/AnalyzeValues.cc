@@ -128,12 +128,7 @@ namespace avl {
             return error(ident, "Type of " + n + " is not completely defined");
         }
 
-        if (type->isFunction()) {
-            return getFunction(ident, storage, type);
-        }
-        else {
-            return getGlobalVar(ident, storage, type);
-        }
+        return ( type->isFunction() ? getFunction(ident, storage, type) : getGlobalVar(ident, storage, type) );
     }
 
     bool Analyzer::literal(const std::shared_ptr<ExprNode>& expr) {
