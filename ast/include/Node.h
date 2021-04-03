@@ -1,9 +1,3 @@
-/*
-
-Node is the base class of all the syntactic units that are parsed by the Parser
-
-*/
-
 #ifndef NODE_H
 #define NODE_H
 
@@ -11,8 +5,6 @@ Node is the base class of all the syntactic units that are parsed by the Parser
 
 namespace avl {
 
-    // Basic types of nodes
-    // Some of the nodes branch out into further sub-types
     enum Node_ID {
 
         NODE_TOKEN,
@@ -28,10 +20,6 @@ namespace avl {
 
     };
 
-    // Every Node has information about its position in the source file (loc : Location) 
-    // and a type identifier (kind : uint16_t)
-    // The Location member (loc) carries information about the name of the source file,
-    // the start line/column of the Node and the end line/column of the Node
     struct Node {
 
         Location loc;

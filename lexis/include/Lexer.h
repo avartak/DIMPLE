@@ -1,20 +1,3 @@
-/*
-
-The Lexer performs lexical analysis for our compiler. 
-It reads text from an input file character-by-character,
-and constructs tokens that are then passed on to the Parser.
-The Lexer stores all the pertinent information about a token
-- The token type or ID (int) that is returned by the lex() function
-- The token string (str : std::string) that contains the textual representation of the token
-- The line on which the first character of the token appears (start_line : int)
-- The column on which the first character of the token appears (start_column : int)
-- The line on which the last character of the token appears (end_line : int)
-- the column on which the last character of the token appears (end_column : int)
-
-Line and column numbers start from 1
-
-*/
-
 #ifndef LEXER_H
 #define LEXER_H
 
