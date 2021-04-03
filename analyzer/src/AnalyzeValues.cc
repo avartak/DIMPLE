@@ -274,10 +274,8 @@ namespace avl {
         if (lhs->is != VALUE_VAR) {
             return error(binary, "Need a variable to perform the element operation");
         }
-        if (lhs->type->isPrimitive() || lhs->type->isUnknown() ||
-            lhs->type->isFunction()  || lhs->type->isVoid())
-        {
-            return error(binary, "Attempting to perform element operation on this type");
+        if (!lhs->type->isCompound() && !lhs->type->isPtr()) {
+            return error(binary, "Cannot perform element operation on this type");
         }
         if (!rhs->type->isInt()) {
             return error(binary, "Element index is not an integer");

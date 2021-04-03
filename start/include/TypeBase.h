@@ -94,7 +94,7 @@ namespace avl {
         }
         
         inline bool isCompound() const {
-            return is == isStruct() || is == isUnion() || is == isArray();
+            return isStruct() || isUnion() || isArray();
         }
         
         inline bool isFunction() const {
