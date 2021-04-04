@@ -1,5 +1,4 @@
 #include <sstream>
-#include <llvm/IR/Constants.h>
 #include <Analyzer.h>
 #include <UnknownType.h>
 #include <VoidType.h>
@@ -123,19 +122,11 @@ namespace avl {
         if (!getValue(atnode->nelements)) {
             return error(atnode->nelements, "Unable to evaluate array size");
         }
-        auto nv = std::static_pointer_cast<Value>(result);
-        if (!nv->type->isInt()) {
-            return error(atnode->nelements, "Array index is not an integer");
+        auto nelem = std::static_pointer_cast<Value>(result);
+        if (!nelem->isConstNonNegativeInt() || nelem->getUInt64ValueOrZero() == 0) {
+            return error(atnode->nelements, "Element index is not a positive integer constant");
         }
-        if (!nv->isConst()) {
-            return error(atnode->nelements, "Array index is not a compile time constant");
-        }
-        auto ci = llvm::cast<llvm::ConstantInt>(nv->val());
-        if (ci->isNegative()) {
-            return error(atnode->nelements, "Array index is negative");
-        }
-        auto nelem = ci->getZExtValue();
-        result = std::make_shared<ArrayType>(array_of, nelem);
+        result = std::make_shared<ArrayType>(array_of, nelem->getUInt64ValueOrZero());
         return success();
     }
 
