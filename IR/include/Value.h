@@ -95,6 +95,10 @@ namespace avl {
             return ( (isConstInt() || isConstBool()) ? llvm::cast<llvm::ConstantInt>(llvm_value)->getZExtValue() : 0);
         }
 
+        inline int64_t getInt64ValueOrZero() const {
+            return ( (isConstInt() || isConstBool()) ? llvm::cast<llvm::ConstantInt>(llvm_value)->getSExtValue() : 0);
+        }
+
     };
 
 }

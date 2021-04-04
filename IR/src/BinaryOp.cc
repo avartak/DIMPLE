@@ -318,7 +318,7 @@ namespace avl {
             if (!i->isConstNonNegativeInt()) {
                 return ret;
             }
-            auto idx = llvm::cast<llvm::ConstantInt>(i->val())->getZExtValue();
+            auto idx = i->getUInt64ValueOrZero();
 
             if (var->type->isStruct()) {
                 auto st = static_cast<StructType*>(var->type.get());
@@ -566,15 +566,12 @@ namespace avl {
 
         if (re->type->isInt()) {
             if (re->isConst()) {
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (rc->getZExtValue() == 0) {
+                if (re->getUInt64ValueOrZero() == 0) {
                     return UB_DIV_ZERO;
                 }
             }
             if (re->type->isSignedInt() && re->isConst() && re->isConst()) {
-                auto lc = llvm::cast<llvm::ConstantInt>(le->val());
-                auto rc = llvm::cast<llvm::ConstantInt>(re->val());
-                if (lc->getSExtValue() == INT64_MIN && rc->getSExtValue() == -1) {
+                if (le->getInt64ValueOrZero() == INT64_MIN && re->getInt64ValueOrZero() == -1) {
                     return UB_DIV_OVERFLOW;
                 }
             }
