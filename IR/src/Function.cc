@@ -115,83 +115,77 @@ namespace avl {
         auto fn = llvm::cast<llvm::Function>(ptr());
 
         // Remove dead block with no predecessors
-        while (true) {
-            bool found = false;
-            for (auto& BB : make_early_inc_range(*fn)) {
-                if (&BB == &fn->getEntryBlock() || BB.hasNPredecessorsOrMore(1)) {
-                    continue;
-                }
-                for (llvm::BasicBlock* succ : successors(&BB)) {
-                    succ->removePredecessor(&BB);
-                }
-                while (!BB.empty()) {
-                    auto& inst = BB.back();
-                    inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
-                    inst.eraseFromParent();
-                }
-                BB.eraseFromParent();
-                found = true;
+        bool found = false;
+        for (auto& BB : make_early_inc_range(*fn)) {
+            if (&BB == &fn->getEntryBlock() || BB.hasNPredecessorsOrMore(1)) {
+                continue;
             }
-            if (!found) {
-                break;
+            for (llvm::BasicBlock* succ : successors(&BB)) {
+                succ->removePredecessor(&BB);
             }
+            while (!BB.empty()) {
+                auto& inst = BB.back();
+                inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
+                inst.eraseFromParent();
+            }
+            BB.eraseFromParent();
+            found = true;
+        }
+        if (found) {
+            simplify();
         }
 
         // Remove branches with constant conditionals
-        while (true) {
-            bool found = false;
-            for (auto& BB : *fn) {
-                auto BI = llvm::dyn_cast<llvm::BranchInst>(BB.getTerminator());
-                if (!BI || !BI->isConditional()) {
-                    continue;
-                }
-                
-                auto CI = llvm::dyn_cast<llvm::ConstantInt>(BI->getCondition());
-                if (!CI) {
-                    continue;
-                }
-                
-                auto RemovedSucc = BI->getSuccessor(CI->isOne());
-                RemovedSucc->removePredecessor(&BB);
-                
-                llvm::BranchInst::Create(BI->getSuccessor(CI->isZero()), BI);
-                BI->eraseFromParent();
-                found = true;
+        found = false;
+        for (auto& BB : *fn) {
+            auto BI = llvm::dyn_cast<llvm::BranchInst>(BB.getTerminator());
+            if (!BI || !BI->isConditional()) {
+                continue;
             }
-            if (!found) {
-                break;
+            
+            auto CI = llvm::dyn_cast<llvm::ConstantInt>(BI->getCondition());
+            if (!CI) {
+                continue;
             }
+            
+            auto RemovedSucc = BI->getSuccessor(CI->isOne());
+            RemovedSucc->removePredecessor(&BB);
+            
+            llvm::BranchInst::Create(BI->getSuccessor(CI->isZero()), BI);
+            BI->eraseFromParent();
+            found = true;
+        }
+        if (found) {
+            simplify();
         }
        
         // Merge block into its single predecessor, if the predecessor has a single successor
-        while (true) {
-            bool found = false;
-            for (auto& BB : make_early_inc_range(*fn)) {
-                auto Pred = BB.getSinglePredecessor();
-                if (!Pred || Pred->getSingleSuccessor() != &BB) {
-                    continue;
-                }
-                if (Pred == &BB) {
-                    continue;
-                }
-                
-                BB.replaceAllUsesWith(Pred);
-                for (auto& PN : make_early_inc_range(BB.phis())) {
-                    PN.replaceAllUsesWith(PN.getIncomingValue(0));
-                    PN.eraseFromParent();
-                }
-                for (auto& I : make_early_inc_range(BB)) {
-                    I.moveBefore(Pred->getTerminator());
-                }
-                
-                Pred->getTerminator()->eraseFromParent();
-                BB.eraseFromParent();
-                
-                found = true;
+        found = false;
+        for (auto& BB : make_early_inc_range(*fn)) {
+            auto Pred = BB.getSinglePredecessor();
+            if (!Pred || Pred->getSingleSuccessor() != &BB) {
+                continue;
             }
-            if (!found) {
-                break;
+            if (Pred == &BB) {
+                continue;
             }
+            
+            BB.replaceAllUsesWith(Pred);
+            for (auto& PN : make_early_inc_range(BB.phis())) {
+                PN.replaceAllUsesWith(PN.getIncomingValue(0));
+                PN.eraseFromParent();
+            }
+            for (auto& I : make_early_inc_range(BB)) {
+                I.moveBefore(Pred->getTerminator());
+            }
+            
+            Pred->getTerminator()->eraseFromParent();
+            BB.eraseFromParent();
+            
+            found = true;
+        }
+        if (found) {
+            simplify();
         }
     }
 
