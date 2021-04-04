@@ -11,33 +11,33 @@ namespace avl {
     }
 
     llvm::Value* Variable::val() const {
-        if (llvm_pointer != nullptr && llvm_value == nullptr) {
+        if (llvm_value != nullptr) {
             return TheBuilder.CreateAlignedLoad(type->llvm_type, ptr(), llvm::MaybeAlign(type->alignment()));
         }
-        return llvm_value;
+        return nullptr;
     }
 
     llvm::Value* Variable::ptr() const {
         auto t = std::make_shared<PointerType>(type);
-        if (llvm_pointer == nullptr) {
-            return llvm_pointer;
+        if (llvm_value == nullptr) {
+            return llvm_value;
         }
-        else if (llvm::isa<llvm::GlobalVariable>(llvm_pointer)) {
-            if (llvm::cast<llvm::GlobalVariable>(llvm_pointer)->getType()->getElementType() != type->llvm_type) {
-                return TheBuilder.CreateBitCast(llvm_pointer, t->llvm_type);
+        else if (llvm::isa<llvm::GlobalVariable>(llvm_value)) {
+            if (llvm::cast<llvm::GlobalVariable>(llvm_value)->getType()->getElementType() != type->llvm_type) {
+                return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
             }
         }
-        else if (llvm::isa<llvm::AllocaInst>(llvm_pointer)) {
-            if (llvm::cast<llvm::AllocaInst>(llvm_pointer)->getType()->getElementType() != type->llvm_type) {
-                return TheBuilder.CreateBitCast(llvm_pointer, t->llvm_type);
+        else if (llvm::isa<llvm::AllocaInst>(llvm_value)) {
+            if (llvm::cast<llvm::AllocaInst>(llvm_value)->getType()->getElementType() != type->llvm_type) {
+                return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
             }
         }
-        return llvm_pointer;
+        return llvm_value;
     }
 
     void Variable::init() {
         if (isGlobal()) {
-            llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
+            llvm::cast<llvm::GlobalVariable>(llvm_value)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
         }
         else {
             if (!type->moveDirectly()) {
@@ -50,33 +50,33 @@ namespace avl {
     }
 
     void Variable::initGlobal(const std::shared_ptr<Value>& init) {
-        if (isGlobal() && llvm_pointer != nullptr && (*init->type == *type) && init->isConst()) {
-            llvm::cast<llvm::GlobalVariable>(llvm_pointer)->setInitializer(llvm::cast<llvm::Constant>(init->val()));
+        if (isGlobal() && llvm_value != nullptr && (*init->type == *type) && init->isConst()) {
+            llvm::cast<llvm::GlobalVariable>(llvm_value)->setInitializer(llvm::cast<llvm::Constant>(init->val()));
         }
     }
 
     void Variable::define() {
         if (isGlobal()) {
             auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-            llvm_pointer = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
+            llvm_value = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
         }
         else {
-            llvm_pointer = TheBuilder.CreateAlloca(type->llvm_type);
+            llvm_value = TheBuilder.CreateAlloca(type->llvm_type);
         }
         align();
     }
 
     bool Variable::align() {
         std::size_t al = type->alignment();
-        if (al == 0 || llvm_pointer == nullptr) {
+        if (al == 0 || llvm_value == nullptr) {
             return false;
         }
-        if (llvm::isa<llvm::AllocaInst>(llvm_pointer)) {
-            auto v = llvm::cast<llvm::AllocaInst>(llvm_pointer);
+        if (llvm::isa<llvm::AllocaInst>(llvm_value)) {
+            auto v = llvm::cast<llvm::AllocaInst>(llvm_value);
             v->setAlignment(llvm::Align(al));
         }
         else {
-            auto v = llvm::cast<llvm::GlobalVariable>(llvm_pointer);
+            auto v = llvm::cast<llvm::GlobalVariable>(llvm_value);
             v->setAlignment(llvm::Align(al));
         }
         return true;

@@ -8,7 +8,7 @@ namespace avl {
     }
     
     CodeBlock::CodeBlock(const Function& func) {
-        block = llvm::BasicBlock::Create(TheContext, "", llvm::cast<llvm::Function>(func.llvm_pointer));
+        block = llvm::BasicBlock::Create(TheContext, "", llvm::cast<llvm::Function>(func.ptr()));
         TheBuilder.SetInsertPoint(block);
     }
     

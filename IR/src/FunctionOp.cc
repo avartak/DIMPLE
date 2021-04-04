@@ -20,7 +20,7 @@ namespace avl {
         std::shared_ptr<Variable> retv;
         if (!ft->ret->retDirectly() || ft->ret->isCompound()) {
             retv = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->ret);
-            retv->llvm_pointer = TheBuilder.CreateAlloca(retv->type->llvm_type);
+            retv->llvm_value = TheBuilder.CreateAlloca(retv->type->llvm_type);
             retv->align();
             retv->init();
         }
@@ -52,7 +52,7 @@ namespace avl {
             }
             else {
                 const auto& v = std::make_shared<Variable>(STORAGE_LOCAL, "", args[i]->type);
-                v->llvm_pointer = TheBuilder.CreateAlloca(v->type->llvm_type);
+                v->llvm_value = TheBuilder.CreateAlloca(v->type->llvm_type);
                 v->align();
                 if (!BinaryOp::assign(v, args[i])) {
                     return ex;
@@ -107,7 +107,7 @@ namespace avl {
             return false;
         }
         
-        llvm::Function* fn = llvm::cast<llvm::Function>(func->llvm_pointer);
+        llvm::Function* fn = llvm::cast<llvm::Function>(func->ptr());
         
         if (!ft->ret->retDirectly()) {
             if (!BinaryOp::assign(func->retvar, retval)) {
@@ -147,11 +147,11 @@ namespace avl {
                 func->retblock = std::make_shared<CodeBlock>();
                 auto current_insert_pt = TheBuilder.saveIP();
                 TheBuilder.SetInsertPoint(fn->getEntryBlock().getFirstNonPHIOrDbgOrLifetime());
-                func->retvar->llvm_pointer = TheBuilder.CreateAlloca(func->retvar->type->llvm_type);
+                func->retvar->llvm_value = TheBuilder.CreateAlloca(func->retvar->type->llvm_type);
                 func->retvar->align();
                 TheBuilder.restoreIP(current_insert_pt);
             }
-            TheBuilder.CreateStore(v, func->retvar->llvm_pointer);
+            TheBuilder.CreateStore(v, func->retvar->ptr());
             CodeBlock::jump(func->retblock);
         }
         return true;

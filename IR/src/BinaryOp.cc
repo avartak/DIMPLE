@@ -327,7 +327,7 @@ namespace avl {
                 }
                 auto gep = TheBuilder.CreateStructGEP(var->ptr(), idx);
                 auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", st->members[idx].type);
-                v->llvm_pointer = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
             else if (var->type->isUnion()) {
@@ -337,7 +337,7 @@ namespace avl {
                 }
                 auto t = std::make_shared<PointerType>(ut->members[idx].type);
                 auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", t->points_to);
-                v->llvm_pointer = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
+                v->llvm_value = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
                 ret = v;
             }
         }
@@ -354,14 +354,14 @@ namespace avl {
                 vidx.push_back(i->val());
                 auto gep = TheBuilder.CreateInBoundsGEP(var->type->llvm_type, var->ptr(), vidx);
                 auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", at->array_of);
-                v->llvm_pointer = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
             else if (var->type->isPtr()) {
                 auto pt = static_cast<PointerType*>(var->type.get());
                 auto gep = TheBuilder.CreateInBoundsGEP(pt->points_to->llvm_type, var->val(), i->val());
                 auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", pt->points_to);
-                v->llvm_pointer = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
         }
@@ -392,7 +392,7 @@ namespace avl {
             }
             auto gep = TheBuilder.CreateStructGEP(var->ptr(), idx);
             auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", st->members[idx].type);
-            v->llvm_pointer = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+            v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
             ret = v;
         }
         else if (var->type->isUnion()) {
@@ -411,7 +411,7 @@ namespace avl {
             }
             auto t = std::make_shared<PointerType>(ut->members[idx].type);
             auto v = std::make_shared<Variable>(STORAGE_UNDEFINED, "", t->points_to);
-            v->llvm_pointer = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
+            v->llvm_value = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
             ret = v;
         }
 

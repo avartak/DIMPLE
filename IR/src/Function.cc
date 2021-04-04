@@ -25,36 +25,36 @@ namespace avl {
                 fptr->getArg(idx)->addAttr(llvm::Attribute::getWithAlignment(TheContext, llvm::Align(8)));
             }
         }
-        llvm_pointer = fptr;
+        llvm_value = fptr;
     }
 
     llvm::Value* Function::val() const {
-        return llvm_value;
+        return nullptr;
     }
 
     llvm::Value* Function::ptr() const {
-        return llvm_pointer;
+        return llvm_value;
     }
 
 	void Function::init() {
-        auto fn = llvm::cast<llvm::Function>(llvm_pointer);
+        auto fn = llvm::cast<llvm::Function>(llvm_value);
         auto ft = static_cast<FunctionType*>(type.get());
 
         const auto& block = std::make_shared<CodeBlock>(*this);
 
         if (!ft->ret->retDirectly()) {
             retvar = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->ret);
-            retvar->llvm_pointer = fn->getArg(0);
+            retvar->llvm_value = fn->getArg(0);
             retblock = std::make_shared<CodeBlock>();
         }
         for (std::size_t i = 0; i < ft->args.size(); i++) {
             auto idx = ft->ret->retDirectly() ? i : i+1;
             auto var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
             if (ft->args[i].type->passDirectly()) {
-                var->llvm_pointer = TheBuilder.CreateAlloca(var->type->llvm_type);
+                var->llvm_value = TheBuilder.CreateAlloca(var->type->llvm_type);
                 var->align();
                 if (var->type->isCompound()) {
-                    auto u64 = TheBuilder.CreateBitCast(var->llvm_pointer, TheBuilder.getInt64Ty());
+                    auto u64 = TheBuilder.CreateBitCast(var->llvm_value, TheBuilder.getInt64Ty());
                     TheBuilder.CreateStore(fn->getArg(idx), u64);
                 }
                 else {
@@ -62,7 +62,7 @@ namespace avl {
                 }
             }
             else {
-                var->llvm_pointer = fn->getArg(idx);
+                var->llvm_value = fn->getArg(idx);
             }
             args.push_back(var);
             lst->variables[ft->args[i].name->name] = var;
@@ -77,7 +77,7 @@ namespace avl {
 
     bool Function::checkTerminations() const {
 
-        auto fn = llvm::cast<llvm::Function>(llvm_pointer);
+        auto fn = llvm::cast<llvm::Function>(llvm_value);
         auto current_block = TheBuilder.GetInsertBlock();
 		bool status = true;
 
