@@ -74,6 +74,7 @@ namespace avl {
             if (!currentFunction->checkTerminations()) {
                 return error(defn->name, "Function \'" + defn->name->name + "\' does not always return");
             }
+            currentFunction->simplify();
             return success();
         }
 

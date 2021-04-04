@@ -26,6 +26,7 @@ namespace avl {
 
         void resetLocals();
         bool checkTerminations() const;
+        void simplify();
     };
 
 }

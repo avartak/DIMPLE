@@ -37,7 +37,7 @@ namespace avl {
     }
 
 	void Function::init() {
-        auto fn = llvm::cast<llvm::Function>(llvm_value);
+        auto fn = llvm::cast<llvm::Function>(ptr());
         auto ft = static_cast<FunctionType*>(type.get());
 
         const auto& block = std::make_shared<CodeBlock>(*this);
@@ -51,10 +51,9 @@ namespace avl {
             auto idx = ft->ret->retDirectly() ? i : i+1;
             auto var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
             if (ft->args[i].type->passDirectly()) {
-                var->llvm_value = TheBuilder.CreateAlloca(var->type->llvm_type);
-                var->align();
+                var->define();
                 if (var->type->isCompound()) {
-                    auto u64 = TheBuilder.CreateBitCast(var->llvm_value, TheBuilder.getInt64Ty());
+                    auto u64 = TheBuilder.CreateBitCast(var->ptr(), TheBuilder.getInt64Ty());
                     TheBuilder.CreateStore(fn->getArg(idx), u64);
                 }
                 else {
@@ -77,7 +76,7 @@ namespace avl {
 
     bool Function::checkTerminations() const {
 
-        auto fn = llvm::cast<llvm::Function>(llvm_value);
+        auto fn = llvm::cast<llvm::Function>(ptr());
         auto current_block = TheBuilder.GetInsertBlock();
 		bool status = true;
 
@@ -102,32 +101,98 @@ namespace avl {
             }
         }
 
-        while (true) {
-            std::vector<llvm::BasicBlock*> orphans;
-            for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
-                if (&*iter == &fn->getEntryBlock() || iter->hasNPredecessorsOrMore(1)) {
-                    continue;
-                }
-                orphans.push_back(&*iter);
-            }
-            if (orphans.size() == 0) {
-                break;
-            }
-            
-            for (auto orphan : orphans) {
-                for (llvm::BasicBlock* succ : successors(orphan)) {
-                    succ->removePredecessor(orphan);
-                }
-                while (!orphan->empty()) {
-                    auto& inst = orphan->back();
-                    inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
-                    inst.eraseFromParent();
-                }
-                orphan->eraseFromParent();
-            }
-        }
-
         TheBuilder.SetInsertPoint(current_block);
         return status;
     }
+
+    /*
+    Taken from : https://github.com/llvm/llvm-project/blob/main/llvm/examples/IRTransforms/SimplifyCFG.cpp
+    This code does not preserve the DominatorTree
+    */
+
+    void Function::simplify() {
+
+        auto fn = llvm::cast<llvm::Function>(ptr());
+
+        // Remove dead block with no predecessors
+        while (true) {
+            bool found = false;
+            for (auto& BB : make_early_inc_range(*fn)) {
+                if (&BB == &fn->getEntryBlock() || BB.hasNPredecessorsOrMore(1)) {
+                    continue;
+                }
+                for (llvm::BasicBlock* succ : successors(&BB)) {
+                    succ->removePredecessor(&BB);
+                }
+                while (!BB.empty()) {
+                    auto& inst = BB.back();
+                    inst.replaceAllUsesWith(llvm::UndefValue::get(inst.getType()));
+                    inst.eraseFromParent();
+                }
+                BB.eraseFromParent();
+                found = true;
+            }
+            if (!found) {
+                break;
+            }
+        }
+
+        // Remove branches with constant conditionals
+        while (true) {
+            bool found = false;
+            for (auto& BB : *fn) {
+                auto BI = llvm::dyn_cast<llvm::BranchInst>(BB.getTerminator());
+                if (!BI || !BI->isConditional()) {
+                    continue;
+                }
+                
+                auto CI = llvm::dyn_cast<llvm::ConstantInt>(BI->getCondition());
+                if (!CI) {
+                    continue;
+                }
+                
+                auto RemovedSucc = BI->getSuccessor(CI->isOne());
+                RemovedSucc->removePredecessor(&BB);
+                
+                llvm::BranchInst::Create(BI->getSuccessor(CI->isZero()), BI);
+                BI->eraseFromParent();
+                found = true;
+            }
+            if (!found) {
+                break;
+            }
+        }
+       
+        // Merge block into its single predecessor, if the predecessor has a single successor
+        while (true) {
+            bool found = false;
+            for (auto& BB : make_early_inc_range(*fn)) {
+                auto Pred = BB.getSinglePredecessor();
+                if (!Pred || Pred->getSingleSuccessor() != &BB) {
+                    continue;
+                }
+                if (Pred == &BB) {
+                    continue;
+                }
+                
+                BB.replaceAllUsesWith(Pred);
+                for (auto& PN : make_early_inc_range(BB.phis())) {
+                    PN.replaceAllUsesWith(PN.getIncomingValue(0));
+                    PN.eraseFromParent();
+                }
+                for (auto& I : make_early_inc_range(BB)) {
+                    I.moveBefore(Pred->getTerminator());
+                }
+                
+                Pred->getTerminator()->eraseFromParent();
+                BB.eraseFromParent();
+                
+                found = true;
+            }
+            if (!found) {
+                break;
+            }
+        }
+    }
+
 }
