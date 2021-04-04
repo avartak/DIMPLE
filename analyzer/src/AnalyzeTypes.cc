@@ -116,6 +116,9 @@ namespace avl {
             return error(atnode->array_of, "Unable to create array element type");
         }
         auto array_of = std::static_pointer_cast<Type>(result);
+        if (array_of->isFunction()) {
+            return error(atnode->array_of, "Array element cannot be a function");
+        }
         if (!useInArraySizeExpr(atnode->nelements)) {
             return error(atnode->nelements, "Array index does not have a determinate constant value");
         }
@@ -143,7 +146,11 @@ namespace avl {
                 std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
                 return error(&m, "Unable to create struct member " + memid);
             }
-            members.push_back(NameType(m.name, std::static_pointer_cast<Type>(result)));
+            auto ty = std::static_pointer_cast<Type>(result);
+            if (ty->isFunction()) {
+                return error(m.node, "Struct element cannot be a function");
+            }
+            members.push_back(NameType(m.name, ty));
         }
         result = std::make_shared<StructType>(members, packed);
         return success();
@@ -161,7 +168,11 @@ namespace avl {
                 std::string memid = (m.name ? m.name->name : "at index " + std::to_string(i+1));
                 return error(&m, "Unable to create union member " + memid);
             }
-            members.push_back(NameType(m.name, std::static_pointer_cast<Type>(result)));
+            auto ty = std::static_pointer_cast<Type>(result);
+            if (ty->isFunction()) {
+                return error(m.node, "Union element cannot be a function");
+            }
+            members.push_back(NameType(m.name, ty));
         }
         result = std::make_shared<UnionType>(members);
         return success();
@@ -178,12 +189,19 @@ namespace avl {
             if (!getType(a.node, includeOpaquePtr)) {
                 return error(&a, "Unable to create function argument " + a.name->name);
             }
-            args.push_back(NameType(a.name, std::static_pointer_cast<Type>(result)));
+            auto ty = std::static_pointer_cast<Type>(result);
+            if (ty->isFunction()) {
+                return error(a.node, "Function argument cannot be a function");
+            }
+            args.push_back(NameType(a.name, ty));
         }
         if (!getType(ftnode->ret, includeOpaquePtr)) {
             return error(ftnode->ret, "Unable to create function return type");
         }
         auto ret = std::static_pointer_cast<Type>(result);
+        if (ret->isFunction()) {
+            return error(ftnode->ret, "Function return type cannot be a function");
+        }
         result = std::make_shared<FunctionType>(args, ret);
         return success();
     }
