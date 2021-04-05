@@ -79,6 +79,10 @@ namespace avl {
             return isConstInt() && !llvm::cast<llvm::ConstantInt>(llvm_value)->isNegative();
         }
 
+        inline bool isConstNoRelocation() const {
+            return isConst() && !llvm::cast<llvm::Constant>(llvm_value)->needsRelocation();
+        }
+
         inline bool isVar() const {
             return is == VALUE_VAR;
         }

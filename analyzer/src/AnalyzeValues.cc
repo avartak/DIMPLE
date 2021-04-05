@@ -281,6 +281,9 @@ namespace avl {
             return error(binary, "Element index is not an integer");
         }
         if (lhs->type->isStruct() || lhs->type->isUnion()) {
+            if (!rhs->isConstNoRelocation()) {
+                return error(binary, "Element index is not a determinate constant");
+            }
             if (!rhs->isConstNonNegativeInt()) {
                 return error(binary, "Element index is not a non-negative integer constant");
             }

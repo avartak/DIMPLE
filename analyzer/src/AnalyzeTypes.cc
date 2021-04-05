@@ -119,13 +119,13 @@ namespace avl {
         if (array_of->isFunction()) {
             return error(atnode->array_of, "Array element cannot be a function");
         }
-        if (!useInArraySizeExpr(atnode->nelements)) {
-            return error(atnode->nelements, "Array index does not have a determinate constant value");
-        }
         if (!getValue(atnode->nelements)) {
             return error(atnode->nelements, "Unable to evaluate array size");
         }
         auto nelem = std::static_pointer_cast<Value>(result);
+        if (!nelem->isConstNoRelocation()) {
+            return error(atnode->nelements, "Array size expression does not have a determinate constant value");
+        }
         if (!nelem->isConstNonNegativeInt() || nelem->getUInt64ValueOrZero() == 0) {
             return error(atnode->nelements, "Element index is not a positive integer constant");
         }
@@ -204,50 +204,6 @@ namespace avl {
         }
         result = std::make_shared<FunctionType>(args, ret);
         return success();
-    }
-
-    /*
-    We do not want to be using indeterminate compile time constants 
-    in the expression involving the size of the array
-    The only source of such constants is global instances (pointers to them)
-    Any identifier that is not a representation would be bad
-    A string literal would also be bad
-    Call or assign expressions would obviously be bad
-    */ 
-    bool Analyzer::useInArraySizeExpr(const std::shared_ptr<Node>& node) {
-        if (node->kind == NODE_IDENTIFIER) {
-            auto ident = static_cast<Identifier*>(node.get());
-            const auto& n = ident->name;
-            if (ast->representations.find(n) != ast->representations.end()) {
-                return useInArraySizeExpr(ast->representations[n]->node);
-            }
-            return false;
-        }
-
-        if (node->kind != NODE_EXPRNODE) {
-            return true;
-        }
-        auto exnode = static_cast<ExprNode*>(node.get());
-        if (exnode->is == EXPR_UNARY) {
-            auto unary = static_cast<UnaryExprNode*>(node.get());
-            if (unary->op == UNARYOP_SIZE) {
-                return true;
-            }
-            else {
-                return useInArraySizeExpr(unary->exp);
-            }
-        }
-        else if (exnode->is == EXPR_BINARY) {
-            auto binary = static_cast<BinaryExprNode*>(node.get());
-            return useInArraySizeExpr(binary->lhs) && useInArraySizeExpr(binary->rhs);
-        }
-        else if (exnode->isLiteralNode()) {
-            if (exnode->is == EXPR_STRING) {
-                return false;
-            }
-            return true;
-        }
-        return false;
     }
 
 }

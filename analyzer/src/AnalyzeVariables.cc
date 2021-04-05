@@ -292,8 +292,11 @@ namespace avl {
                 return error(ie.tag, "Unable to get the index of the initalizer element");
             }
             auto index = static_cast<Value*>(result.get());
+            if (!index->isConstNoRelocation()) {
+                return error(ie.tag, "Array element index is not a determinate constant");
+            }
             if (!index->isConstNonNegativeInt()) {
-                return error(ie.tag, "Index of the initalizer element must be a non-negative integer constant");
+                return error(ie.tag, "Array element index must be a non-negative integer constant");
             }
             idx = index->getUInt64ValueOrZero();
         }
@@ -329,6 +332,9 @@ namespace avl {
                     return error("Unable to obtain struct initializer index");
                 }
                 auto iv = static_cast<Value*>(result.get());
+                if (!iv->isConstNoRelocation()) {
+                    return error(ie.tag, "Struct initalizer index is not a determinate constant");
+                }
                 if (!iv->isConstNonNegativeInt()) {
                     return error(ie.tag, "Struct initializer index must be a non-negative integer constant");
                 }
@@ -369,6 +375,9 @@ namespace avl {
                 return error(ie.tag, "Unable to obtain union initializer index as a compile-time constant");
             }
             auto iv = static_cast<Value*>(result.get());
+            if (!iv->isConstNoRelocation()) {
+                return error(ie.tag, "Union initalizer index is not a determinate constant");
+            }
             if (!iv->isConstNonNegativeInt()) {
                 return error(ie.tag, "Union initializer index must be a non-negative integer constant");
             }
