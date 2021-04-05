@@ -570,7 +570,7 @@ namespace avl {
                     return UB_DIV_ZERO;
                 }
             }
-            if (re->type->isSignedInt() && re->isConst() && re->isConst()) {
+            if (re->type->isSignedInt() && le->isConst() && re->isConst()) {
                 if (le->getInt64ValueOrZero() == INT64_MIN && re->getInt64ValueOrZero() == -1) {
                     return UB_DIV_OVERFLOW;
                 }
