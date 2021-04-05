@@ -47,7 +47,7 @@ namespace avl {
             currentFunction = gst->functions[n];
             currentFunction->init();
             if (!defineCurrentFunction(ast->definitions[n])) {
-                return error(ast->definitions[n]->name, "Unable to define function " + n);
+                return error();
             }
             gst->functions[n] = currentFunction;
             currentFunction.reset();
@@ -67,7 +67,11 @@ namespace avl {
             FunctionOp::ret(currentFunction, nullptr);
             return success();
         }
-        else {
+        else if (defn->def->kind == NODE_STATEMENT) {
+            auto stmt = static_cast<Statement*>(defn->def.get());
+            if (stmt->is != BLOCK_FUNCTION) {
+                return error(stmt, "Invalid function body");
+            }
             if (!defineBlock(std::static_pointer_cast<FuncBlockNode>(defn->def))) {
                 return error(defn->name, "Unable to define \'" + defn->name->name + "\'");
             }
@@ -77,7 +81,9 @@ namespace avl {
             currentFunction->simplify();
             return success();
         }
-
+        else {
+            return error(defn->def, "Invalid function body");
+        }
     }
 
     bool Analyzer::call(const std::shared_ptr<CallExprNode>& callex, const std::shared_ptr<Variable>& retv) {

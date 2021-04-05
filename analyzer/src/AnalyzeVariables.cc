@@ -35,14 +35,14 @@ namespace avl {
     bool Analyzer::initGlobal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
         if (rval->kind == NODE_STATEMENT) {
-            auto stat = static_cast<Statement*>(rval.get());
-            if (stat->is != STATEMENT_DEFINE) {
-                return error();
+            auto stmt = static_cast<Statement*>(rval.get());
+            if (stmt->is != STATEMENT_DEFINE) {
+                return error(stmt, "Invalid variable definition");
             }
             auto defn = std::static_pointer_cast<DefineStatement>(rval);
             auto def = defn->def;
-            if (var->type->isPrimitive() || var->type->isPtr()) {
-                if (def->kind == NODE_INITIALIZER) {
+            if (def->kind == NODE_INITIALIZER) {
+                if (var->type->isPrimitive() || var->type->isPtr()) {
                     auto init = std::static_pointer_cast<Initializer>(def);
                     if (init->elements.size() != 1 || init->elements[0].is != INIT_UNTAGGED) {
                         return error(def, "Invalid variable initializer");
@@ -52,18 +52,21 @@ namespace avl {
             }
             return initGlobal(var, def);
         }
-
-        var->define();
-        if (rval->kind == NODE_NULLINIT) {
+        else if (rval->kind == NODE_NULLINIT) {
+            var->define();
             if (static_cast<NullInit*>(rval.get())->zero) {
                 var->init();
             }
         }
-        else {
+        else if (rval->kind == NODE_INITIALIZER || rval->kind == NODE_EXPRNODE || rval->kind == NODE_IDENTIFIER) {
+            var->define();
             if (!initConst(var->type, rval)) {
                 return error();
             }
             var->initGlobal(std::static_pointer_cast<Value>(result));
+        }
+        else {
+            return error(rval, "Invalid variable initializer");
         }
         result = var;
         return success();
@@ -72,14 +75,14 @@ namespace avl {
     bool Analyzer::initLocal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
         if (rval->kind == NODE_STATEMENT) {
-            auto stat = static_cast<Statement*>(rval.get());
-            if (stat->is != STATEMENT_DEFINE) {
-                return error();
+            auto stmt = static_cast<Statement*>(rval.get());
+            if (stmt->is != STATEMENT_DEFINE) {
+                return error(stmt, "Invalid variable definition");
             }
             auto defn = std::static_pointer_cast<DefineStatement>(rval);
             auto def = defn->def;
-            if (var->type->isPrimitive() || var->type->isPtr()) {
-                if (def->kind == NODE_INITIALIZER) {
+            if (def->kind == NODE_INITIALIZER) {
+                if (var->type->isPrimitive() || var->type->isPtr()) {
                     auto init = std::static_pointer_cast<Initializer>(def);
                     if (init->elements.size() != 1 || init->elements[0].is != INIT_UNTAGGED) {
                         return error(def, "Invalid variable initializer");
@@ -90,8 +93,8 @@ namespace avl {
             return initLocal(var, def);
         }
 
-        var->define();
-        if (rval->kind == NODE_NULLINIT) {
+        else if (rval->kind == NODE_NULLINIT) {
+            var->define();
             if (static_cast<NullInit*>(rval.get())->zero) {
                 var->init();
             }
@@ -99,6 +102,7 @@ namespace avl {
             return success();
         }
         else if (rval->kind == NODE_INITIALIZER) {
+            var->define();
             if (!var->type->isCompound()) {
                 return error(rval, "Only compound types can be initialized using an initializer");
             }
@@ -111,8 +115,12 @@ namespace avl {
             }
             return initLocalUnion(var, in);
         }
-        else {
+        else if (rval->kind == NODE_EXPRNODE || rval->kind == NODE_IDENTIFIER) {
+            var->define();
             return assign(var, rval);
+        }
+        else {
+            return error(rval, "Invalid variable initializer");
         }
     }
 
