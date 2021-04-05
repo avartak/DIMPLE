@@ -122,7 +122,7 @@ namespace avl {
             array_of = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
             n++;
         }
-        else if (parseDataType(it+n)) {
+        else if (parseType(it+n)) {
             n += nParsed;
             array_of = result; 
         }
@@ -222,7 +222,7 @@ namespace avl {
         }
         else {
             n++;
-            if (parseDataType(it+n)) {
+            if (parseType(it+n)) {
                 n += nParsed;
                 ret = result;
             }
@@ -259,12 +259,12 @@ namespace avl {
                 type = std::make_shared<Identifier>(tokens[it+n+2]->str, tokens[it+n+2]->loc);
                 n += 3;
             }
-            else if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseDataType(it+n+2)) {
+            else if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseType(it+n+2)) {
                 name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 type = result;
                 n += 2+nParsed;
             }
-            else if (parseDataType(it+n)) {
+            else if (parseType(it+n)) {
                 name = std::make_shared<Identifier>();
                 type = result;
                 n += nParsed;

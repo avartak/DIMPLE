@@ -13,6 +13,9 @@ namespace avl {
     bool Analyzer::getGlobalVar(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
 
         const auto& n = ident->name;
+        if (n == "main") {
+            return error("\'main\' can only ne defined as a function");
+        }
 
         std::shared_ptr<Node> defn;
         auto var = std::make_shared<Variable>(storage, n, type);

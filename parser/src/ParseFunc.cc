@@ -235,7 +235,7 @@ namespace avl {
             type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
             n++;
         }
-        else if (parseDataType(it+n)) {
+        else if (parseType(it+n)) {
             type = result;
             n += nParsed;
         }
