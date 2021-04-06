@@ -2,7 +2,7 @@
 
 DIMPLE is an imperative programming language. It's my hobby project to learn about writing compilers and creating a real-world programming language. DIMPLE supports a procedural paradigm, with many C-like features like structs, unions, pointers, etc. It is possible to write, compile and execute programs (only some simple ones have been tested so far). DIMPLE makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation of the source code and then to produce machine-dependent object code. 
 
-You can read more about DIMPLE on the [wiki page](https://github.com/avartak/DIMPLE/wiki). The instructions to build the DIMPLE source code can be found [here](https://github.com/avartak/DIMPLE/wiki/Building-DIMPLE). The DIMPLE syntax is explained on [this page](https://github.com/avartak/DIMPLE/wiki/Syntax). To get a flavor of how DIMPLE source code looks like, take a look at the [Hello World program](https://github.com/avartak/DIMPLE/blob/master/test/helloworld/helloworld.avl). 
+You can read more about DIMPLE on the [wiki page](https://github.com/avartak/DIMPLE/wiki). The instructions to build the DIMPLE source code can be found [here](https://github.com/avartak/DIMPLE/wiki/Building-DIMPLE). The DIMPLE syntax is explained on [this page](https://github.com/avartak/DIMPLE/wiki/Syntax). To get a flavor of how DIMPLE source code looks like, take a look at the [Hello World program](https://github.com/avartak/DIMPLE/blob/master/test/helloworld/helloworld.dmp) and the [Factorial program](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp). 
 
 # Some Features
 
