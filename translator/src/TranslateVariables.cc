@@ -1,4 +1,4 @@
-#include <Analyzer.h>
+#include <Translator.h>
 #include <NameNode.h>
 #include <ExprNode.h>
 #include <Statement.h>
@@ -10,7 +10,7 @@
 
 namespace avl {
 
-    bool Analyzer::getGlobalVar(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
+    bool Translator::getGlobalVar(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
 
         const auto& n = ident->name;
         if (n == "main") {
@@ -32,7 +32,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initGlobal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
+    bool Translator::initGlobal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
         if (rval->kind == NODE_STATEMENT) {
             auto stmt = static_cast<Statement*>(rval.get());
@@ -72,7 +72,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initLocal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
+    bool Translator::initLocal(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
         if (rval->kind == NODE_STATEMENT) {
             auto stmt = static_cast<Statement*>(rval.get());
@@ -124,7 +124,7 @@ namespace avl {
         }
     }
 
-    bool Analyzer::initLocalArray(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initLocalArray(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
         std::size_t idx = -1;
         for (const auto& ie : in->elements) { 
             if (!getArrayTypeIndex(std::static_pointer_cast<ArrayType>(var->type), ie, idx)) {
@@ -144,7 +144,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initLocalStruct(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initLocalStruct(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
         std::size_t idx = -1;
         for (const auto& ie : in->elements) {
             if (!getStructTypeIndex(std::static_pointer_cast<StructType>(var->type), ie, idx)) {
@@ -164,7 +164,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initLocalUnion(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initLocalUnion(const std::shared_ptr<Variable>& var, const std::shared_ptr<Initializer>& in) {
         auto ty = static_cast<UnionType*>(var->type.get());
         if (in->elements.size() > 1) {
             return error(in, "Union initializer with more than one element");
@@ -186,7 +186,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
+    bool Translator::initConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
 
         if (ty->isCompound()) {
             if (nd->kind != NODE_INITIALIZER) {
@@ -208,7 +208,7 @@ namespace avl {
         return initSimpleConst(ty, nd);
     }
 
-    bool Analyzer::initSimpleConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
+    bool Translator::initSimpleConst(const std::shared_ptr<Type>& ty, const std::shared_ptr<Node>& nd) {
 
         if (!getValue(nd)) {
             return error(nd, "Unable to obtain initial value");
@@ -232,7 +232,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initArrayConst(const std::shared_ptr<ArrayType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<ArrayType>(ty->clone());
 
@@ -252,7 +252,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initStructConst(const std::shared_ptr<StructType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<StructType>(ty->clone());
 
@@ -272,7 +272,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Initializer>& in) {
+    bool Translator::initUnionConst(const std::shared_ptr<UnionType>& ty, const std::shared_ptr<Initializer>& in) {
 
         auto t = std::static_pointer_cast<UnionType>(ty->clone());
 
@@ -293,7 +293,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getArrayTypeIndex(const std::shared_ptr<ArrayType>& t, const InitElement& ie, std::size_t& last_idx) {
+    bool Translator::getArrayTypeIndex(const std::shared_ptr<ArrayType>& t, const InitElement& ie, std::size_t& last_idx) {
         auto idx = last_idx + 1;
         if (ie.is != INIT_UNTAGGED) {
             if (ie.is == INIT_LABELED) {
@@ -318,7 +318,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getStructTypeIndex(const std::shared_ptr<StructType>& t, const InitElement& ie, std::size_t& last_idx) {
+    bool Translator::getStructTypeIndex(const std::shared_ptr<StructType>& t, const InitElement& ie, std::size_t& last_idx) {
         auto idx = last_idx + 1;
         if (ie.is != INIT_UNTAGGED) {
             if (ie.is == INIT_LABELED) {
@@ -359,7 +359,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getUnionTypeIndex(const std::shared_ptr<UnionType>& t, const InitElement& ie, std::size_t& last_idx) {
+    bool Translator::getUnionTypeIndex(const std::shared_ptr<UnionType>& t, const InitElement& ie, std::size_t& last_idx) {
         auto idx = last_idx;
         if (ie.is == INIT_UNTAGGED) {
             return error(ie, "Union initializer cannot be untagged");

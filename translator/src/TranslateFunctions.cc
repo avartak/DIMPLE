@@ -1,4 +1,4 @@
-#include <Analyzer.h>
+#include <Translator.h>
 #include <FunctionType.h>
 #include <VoidType.h>
 #include <BinaryOp.h>
@@ -10,7 +10,7 @@
 
 namespace avl {
 
-    bool Analyzer::getFunction(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
+    bool Translator::getFunction(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
 
         const auto& n = ident->name;
 
@@ -57,7 +57,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::defineCurrentFunction(const std::shared_ptr<DefineStatement>& defn) {
+    bool Translator::defineCurrentFunction(const std::shared_ptr<DefineStatement>& defn) {
         
         if (defn->def->kind == NODE_NULLINIT) {
             auto ft = static_cast<FunctionType*>(currentFunction->type.get());
@@ -86,7 +86,7 @@ namespace avl {
         }
     }
 
-    bool Analyzer::call(const std::shared_ptr<CallExprNode>& callex, const std::shared_ptr<Variable>& retv) {
+    bool Translator::call(const std::shared_ptr<CallExprNode>& callex, const std::shared_ptr<Variable>& retv) {
 
         if (!getValue(callex->func)) {
             return error(callex->func, "Unable to construct the function of the call expression");
@@ -127,7 +127,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::ret(const std::shared_ptr<ReturnStatement>& retstat) {
+    bool Translator::ret(const std::shared_ptr<ReturnStatement>& retstat) {
         auto ft = static_cast<FunctionType*>(currentFunction->type.get());
         if (!retstat->val && !ft->ret->isVoid()) {
             return error(retstat, "This function does not return void");
@@ -154,7 +154,7 @@ namespace avl {
         return FunctionOp::ret(currentFunction, retval); // This should never be false
     }
 
-    bool Analyzer::defineLocalVar(const std::shared_ptr<DefineStatement>& definition) {
+    bool Translator::defineLocalVar(const std::shared_ptr<DefineStatement>& definition) {
 
         const auto& n = definition->name->name;
 
@@ -191,7 +191,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::defineBlock(const std::shared_ptr<BlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
+    bool Translator::defineBlock(const std::shared_ptr<BlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
 
         for (const auto& statement : block->body) {
             if (statement->is == STATEMENT_CONTINUE) {
@@ -246,7 +246,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::defineIfBlock(const std::shared_ptr<IfBlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
+    bool Translator::defineIfBlock(const std::shared_ptr<IfBlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
 
         auto mergeBB = std::make_shared<CodeBlock>();
 
@@ -287,7 +287,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
+    bool Translator::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
 
         auto newlst = std::make_shared<LST>();
         newlst->prev = currentFunction->lst;

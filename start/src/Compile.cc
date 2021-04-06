@@ -4,7 +4,7 @@
 #include <AST.h>
 #include <GST.h>
 #include <Parser.h>
-#include <Analyzer.h>
+#include <Translator.h>
 #include <Backend.h>
 #include <Globals.h>
 
@@ -16,7 +16,7 @@ namespace avl {
         auto ast = std::make_shared<AST>();
         auto gst = std::make_shared<GST>();
         auto parser = std::make_shared<Parser>(input, ast);
-        auto analyzer = std::make_shared<Analyzer>(ast, gst);
+        auto translator = std::make_shared<Translator>(ast, gst);
         auto backend = std::make_shared<Backend>(srcfile, outfile);
 
         input->set(srcfile);
@@ -29,8 +29,8 @@ namespace avl {
             return;
         }
 
-        if (!analyzer->run()) {
-            std::cerr << analyzer->errorPrintout();
+        if (!translator->run()) {
+            std::cerr << translator->errorPrintout();
             return;
         }
 

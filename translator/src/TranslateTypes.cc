@@ -1,5 +1,5 @@
 #include <sstream>
-#include <Analyzer.h>
+#include <Translator.h>
 #include <UnknownType.h>
 #include <VoidType.h>
 #include <PrimitiveType.h>
@@ -12,7 +12,7 @@
 
 namespace avl {
 
-    bool Analyzer::getType(const std::shared_ptr<Node>& node, bool includeOpaquePtr) {
+    bool Translator::getType(const std::shared_ptr<Node>& node, bool includeOpaquePtr) {
 
         if (node->kind == NODE_IDENTIFIER) {
             return getTypeRep(std::static_pointer_cast<Identifier>(node), includeOpaquePtr);
@@ -38,7 +38,7 @@ namespace avl {
         }
     }
 
-    bool Analyzer::getTypeRep(const std::shared_ptr<Identifier>& ident, bool includeOpaquePtr) {
+    bool Translator::getTypeRep(const std::shared_ptr<Identifier>& ident, bool includeOpaquePtr) {
 
         const auto& n = ident->name;
 
@@ -91,7 +91,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getPtrType(const std::shared_ptr<PointerTypeNode>& tnode, bool includeOpaquePtr) {
+    bool Translator::getPtrType(const std::shared_ptr<PointerTypeNode>& tnode, bool includeOpaquePtr) {
 
         auto ptnode = tnode->points_to;
         if (ptnode->kind == NODE_IDENTIFIER) {
@@ -110,7 +110,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getArrayType(const std::shared_ptr<ArrayTypeNode>& atnode, bool includeOpaquePtr) {
+    bool Translator::getArrayType(const std::shared_ptr<ArrayTypeNode>& atnode, bool includeOpaquePtr) {
 
         if (!getType(atnode->array_of, includeOpaquePtr)) {
             return error(atnode->array_of, "Unable to create array element type");
@@ -133,7 +133,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getStructType(const std::shared_ptr<StructTypeNode>& stnode, bool includeOpaquePtr) {
+    bool Translator::getStructType(const std::shared_ptr<StructTypeNode>& stnode, bool includeOpaquePtr) {
 
         std::vector<NameType> members;
         bool packed = stnode->isPacked();
@@ -156,7 +156,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getUnionType(const std::shared_ptr<UnionTypeNode>& utnode, bool includeOpaquePtr) {
+    bool Translator::getUnionType(const std::shared_ptr<UnionTypeNode>& utnode, bool includeOpaquePtr) {
 
         std::vector<NameType> members;
         for (std::size_t i = 0; i < utnode->members->set.size(); i++) {
@@ -178,7 +178,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::getFunctionType(const std::shared_ptr<FunctionTypeNode>& ftnode, bool includeOpaquePtr) {
+    bool Translator::getFunctionType(const std::shared_ptr<FunctionTypeNode>& ftnode, bool includeOpaquePtr) {
 
         std::vector<NameType> args;
         for (std::size_t i = 0; i < ftnode->args->set.size(); i++) {

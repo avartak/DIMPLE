@@ -10,7 +10,7 @@ SOURCES  += $(wildcard IR/src/*.cc)
 SOURCES  += $(wildcard input/src/*.cc)
 SOURCES  += $(wildcard lexis/src/*.cc)
 SOURCES  += $(wildcard parser/src/*.cc)
-SOURCES  += $(wildcard analyzer/src/*.cc)
+SOURCES  += $(wildcard translator/src/*.cc)
 SOURCES  += $(wildcard backend/src/*.cc)
 OBJECTS  := $(patsubst %.cc,%.o,$(SOURCES))
 DEPENDS  := $(patsubst %.cc,%.d,$(SOURCES))
@@ -21,7 +21,7 @@ INCLUDES += -I$(PWD)/IR/include
 INCLUDES += -I$(PWD)/input/include 
 INCLUDES += -I$(PWD)/lexis/include 
 INCLUDES += -I$(PWD)/parser/include 
-INCLUDES += -I$(PWD)/analyzer/include 
+INCLUDES += -I$(PWD)/translator/include 
 INCLUDES += -I$(PWD)/backend/include 
 
 CC       := clang++

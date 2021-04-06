@@ -1,21 +1,21 @@
-#include <Analyzer.h>
+#include <Translator.h>
 
 namespace avl {
 
-    Analyzer::Analyzer(const std::shared_ptr<AST>& tree, const std::shared_ptr<GST>& sym):
+    Translator::Translator(const std::shared_ptr<AST>& tree, const std::shared_ptr<GST>& sym):
         Pass(nullptr, tree, sym)
     {
     }
 
-    void Analyzer::fail() {
+    void Translator::fail() {
         result.reset();
     }
 
-    bool Analyzer::run() {
+    bool Translator::run() {
         return createRepresentations() && createGlobals();
     }
 
-    bool Analyzer::createRepresentations() {
+    bool Translator::createRepresentations() {
         for (const auto& rep : ast->representations) {
             const auto& name = rep.second->name;
             const auto& node = rep.second->node;
@@ -33,7 +33,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::createGlobals() {
+    bool Translator::createGlobals() {
         for (const auto& decl : ast->declarations) {
             const auto& name = decl.second->name;
             if (!getGlobalInstance(name)) {

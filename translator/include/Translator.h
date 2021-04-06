@@ -1,5 +1,5 @@
-#ifndef ANALYZER_H
-#define ANALYZER_H
+#ifndef TRANSLATOR_H
+#define TRANSLATOR_H
 
 #include <map>
 #include <string>
@@ -23,11 +23,11 @@
 
 namespace avl {
 
-    struct Analyzer : public Pass<Entity> {
+    struct Translator : public Pass<Entity> {
 
         std::shared_ptr<Function> currentFunction;
 
-        Analyzer(const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
+        Translator(const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
 
         virtual void fail() override; 
         virtual bool run() override;

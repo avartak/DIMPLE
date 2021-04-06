@@ -1,4 +1,4 @@
-#include <Analyzer.h>
+#include <Translator.h>
 #include <Literal.h>
 #include <LiteralNode.h>
 #include <UnaryOp.h>
@@ -10,7 +10,7 @@
 
 namespace avl {
 
-    bool Analyzer::getValue(const std::shared_ptr<Node>& node) {
+    bool Translator::getValue(const std::shared_ptr<Node>& node) {
         if (node->kind == NODE_IDENTIFIER) {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
@@ -43,7 +43,7 @@ namespace avl {
         }
     }
 
-    bool Analyzer::getConstRep(const std::shared_ptr<Identifier>& ident) {
+    bool Translator::getConstRep(const std::shared_ptr<Identifier>& ident) {
 
         auto n = ident->name;
         if (gst->constants.find(n) != gst->constants.end()) {
@@ -67,7 +67,7 @@ namespace avl {
         return error();
     }
 
-    bool Analyzer::getGlobalInstance(const std::shared_ptr<Identifier>& ident) {
+    bool Translator::getGlobalInstance(const std::shared_ptr<Identifier>& ident) {
 
         const auto& n = ident->name;
 
@@ -131,7 +131,7 @@ namespace avl {
         return ( type->isFunction() ? getFunction(ident, storage, type) : getGlobalVar(ident, storage, type) );
     }
 
-    bool Analyzer::literal(const std::shared_ptr<ExprNode>& expr) {
+    bool Translator::literal(const std::shared_ptr<ExprNode>& expr) {
         if (expr->is == EXPR_INT) {
             auto intnode = static_cast<IntNode*>(expr.get());
             result = std::make_shared<IntLiteral>(intnode->literal);
@@ -158,7 +158,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::unary(const std::shared_ptr<UnaryExprNode>& un) {
+    bool Translator::unary(const std::shared_ptr<UnaryExprNode>& un) {
         if (un->op == UNARYOP_SIZE) {
             bool istype = false;
             if (!getValue(un->exp)) {
@@ -218,7 +218,7 @@ namespace avl {
         return (result ? success() : error(un, err));
     }
 
-    bool Analyzer::recast(const std::shared_ptr<BinaryExprNode>& binary) {
+    bool Translator::recast(const std::shared_ptr<BinaryExprNode>& binary) {
         if (!getType(binary->rhs)) {
             return error(binary, "Unable to obtain recast type");
         }
@@ -240,7 +240,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::member(const std::shared_ptr<BinaryExprNode>& binary) {
+    bool Translator::member(const std::shared_ptr<BinaryExprNode>& binary) {
         if (!getValue(binary->lhs)) {
             return error(binary, "Unable to evaluate the left side of the member operation");
         }
@@ -261,7 +261,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::element(const std::shared_ptr<BinaryExprNode>& binary) {
+    bool Translator::element(const std::shared_ptr<BinaryExprNode>& binary) {
         if (!getValue(binary->lhs)) {
             return error(binary, "Unable to evaluate the left side of the element operation");
         }
@@ -315,7 +315,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::binary(const std::shared_ptr<ExprNode>& expr) {
+    bool Translator::binary(const std::shared_ptr<ExprNode>& expr) {
 
         uint16_t op;
         std::string opstr;
@@ -507,7 +507,7 @@ namespace avl {
         return success();
     }
 
-    bool Analyzer::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
+    bool Translator::assign(const std::shared_ptr<Variable>& var, const std::shared_ptr<Node>& rval) {
 
         if (rval->kind == NODE_EXPRNODE) {
             auto expr = static_cast<ExprNode*>(rval.get());
