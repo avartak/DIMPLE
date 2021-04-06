@@ -89,7 +89,7 @@ namespace avl {
 
     ASSIGN_STATEMENT : EXPR_ASSIGN
 
-    CALL_STATEMENT : POSTOP_UNARY ('(' ')' | '(' ONE_OR_MORE_PARAMS ')')
+    CALL_STATEMENT : POSTOP_UNARY_CALL
 
     */
 
