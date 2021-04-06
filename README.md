@@ -17,9 +17,24 @@ C :: 2 + 3;
 BinOp :: func(a : int32, b: int32) -> int32;
 ```
 
-Here, ```C``` stands for the constant integer value 5, and ```BinOp``` stands for a _funtion type_ that takes two 32-bit integers as arguments and returns a 32-bit integer. The representation ```BinOp``` can be used as a stand-in replacement for all function types that have the signature ```func(int32, int32) -> int32```. For instance, one could define several functions that perform binary operations using the ```BinOp``` as the _signature_. These can be declared as follows
+Here, ```C``` stands for the constant integer value 5, and ```BinOp``` stands for a _funtion type_ that takes two 32-bit integers as arguments and returns a 32-bit integer. The representation ```BinOp``` can be used as a stand-in replacement for all function types that have the _signature_ ```func(int32, int32) -> int32```. For instance, consider the following functions that perform operations on a pair of integers. 
 
 ```
+add := func(a : int32, b: int32) {
+    return a+b;
+}
+subtract := func(a : int32, b: int32) {
+    return a-b;
+}
+multiply := func(a : int32, b: int32) {
+    return a*b;
+}
+```
+
+These can be written as
+
+```
+BinOp :: func(a : int32, b: int32) -> int32;
 add := BinOp {
     return a+b;
 }
@@ -31,7 +46,7 @@ multiply := BinOp {
 }
 ```
 
-Representations can also be used for data-types. Representations can be used to alias or _typedef_ a given type. 
+Representations can also be used for data-types. A representation serves as an _alias_ of a given type. 
 
 ```
 char :: int8
