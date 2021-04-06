@@ -6,6 +6,14 @@
 
 namespace avl {
 
+    /*
+
+    LITERAL : TOKEN_INT | TOKEN_REAL | TOKEN_TRUE | TOKEN_FALSE | TOKEN_CHAR | LITERAL_STRING
+
+    LITERAL_STRING : TOKEN_STRING | TOKEN_STRING LITERAL_STRING
+
+    */
+
     bool Parser::parseLiteral(std::size_t it) {
 
         std::size_t n = 0;
@@ -49,6 +57,17 @@ namespace avl {
         }
         return error();
     }
+
+    /*
+
+    UNARY : UNARY_NO_RECAST | UNARY_NO_RECAST '=>' (TOKEN_IDENT | TYPE) 
+
+    UNARY_NO_RECAST : '(' EXPR ')' | 
+                      LITERAL      |
+                      PREOP_UNARY  |
+                      POSTOP_UNARY |
+
+    */
 
     bool Parser::parseUnary(std::size_t it) {
 
@@ -116,6 +135,18 @@ namespace avl {
 
     }
 
+    /*
+
+    PREOP_UNARY : '#' TYPE  | 
+                  '#' UNARY |
+                  '@' UNARY |  
+                  '+' UNARY |  
+                  '-' UNARY |  
+                  '~' UNARY |  
+                  '!' UNARY 
+
+    */
+
     bool Parser::parsePreOpUnary(std::size_t it) {
 
         std::size_t n = 0;
@@ -140,6 +171,18 @@ namespace avl {
         }
         return error();
     }
+
+    /*
+
+    POSTOP_UNARY : TOKEN_IDENT ONE_OR_MORE_POSTOPS
+
+    ONE_OR_MORE_POSTOPS : POSTOP | POSTOP ONE_OR_MORE_POSTOPS
+
+    POSTOP : '$' | '.' TOKEN_IDENT | '[' EXPR ']' | '(' ')' | '(' ONE_OR_MORE_PARAMS ')'
+
+    ONE_OR_MORE_PARAMS : EXPR | EXPR ',' ONE_OR_MORE_PARAMS
+
+    */
 
     bool Parser::parsePostOpUnary(std::size_t it) {
 
@@ -205,6 +248,25 @@ namespace avl {
         n++;
         return success(n);
     }
+
+    /*
+
+    EXPR : EXPR_NO_ASSIGN | EXPR_ASSIGN
+
+    EXPR_NO_ASSIGN : UNARY | BINARY 
+
+    BINARY : UNARY BIN_OP EXPR_NO_ASSIGN
+
+    EXPR_ASSIGN : BINARY ASSIGN_OP EXPR
+
+    BIN_OP : '+' | '-' | '*'  | '/'  | '//' | 
+             '&' | '|' | '^'  | '<<' | '>>' |
+             '<' | '>' | '<=' | '>=' | '==' | '!=' | '&&' | '||'
+
+    ASSIGN_OP : '+=' | '-=' | '*=' | '/='  | '//=' |
+                '&=' | '|=' | '^=' | '<<=' | '>>='
+
+    */
 
     bool Parser::parseExpr(std::size_t it) {
 

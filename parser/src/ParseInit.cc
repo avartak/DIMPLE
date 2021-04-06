@@ -4,6 +4,17 @@
   
 namespace avl {
 
+    /*
+
+    UNTAGGED_INITIALIZER : '{' ONE_OR_MORE_UNTAGGED_INITELEMENTS'}'
+
+    ONE_OR_MORE_UNTAGGED_INITELEMENTS : UNTAGGED_INITELEMENT | 
+                                        UNTAGGED_INITELEMENT ',' ONE_OR_MORE_UNTAGGED_INITELEMENTS
+
+    UNTAGGED_INITELEMENT : EXPR | INITIALIZER
+
+    */
+
     bool Parser::parseUntaggedInitSet(std::size_t it) {
 
         std::size_t n = 0;
@@ -26,6 +37,19 @@ namespace avl {
         result = std::make_shared<Initializer>(iev);
         return success(n);
     }
+
+    /*
+
+    TAGGED_INITIALIZER : '{' ONE_OR_MORE_TAGGED_INITELEMENTS'}'
+
+    ONE_OR_MORE_TAGGED_INITELEMENTS : TAGGED_INITELEMENT | 
+                                      TAGGED_INITELEMENT ',' ONE_OR_MORE_TAGGED_INITELEMENTS
+
+    TAGGED_INITELEMENT : '[' EXPR ']'    '=' UNTAGGED_INITELEMENT | 
+                         '.' TOKEN_IDENT '=' UNTAGGED_INITELEMENT
+
+    */
+
 
     bool Parser::parseTaggedInitSet(std::size_t it) {
 
@@ -91,6 +115,14 @@ namespace avl {
         result = std::make_shared<Initializer>(iev);
         return success(n);
     }
+
+    /*
+
+    NULLINIT : '{' '}'
+
+    INITIALIZER : '{' (UNTAGGED_INITIALIZER | TAGGED_INITIALIZER) '}'
+
+    */
 
     bool Parser::parseInit(std::size_t it) {
 

@@ -7,6 +7,12 @@
 
 namespace avl {
 
+    /*
+
+    FUNCTION_BLOCK : BLOCK
+
+    */
+
     bool Parser::parseFunc(std::size_t it) {
 
         std::shared_ptr<BlockNode> func = std::make_shared<FuncBlockNode>();
@@ -17,6 +23,16 @@ namespace avl {
         return error();
         
     }
+
+    /*
+
+    BLOCK : '{' ONE_OR_MORE_STATEMENTS '}'
+
+    ONE_OR_MORE_STATEMENTS : STATEMENT_OR_BLOCK | STATEMENT_OR_BLOCK ONE_OR_MORE_STATEMENTS
+
+    STATEMENT_OR_BLOCK : ';' | STATEMENT ';' | IF_BLOCK | LOOP_BLOCK
+
+    */
 
     bool Parser::parseBlock(std::size_t it, const std::shared_ptr<BlockNode>& b) {
 
@@ -67,6 +83,16 @@ namespace avl {
         return success(n);
     }
 
+    /*
+
+    STATEMENT : 'continue' | 'break' | 'return' | 'return' EXPR | LOCAL_VAR_DEF | ASSIGN_STATEMENT | CALL_STATEMENT
+
+    ASSIGN_STATEMENT : EXPR_ASSIGN
+
+    CALL_STATEMENT : POSTOP_UNARY ('(' ')' | '(' ONE_OR_MORE_PARAMS ')')
+
+    */
+
     bool Parser::parseStatement(std::size_t it, const std::shared_ptr<BlockNode>& b) {
         
         std::size_t n = 0;
@@ -114,6 +140,16 @@ namespace avl {
 
     }
 
+    /*
+
+    IF_BLOCK : ONE_OR_MORE_IFS | ONE_OR_MORE_IFS ELSE_BLOCK
+
+    ONE_OR_MORE_IFS : 'if' EXPR BLOCK | 'if' EXPR BLOCK 'else' ONE_OR_MORE_IFS
+
+    ELSE_BLOCK : 'else' BLOCK
+
+    */
+
     bool Parser::parseIf(std::size_t it, const std::shared_ptr<BlockNode>& b) {
         
         std::size_t n = 0;
@@ -156,6 +192,14 @@ namespace avl {
         return success(n);
     }
 
+    /*
+
+    LOOP_BLOCK : 'loop' BLOCK | 
+                 'loop' EXPR BLOCK | 
+                 'loop' [EXPR] ';' [EXPR] ';' [EXPR] BLOCK |
+
+    */
+
     bool Parser::parseLoop(std::size_t it, const std::shared_ptr<BlockNode>& b) {
         
         std::size_t n = 0;
@@ -186,13 +230,15 @@ namespace avl {
             }
             n++;
 
-            if (!parseExpr(it+n)) {
-                return error(tokens[it+n], "Failed to parse loop termination expression");
-            }
-            cond_block->condition = result;
-            n += nParsed;
             if (!parseToken(it+n, TOKEN_SEMICOLON)) {
-                return error(tokens[it+n], "Expect \';\' at the end of the loop termination expression");
+                if (!parseExpr(it+n)) {
+                    return error(tokens[it+n], "Failed to parse loop termination expression");
+                }
+                cond_block->condition = result;
+                n += nParsed;
+                if (!parseToken(it+n, TOKEN_SEMICOLON)) {
+                    return error(tokens[it+n], "Expect \';\' at the end of the loop termination expression");
+                }
             }
             n++;
 
@@ -216,6 +262,12 @@ namespace avl {
         result = loop;
         return success(n);
     }
+
+    /*
+
+    LOCAL_VAR_DEF : TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) INITIALIZER
+
+    */
 
     bool Parser::parseLocalVarDef(std::size_t it, const std::shared_ptr<BlockNode>& b) {
  

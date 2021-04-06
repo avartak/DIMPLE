@@ -5,6 +5,19 @@
 
 namespace avl {
 
+    /*
+
+    PROG : TOKEN_EOF | UNIT PROG
+
+    UNIT : EMPTY          | 
+           INCLUDE        | 
+           REPRESENTATION |
+           DECLARATION    |
+           DEFINITION     |
+           MAIN_FUNCTION
+
+    */
+
     bool Parser::parseProg(std::size_t it) {
 
         if (parseToken(it, TOKEN_EOF)) {
@@ -29,6 +42,12 @@ namespace avl {
 
     }
 
+    /*
+
+    EMPTY : ';'
+
+    */
+
     bool Parser::parseEmpty(std::size_t it) {
 
         if (parseToken(it, TOKEN_SEMICOLON)) {
@@ -37,6 +56,12 @@ namespace avl {
         return error();
     
     }
+
+    /*
+
+    INCLUDE : 'include' TOKEN_FILENAME '\n'
+
+    */
 
     bool Parser::parseInclude(std::size_t it) {
 
@@ -90,6 +115,12 @@ namespace avl {
 
     }
 
+    /*
+
+    REPRESENTATION : TOKEN_IDENT '::' (TOKEN_IDENT | TYPE | EXPR) (';' | '\n' | TOKEN_EOF)
+
+    */
+
     bool Parser::parseRepresentation(std::size_t it) {
 
         std::size_t n = 0;
@@ -121,6 +152,12 @@ namespace avl {
         n += nParsed;
         return success(n);
     }
+
+    /*
+
+    DECLARATION : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE) (';' | '\n' | TOKEN_EOF)
+
+    */
 
     bool Parser::parseDeclaration(std::size_t it) {
 
@@ -157,6 +194,12 @@ namespace avl {
         n += nParsed;
         return success(n);
     }
+
+    /*
+
+    DEFINITION : TOKEN_IDENT ':=' ['extern'] (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) (';' | '\n' | TOKEN_EOF)
+
+    */
 
     bool Parser::parseDefinition(std::size_t it) {
 
@@ -208,6 +251,12 @@ namespace avl {
         n += nParsed;
         return success(n);
     }
+
+    /*
+
+    DEFINITION : TOKEN_MAIN ':=' 'extern' (TOKEN_IDENT | TYPE) FUNCTION_BLOCK (';' | '\n' | TOKEN_EOF)
+
+    */
 
     bool Parser::parseMain(std::size_t it) {
 

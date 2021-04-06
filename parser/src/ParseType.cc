@@ -4,6 +4,12 @@
 
 namespace avl {
 
+    /*
+
+    TYPE : DATA_TYPE | FUNC_TYPE
+
+    */
+
     bool Parser::parseType(std::size_t it) {
 
         if (parseDataType(it) ||
@@ -15,6 +21,16 @@ namespace avl {
         return error();
 
     }
+
+    /*
+
+    DATA_TYPE : PRIMITIVE_TYPE | 
+                POINTER_TYPE   | 
+                ARRAY_TYPE     | 
+                STRUCT_TYPE    | 
+                UNION_TYPE
+
+    */
 
     bool Parser::parseDataType(std::size_t it) {
 
@@ -30,6 +46,14 @@ namespace avl {
         return error();
 
     }
+
+    /*
+
+    PRIMITIVE_TYPE : TOKEN_UINT8  | TOKEN_UINT16 | TOKEN_UINT32 | TOKEN_UINT64 |
+                     TOKEN_INT8   | TOKEN_INT16  | TOKEN_INT32  | TOKEN_INT64  |
+                     TOKEN_REAL32 | TOKEN_REAL64 | TOKEN_BOOL
+
+    */
 
     bool Parser::parsePrimitiveType(std::size_t it) {
 
@@ -58,6 +82,12 @@ namespace avl {
 
         return error();
     }
+
+    /*
+
+    POINTER_TYPE : '%?' | '%' (TOKEN_IDENT | TOKEN_TYPE)
+
+    */
 
     bool Parser::parsePointerType(std::size_t it) {
 
@@ -95,6 +125,13 @@ namespace avl {
         result->loc = loc;
         return success(n);
     }
+
+    /*
+
+    ARRAY_TYPE : '[' EXPR ']' (TOKEN_IDENT | TOKEN_TYPE)
+
+    */
+
 
     bool Parser::parseArrayType(std::size_t it) {
 
@@ -137,6 +174,12 @@ namespace avl {
         return success(n);
     }
 
+    /*
+
+    STRUCT_TYPE : 'struct' ['packed'] MEMBER_SET
+
+    */
+
     bool Parser::parseStructType(std::size_t it) {
 
         std::size_t n = 0;
@@ -169,6 +212,13 @@ namespace avl {
         return success(n);
     }
 
+    /*
+
+    UNION_TYPE : 'union' MEMBER_SET
+
+    */
+
+
     bool Parser::parseUnionType(std::size_t it) {
 
         std::size_t n = 0;
@@ -193,6 +243,14 @@ namespace avl {
         result->loc = loc;
         return success(n);
     }
+
+    /*
+
+    FUNC_TYPE : 'func' ARGUMENT_SET | 
+                'func' ARGUMENT_SET '->' (TOKEN_IDENTIFIER | TYPE)
+
+    */
+
 
     bool Parser::parseFuncType(std::size_t it) {
 
@@ -240,6 +298,24 @@ namespace avl {
         result->loc = loc;
         return success(n);
     }
+
+    /*
+
+    MEMBER_SET : '(' ONE_OR_MORE_MEMBERS ')'
+
+    ONE_OR_MORE_MEMBERS : MEMBER | MEMBER ',' ONE_OR_MORE_MEMBERS
+
+    MEMBER : TOKEN_IDENT | TYPE | TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+
+
+
+    ARGUMENT_SET : '(' ')' | '(' ONE_OR_MORE_ARGS ')'
+
+    ONE_OR_MORE_ARGS : ARG | ARG ',' ONE_OR_MORE_ARGS
+
+    ARG : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+
+    */
 
     bool Parser::parseNameNodeSet(std::size_t it) {
 
