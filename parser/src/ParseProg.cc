@@ -257,7 +257,7 @@ namespace avl {
 
     /*
 
-    DEFINITION : TOKEN_MAIN ':=' 'extern' (TOKEN_IDENT | TYPE) FUNCTION_BLOCK (';' | '\n' | TOKEN_EOF)
+    MAIN_FUNCTION : 'main' ':=' 'extern' (TOKEN_IDENT | TYPE) FUNCTION_BLOCK (';' | '\n' | TOKEN_EOF)
 
     */
 

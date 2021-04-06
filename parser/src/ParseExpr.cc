@@ -65,7 +65,7 @@ namespace avl {
     UNARY_NO_RECAST : '(' EXPR ')' | 
                       LITERAL      |
                       PREOP_UNARY  |
-                      POSTOP_UNARY |
+                      POSTOP_UNARY 
 
     */
 
@@ -137,13 +137,7 @@ namespace avl {
 
     /*
 
-    PREOP_UNARY : '#' TYPE  | 
-                  '#' UNARY |
-                  '@' UNARY |  
-                  '+' UNARY |  
-                  '-' UNARY |  
-                  '~' UNARY |  
-                  '!' UNARY 
+    PREOP_UNARY : '#' TYPE  | ('#' | '@' | '+' | '-' | '~' | '!') UNARY
 
     */
 

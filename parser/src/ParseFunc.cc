@@ -196,7 +196,7 @@ namespace avl {
 
     LOOP_BLOCK : 'loop' BLOCK | 
                  'loop' EXPR BLOCK | 
-                 'loop' [EXPR] ';' [EXPR] ';' [EXPR] BLOCK |
+                 'loop' [EXPR] ';' [EXPR] ';' [EXPR] BLOCK
 
     */
 
