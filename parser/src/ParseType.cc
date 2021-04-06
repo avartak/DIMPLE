@@ -49,9 +49,9 @@ namespace avl {
 
     /*
 
-    PRIMITIVE_TYPE : TOKEN_UINT8  | TOKEN_UINT16 | TOKEN_UINT32 | TOKEN_UINT64 |
-                     TOKEN_INT8   | TOKEN_INT16  | TOKEN_INT32  | TOKEN_INT64  |
-                     TOKEN_REAL32 | TOKEN_REAL64 | TOKEN_BOOL
+    PRIMITIVE_TYPE : 'uint8'  | 'uint16' | 'uint32' | 'uint64' |
+                     'int8'   | 'int16'  | 'int32'  | 'int64'  |
+                     'real32' | 'real64' | BOOL
 
     */
 
@@ -85,7 +85,7 @@ namespace avl {
 
     /*
 
-    POINTER_TYPE : '%?' | '%' (TOKEN_IDENT | TOKEN_TYPE)
+    POINTER_TYPE : '%?' | '%' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -128,7 +128,7 @@ namespace avl {
 
     /*
 
-    ARRAY_TYPE : '[' EXPR ']' (TOKEN_IDENT | TOKEN_TYPE)
+    ARRAY_TYPE : '[' EXPR ']' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -196,7 +196,7 @@ namespace avl {
             n++;
         }
 
-        if (!parseNameNodeSet(it+n)) {
+        if (!parseMembers(it+n)) {
             return error();
         }
         auto members = std::static_pointer_cast<NameNodeSet>(result);
@@ -228,7 +228,7 @@ namespace avl {
         }
         n++;
 
-        if (!parseNameNodeSet(it+n)) {
+        if (!parseMembers(it+n)) {
             return error();
         }
         auto members = std::static_pointer_cast<NameNodeSet>(result);
@@ -262,7 +262,7 @@ namespace avl {
         auto loc = tokens[it]->loc;
         n++;
 
-        if (!parseNameNodeSet(it+n)) {
+        if (!parseArguments(it+n)) {
             return error();
         }
         auto args = std::static_pointer_cast<NameNodeSet>(result);
@@ -307,17 +307,9 @@ namespace avl {
 
     MEMBER : TOKEN_IDENT | TYPE | TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
 
-
-
-    ARGUMENT_SET : '(' ')' | '(' ONE_OR_MORE_ARGS ')'
-
-    ONE_OR_MORE_ARGS : ARG | ARG ',' ONE_OR_MORE_ARGS
-
-    ARG : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
-
     */
 
-    bool Parser::parseNameNodeSet(std::size_t it) {
+    bool Parser::parseMembers(std::size_t it) {
 
         std::size_t n = 0;
         auto nns = std::make_shared<NameNodeSet>();
@@ -364,6 +356,9 @@ namespace avl {
         }
 
         if (parseToken(it+n, TOKEN_ROUND_CLOSE)) {
+            if (nns->set.size() == 0) {
+                return error(tokens[it+n], "Empty member set not allowed");
+            }
             auto loc = tokens[it]->loc;
             loc.end = tokens[it+n]->loc.end;
             result = nns;
@@ -371,10 +366,65 @@ namespace avl {
             n++;
             return success(n);
         }
-        if (nns->set.size() == 0) {
-            return error(tokens[it+n], "Unexpected token \'" + tokens[it+n]->str + "\' after \'(\'");
-        }
-        return error(tokens[it+n], "Expect \',\' or \')\' after " + tokens[it+n-1]->str);
+        return error(tokens[it+n], "Unable to parse member");
     }
+
+    /*
+
+    ARGUMENT_SET : '(' ')' | '(' ONE_OR_MORE_ARGS ')'
+
+    ONE_OR_MORE_ARGS : ARG | ARG ',' ONE_OR_MORE_ARGS
+
+    ARG : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+
+    */
+
+    bool Parser::parseArguments(std::size_t it) {
+
+        std::size_t n = 0;
+        auto nns = std::make_shared<NameNodeSet>();
+
+        if (!parseToken(it, TOKEN_ROUND_OPEN)) {
+            return error(tokens[it], "Expect \'(\' after " + tokens[it-1]->str);
+        }
+        n++;
+
+        while (true) {
+            std::shared_ptr<Identifier> name;
+            std::shared_ptr<Node> type;
+            if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseToken(it+n+2, TOKEN_IDENT)) {
+                name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+                type = std::make_shared<Identifier>(tokens[it+n+2]->str, tokens[it+n+2]->loc);
+                n += 3;
+            }
+            else if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseType(it+n+2)) {
+                name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+                type = result;
+                n += 2+nParsed;
+            }
+            else {
+                break;
+            }
+
+            nns->set.push_back(NameNode(name, type));
+            if (parseToken(it+n, TOKEN_COMMA)) {
+                n++;
+            }
+            else {
+                break;
+            }
+        }
+
+        if (parseToken(it+n, TOKEN_ROUND_CLOSE)) {
+            auto loc = tokens[it]->loc;
+            loc.end = tokens[it+n]->loc.end;
+            result = nns;
+            result->loc = loc;
+            n++;
+            return success(n);
+        }
+        return error(tokens[it+n], "Unable to parse argument");
+    }
+
 
 }

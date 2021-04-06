@@ -1,8 +1,8 @@
 char :: int8
 int  :: int64
 
-printInt : func(int)
-printChar : func(char)
+printInt : func(i : int)
+printChar : func(c : char)
 
 factorial := func(i : int) -> int {
 
@@ -18,7 +18,7 @@ factorial := func(i : int) -> int {
 
 }
 
-main := extern func(int32, %%char) -> int32 {
+main := extern func(argc : int32, argv : %%char) -> int32 {
 
     printInt(factorial(5));
     printChar('\n');

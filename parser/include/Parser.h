@@ -53,7 +53,8 @@ namespace avl {
         bool parseStructType(std::size_t);
         bool parseUnionType(std::size_t);
         bool parseFuncType(std::size_t);
-        bool parseNameNodeSet(std::size_t);
+        bool parseMembers(std::size_t);
+        bool parseArguments(std::size_t);
 
         bool parseInit(std::size_t);
         bool parseUntaggedInitSet(std::size_t);

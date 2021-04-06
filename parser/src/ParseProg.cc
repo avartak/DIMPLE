@@ -117,7 +117,7 @@ namespace avl {
 
     /*
 
-    REPRESENTATION : TOKEN_IDENT '::' (TOKEN_IDENT | TYPE | EXPR) (';' | '\n' | TOKEN_EOF)
+    REPRESENTATION : TOKEN_IDENT '::' (TYPE | EXPR) (';' | '\n' | TOKEN_EOF)
 
     */
 
@@ -143,7 +143,7 @@ namespace avl {
             n += nParsed;
         }
         else {
-            return error(tokens[it+n], "Failed to parse the definition of representation " + nm);
+            return error(tokens[it+n], "Unable to parse the definition of representation " + nm);
         }
 
         if (!parseTerm(it+n, false)) {
@@ -184,6 +184,9 @@ namespace avl {
         else if (parseType(it+n)) {
             type = result;
             n += nParsed;
+        }
+        else {
+            return error(tokens[it+n], "Unable to parse declaration type");
         }
 
         ast->declarations[nm] = std::make_shared<NameNode>(name, type);

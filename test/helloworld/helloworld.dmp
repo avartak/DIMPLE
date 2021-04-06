@@ -11,7 +11,7 @@ int  :: int64
 null :: 0 => char
 
 `` Declaration
-printChar : func(char)
+printChar : func(c : char)
 
 `` Function definition
 hello := func() {
@@ -46,7 +46,7 @@ hello := func() {
 }
 
 `` The "main" function
-main := extern func(int32, %%char) -> int32 {
+main := extern func(argc : int32, argv : %%char) -> int32 {
 
     hello();
 
