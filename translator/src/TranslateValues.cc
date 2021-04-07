@@ -14,6 +14,9 @@ namespace avl {
         if (node->kind == NODE_IDENTIFIER) {
             auto ident = std::static_pointer_cast<Identifier>(node);
             auto n = ident->name;
+            if (n == "main") {
+                return error(ident, "Invalid use of \'main\'");
+            }
             if (currentFunction && currentFunction->lst->isDefined(n)) {
                 result = currentFunction->lst->getVariable(n);
             }
