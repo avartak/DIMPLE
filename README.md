@@ -95,6 +95,23 @@ s.d = 3.14;
 s[1] = 2.5;
 ```
 
+## Function arguments
+DIMPLE allows both pass-by-value and pass-by-reference arguments to functions. By default, arguments are passed by value. However, if the argument name is preceded by the `@` symbol in the function signature, that argument is passed by reference. 
+
+```
+flip := func(@b : bool) {
+
+    if b {
+        b = false;
+    }
+    else {
+        b = true;
+    }
+}
+```
+
+Note, that unlike C++ DIMPLE does not support any explicit use of references (or aliases). 
+
 # Code Arrangement
 
 For those interested in browsing through the compiler code, here is a quick overview of how the source code is arranged. 
