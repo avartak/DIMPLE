@@ -53,6 +53,10 @@ namespace avl {
                 being_compared.pop_back();
                 return false;
             }
+            if (members[i].attr != st->members[i].attr) {
+                being_compared.pop_back();
+                return false;
+            }
         }
         being_compared.pop_back();
         return true;
@@ -77,7 +81,7 @@ namespace avl {
     std::shared_ptr<Type> StructType::clone() const {
         std::vector<NameType> ntv;
         for (const auto& m : members) {
-            ntv.push_back(NameType(m.name, m.type->clone()));
+            ntv.push_back(NameType(m.name, m.type->clone(), m.attr));
         }
         auto st = std::make_shared<StructType>(ntv, isPacked());
         st->flags = flags;

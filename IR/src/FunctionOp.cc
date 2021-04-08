@@ -47,7 +47,13 @@ namespace avl {
             if (*ft->args[i].type != *args[i]->type) {
                 return ex;
             }
-            if (ft->args[i].type->passDirectly()) {
+            if (ft->args[i].passByRef()) {
+                if (!args[i]->isVar()) {
+                    return ex;
+                }
+                fargs.push_back(static_cast<Variable*>(args[i].get())->ptr());
+            }
+            else if (ft->args[i].type->passDirectly()) {
                 fargs.push_back(args[i]->val());
             }
             else {

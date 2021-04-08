@@ -1,0 +1,32 @@
+char :: int8
+int  :: int64
+
+printInt : func(i : int)
+printChar : func(c : char)
+
+`` Flip the value of a boolean variable
+`` The boolean variable is passed by reference
+flip := func(@b : bool) {
+
+    if b {
+        b = false;
+    }
+    else {
+        b = true;
+    }
+}
+
+main := extern func(argc : int32, argv : %%char) -> int32 {
+
+    b := bool{false};
+    printInt(b => int);
+    printChar('\n');
+
+    flip(b);
+    printInt(b => int);
+    printChar('\n');
+
+    return 0 => int32;
+
+}
+

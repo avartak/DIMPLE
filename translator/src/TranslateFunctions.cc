@@ -118,6 +118,9 @@ namespace avl {
             if (!argvals[i]) {
                 return error(args[i], "Function argument " + std::to_string(i+1) + " has inconsistent type");
             }
+            if (ft->args[i].passByRef() && !argvals[i]->isVar()) {
+                return error(args[i], "Function argument " + std::to_string(i+1) + " must be an instance (variable)");
+            }
         }
 
         result = bool(retv) ? FunctionOp::call(func, argvals, retv) : FunctionOp::call(func, argvals);

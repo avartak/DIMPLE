@@ -12,10 +12,13 @@ namespace avl {
 
         std::shared_ptr<Identifier> name;
         std::shared_ptr<Node> node;
+        uint64_t attr;
 
         NameNode();
         NameNode(const std::shared_ptr<Node>&);
+        NameNode(const std::shared_ptr<Node>&, uint64_t);
         NameNode(const std::shared_ptr<Identifier>&, const std::shared_ptr<Node>&);
+        NameNode(const std::shared_ptr<Identifier>&, const std::shared_ptr<Node>&, uint64_t);
 
     };
 

@@ -9,6 +9,13 @@
 
 namespace avl {
 
+    enum Argument_Attribute_ID {
+
+        PASS_BY_VALUE = 0,
+        PASS_BY_REFERENCE = 1
+
+    };
+
     struct TypeNode : public Node, public TypeBase {
 
         TypeNode(uint16_t);

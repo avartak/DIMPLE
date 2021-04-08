@@ -19,8 +19,11 @@ namespace avl {
             fptr->getArg(0)->addAttr(llvm::Attribute::NoAlias);
         }
         for (std::size_t i = 0; i < ft->args.size(); i++) {
-            if (!ft->args[i].type->passDirectly()) {
-                auto idx = ft->ret->retDirectly() ? i : i+1;
+            auto idx = ft->ret->retDirectly() ? i : i+1;
+            if (ft->args[i].passByRef()) {
+                fptr->getArg(idx)->addAttr(llvm::Attribute::getWithDereferenceableBytes(TheContext, ft->args[i].type->size()));
+            }
+            else if (!ft->args[i].type->passDirectly()) {
                 fptr->getArg(idx)->addAttr(llvm::Attribute::ByVal);
                 fptr->getArg(idx)->addAttr(llvm::Attribute::getWithAlignment(TheContext, llvm::Align(8)));
             }
@@ -49,8 +52,9 @@ namespace avl {
         }
         for (std::size_t i = 0; i < ft->args.size(); i++) {
             auto idx = ft->ret->retDirectly() ? i : i+1;
-            auto var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
-            if (ft->args[i].type->passDirectly()) {
+            std::shared_ptr<Variable> var;
+            if (!ft->args[i].passByRef() && ft->args[i].type->passDirectly()) {
+                var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
                 var->define();
                 if (var->type->isCompound()) {
                     auto u64 = TheBuilder.CreateBitCast(var->ptr(), TheBuilder.getInt64Ty());
@@ -61,6 +65,7 @@ namespace avl {
                 }
             }
             else {
+                var = std::make_shared<Variable>(STORAGE_UNDEFINED, "", ft->args[i].type);
                 var->llvm_value = fn->getArg(idx);
             }
             args.push_back(var);

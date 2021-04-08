@@ -375,7 +375,7 @@ namespace avl {
 
     ONE_OR_MORE_ARGS : ARG | ARG ',' ONE_OR_MORE_ARGS
 
-    ARG : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+    ARG : [@] TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -392,6 +392,11 @@ namespace avl {
         while (true) {
             std::shared_ptr<Identifier> name;
             std::shared_ptr<Node> type;
+            uint64_t attr = 0;
+            if (parseToken(it+n, TOKEN_ADDRESS)) {
+                attr |= PASS_BY_REFERENCE;
+                n++;
+            }
             if (parseToken(it+n, TOKEN_IDENT) && parseToken(it+n+1, TOKEN_DECLARE) && parseToken(it+n+2, TOKEN_IDENT)) {
                 name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 type = std::make_shared<Identifier>(tokens[it+n+2]->str, tokens[it+n+2]->loc);
@@ -406,7 +411,7 @@ namespace avl {
                 break;
             }
 
-            nns->set.push_back(NameNode(name, type));
+            nns->set.push_back(NameNode(name, type, attr));
             if (parseToken(it+n, TOKEN_COMMA)) {
                 n++;
             }

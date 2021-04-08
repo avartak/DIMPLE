@@ -13,7 +13,7 @@ namespace avl {
             tv.push_back(ret->llvm_type);
         }
         for (const auto& a : args) {
-            if (a.type->passDirectly()) {
+            if (!a.passByRef() && a.type->passDirectly()) {
                 if (a.type->isCompound()) {
 				    tv.push_back(TheBuilder.getInt64Ty());
                 }
@@ -60,6 +60,10 @@ namespace avl {
                 being_compared.pop_back();
                 return false;
             }
+            if (args[i].attr != ft->args[i].attr) {
+                being_compared.pop_back();
+                return false;
+            }
         }
         if (*ret != *ft->ret) {
             being_compared.pop_back();
@@ -76,7 +80,7 @@ namespace avl {
     std::shared_ptr<Type> FunctionType::clone() const {
         std::vector<NameType> ntv;
         for (const auto& a : args) {
-            ntv.push_back(NameType(a.name, a.type->clone()));
+            ntv.push_back(NameType(a.name, a.type->clone(), a.attr));
         }
         auto ft = std::make_shared<FunctionType>(ntv, ret->clone());
         ft->flags = flags;

@@ -51,6 +51,10 @@ namespace avl {
                 being_compared.pop_back();
                 return false;
             }
+            if (members[i].attr != st->members[i].attr) {
+                being_compared.pop_back();
+                return false;
+            }
         }
         being_compared.pop_back();
         return true;
@@ -72,7 +76,7 @@ namespace avl {
     std::shared_ptr<Type> UnionType::clone() const {
         std::vector<NameType> ntv;
         for (const auto& m : members) {
-            ntv.push_back(NameType(m.name, m.type->clone()));
+            ntv.push_back(NameType(m.name, m.type->clone(), m.attr));
         }
         auto ut = std::make_shared<UnionType>(ntv);
         ut->flags = flags;

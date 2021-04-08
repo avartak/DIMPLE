@@ -193,7 +193,7 @@ namespace avl {
             if (ty->isFunction()) {
                 return error(a.node, "Function argument cannot be a function");
             }
-            args.push_back(NameType(a.name, ty));
+            args.push_back(NameType(a.name, ty, a.attr));
         }
         if (!getType(ftnode->ret, includeOpaquePtr)) {
             return error(ftnode->ret, "Unable to create function return type");

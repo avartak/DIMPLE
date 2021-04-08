@@ -27,7 +27,7 @@ namespace avl {
                 return getConstRep(ident) || getGlobalInstance(ident);
             }
             else {
-                return error(ident, "Unable to decipher idenitifer " + n);
+                return error(ident, "Unable to decipher identifer " + n);
             }
             return success();
         }
