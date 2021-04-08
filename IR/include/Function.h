@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <llvm/IR/BasicBlock.h>
 #include <Instance.h>
 #include <LST.h>
 #include <Variable.h>
@@ -17,6 +18,7 @@ namespace avl {
         std::vector<std::shared_ptr<Variable> > args;
         std::shared_ptr<Variable> retvar;
         std::shared_ptr<CodeBlock> retblock;
+        llvm::BasicBlock* freeze_block;
 
         Function(int, const std::string&, const std::shared_ptr<Type>&);
 
@@ -25,7 +27,9 @@ namespace avl {
         virtual void init() override;
 
         void resetLocals();
-        bool checkTerminations() const;
+        void freeze();
+        bool resume();
+        bool checkTerminations();
         void simplify();
     };
 

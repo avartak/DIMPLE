@@ -44,13 +44,20 @@ namespace avl {
 
         gst->functions[n] = std::make_shared<Function>(storage, n, type);
         if (ast->definitions.find(n) != ast->definitions.end()) {
+            auto cf = currentFunction;
+            if (cf) {
+                cf->freeze();
+            }
             currentFunction = gst->functions[n];
             currentFunction->init();
             if (!defineCurrentFunction(ast->definitions[n])) {
                 return error();
             }
             gst->functions[n] = currentFunction;
-            currentFunction.reset();
+            if (cf) {
+                cf->resume();
+            }
+            currentFunction = cf;
         }
 
         result = gst->functions[n];
@@ -58,7 +65,7 @@ namespace avl {
     }
 
     bool Translator::defineCurrentFunction(const std::shared_ptr<DefineStatement>& defn) {
-        
+
         if (defn->def->kind == NODE_NULLINIT) {
             auto ft = static_cast<FunctionType*>(currentFunction->type.get());
             if (!ft->ret->isVoid()) {

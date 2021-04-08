@@ -9,7 +9,8 @@ namespace avl {
 
     Function::Function(int s, const std::string& n, const std::shared_ptr<Type>& t):
         Instance(VALUE_FUNC, s, n, t),
-        lst(std::make_shared<LST>())
+        lst(std::make_shared<LST>()),
+        freeze_block(nullptr)
     {
         auto ft = static_cast<FunctionType*>(type.get());
         auto linkage = (s == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
@@ -79,11 +80,23 @@ namespace avl {
         }
     }
 
-    bool Function::checkTerminations() const {
+    void Function::freeze() {
+        freeze_block = TheBuilder.GetInsertBlock();
+    }
+
+    bool Function::resume() {
+        if (freeze_block != nullptr) {
+            TheBuilder.SetInsertPoint(freeze_block);
+            return true;
+        }
+        return false;
+    }
+
+    bool Function::checkTerminations() {
 
         auto fn = llvm::cast<llvm::Function>(ptr());
-        auto current_block = TheBuilder.GetInsertBlock();
 		bool status = true;
+        freeze();
 
         if (retvar && retblock && retblock->block->getParent() == nullptr) {
             CodeBlock::insert(retblock);
@@ -98,7 +111,7 @@ namespace avl {
             if (fn->getReturnType()->isVoidTy()) {
                 TheBuilder.CreateRetVoid();
             }
-            else if (retvar && current_block == &*iter) {
+            else if (retvar && freeze_block == &*iter) {
                 TheBuilder.CreateRet(retvar->val());
             }
 			else {
@@ -106,7 +119,7 @@ namespace avl {
             }
         }
 
-        TheBuilder.SetInsertPoint(current_block);
+        resume();
         return status;
     }
 
