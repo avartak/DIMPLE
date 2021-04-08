@@ -70,7 +70,7 @@ namespace avl {
         bool getUnionTypeIndex(const std::shared_ptr<UnionType>&, const InitElement&, std::size_t&);
 
         bool getFunction(const std::shared_ptr<Identifier>&, uint16_t, const std::shared_ptr<Type>&);
-        bool defineCurrentFunction(const std::shared_ptr<DefineStatement>&);
+        bool defineFunction(const std::shared_ptr<DefineStatement>&);
         bool defineLocalVar(const std::shared_ptr<DefineStatement>&);
         bool defineBlock(const std::shared_ptr<BlockNode>&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);
         bool defineIfBlock(const std::shared_ptr<IfBlockNode>&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>);

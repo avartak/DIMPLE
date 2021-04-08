@@ -44,27 +44,24 @@ namespace avl {
 
         gst->functions[n] = std::make_shared<Function>(storage, n, type);
         if (ast->definitions.find(n) != ast->definitions.end()) {
-            auto cf = currentFunction;
-            if (cf) {
-                cf->freeze();
-            }
-            currentFunction = gst->functions[n];
-            currentFunction->init();
-            if (!defineCurrentFunction(ast->definitions[n])) {
+            if (!defineFunction(ast->definitions[n])) {
                 return error();
             }
-            gst->functions[n] = currentFunction;
-            if (cf) {
-                cf->resume();
-            }
-            currentFunction = cf;
+            gst->functions[n] = std::static_pointer_cast<Function>(result);
         }
 
         result = gst->functions[n];
         return success();
     }
 
-    bool Translator::defineCurrentFunction(const std::shared_ptr<DefineStatement>& defn) {
+    bool Translator::defineFunction(const std::shared_ptr<DefineStatement>& defn) {
+
+        auto cf = currentFunction;
+        if (cf) {
+            cf->freeze();
+        }
+        currentFunction = gst->functions[defn->name->name];
+        currentFunction->init();
 
         if (defn->def->kind == NODE_NULLINIT) {
             auto ft = static_cast<FunctionType*>(currentFunction->type.get());
@@ -72,7 +69,6 @@ namespace avl {
                 return error(defn->name, "Function with a non-void return type cannot have an empty body");
             }
             FunctionOp::ret(currentFunction, nullptr);
-            return success();
         }
         else if (defn->def->kind == NODE_STATEMENT) {
             auto stmt = static_cast<Statement*>(defn->def.get());
@@ -86,11 +82,17 @@ namespace avl {
                 return error(defn->name, "Function \'" + defn->name->name + "\' does not always return");
             }
             currentFunction->simplify();
-            return success();
         }
         else {
             return error(defn->def, "Invalid function body");
         }
+
+        result = currentFunction;
+        if (cf) {
+            cf->resume();
+        }
+        currentFunction = cf;
+        return success();
     }
 
     bool Translator::call(const std::shared_ptr<CallExprNode>& callex, const std::shared_ptr<Variable>& retv) {
