@@ -35,6 +35,17 @@ namespace avl {
         return llvm_value;
     }
 
+    void Variable::declare() {
+        if (isGlobal()) {
+            auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
+            llvm_value = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
+        }
+        else {
+            llvm_value = TheBuilder.CreateAlloca(type->llvm_type);
+        }
+        align();
+    }
+
     void Variable::init() {
         if (isGlobal()) {
             llvm::cast<llvm::GlobalVariable>(llvm_value)->setInitializer(llvm::Constant::getNullValue(type->llvm_type));
@@ -53,17 +64,6 @@ namespace avl {
         if (isGlobal() && llvm_value != nullptr && (*init->type == *type) && init->isConst()) {
             llvm::cast<llvm::GlobalVariable>(llvm_value)->setInitializer(llvm::cast<llvm::Constant>(init->val()));
         }
-    }
-
-    void Variable::define() {
-        if (isGlobal()) {
-            auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-            llvm_value = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
-        }
-        else {
-            llvm_value = TheBuilder.CreateAlloca(type->llvm_type);
-        }
-        align();
     }
 
     bool Variable::align() {

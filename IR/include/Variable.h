@@ -12,10 +12,10 @@ namespace avl {
 
         virtual llvm::Value* val() const override;
         virtual llvm::Value* ptr() const override;
+        virtual void declare() override;
         virtual void init() override;
 
         void initGlobal(const std::shared_ptr<Value>&);
-        void define();
         bool align();
 
         inline bool isGlobal() {

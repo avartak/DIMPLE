@@ -53,13 +53,13 @@ namespace avl {
             return initGlobal(var, def);
         }
         else if (rval->kind == NODE_NULLINIT) {
-            var->define();
+            var->declare();
             if (static_cast<NullInit*>(rval.get())->zero) {
                 var->init();
             }
         }
         else if (rval->kind == NODE_INITIALIZER || rval->kind == NODE_EXPRNODE || rval->kind == NODE_IDENTIFIER) {
-            var->define();
+            var->declare();
             if (!initConst(var->type, rval)) {
                 return error();
             }
@@ -94,7 +94,7 @@ namespace avl {
         }
 
         else if (rval->kind == NODE_NULLINIT) {
-            var->define();
+            var->declare();
             if (static_cast<NullInit*>(rval.get())->zero) {
                 var->init();
             }
@@ -102,7 +102,7 @@ namespace avl {
             return success();
         }
         else if (rval->kind == NODE_INITIALIZER) {
-            var->define();
+            var->declare();
             if (!var->type->isCompound()) {
                 return error(rval, "Only compound types can be initialized using an initializer");
             }
@@ -116,7 +116,7 @@ namespace avl {
             return initLocalUnion(var, in);
         }
         else if (rval->kind == NODE_EXPRNODE || rval->kind == NODE_IDENTIFIER) {
-            var->define();
+            var->declare();
             return assign(var, rval);
         }
         else {

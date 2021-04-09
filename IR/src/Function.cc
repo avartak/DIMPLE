@@ -59,7 +59,7 @@ namespace avl {
             std::shared_ptr<Variable> var;
             if (!ft->args[i].passByRef() && ft->args[i].type->passDirectly()) {
                 var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
-                var->define();
+                var->declare();
                 if (var->type->isCompound()) {
                     auto u64 = TheBuilder.CreateBitCast(var->ptr(), TheBuilder.getInt64Ty());
                     TheBuilder.CreateStore(fn->getArg(idx), u64);

@@ -369,7 +369,7 @@ namespace avl {
             }
 
             auto res = std::make_shared<Variable>(STORAGE_LOCAL, "", std::make_shared<PrimitiveType>(TYPE_BOOL));
-            res->define();
+            res->declare();
             BinaryOp::assign(res, lhs);
 
             auto lres = (op == BINARYOP_LOGICAL_OR ? UnaryOp::isTrue(lhs) : UnaryOp::isFalse(lhs));
