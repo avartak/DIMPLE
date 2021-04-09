@@ -127,7 +127,7 @@ For those interested in browsing through the compiler code, here is a quick over
 
 # Example Program
 
-This is an example program written in DIMPLE. It shows how to implement late binding of functions (also known as runtime polymorphism in object oriented programming). DIMPLE does not (as of now) support runtime polymorphism natively.
+This is an example program written in DIMPLE. It shows how to implement late binding of functions (also known as runtime polymorphism in object oriented programming). DIMPLE does not (as of now) natively support classes or runtime polymorphism.
 
 ```
 /*
