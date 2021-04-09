@@ -43,12 +43,12 @@ namespace avl {
         llvm_value = fptr;
     }
 
-	void Function::init() {
+    void Function::init() {
         auto fn = llvm::cast<llvm::Function>(ptr());
         auto ft = static_cast<FunctionType*>(type.get());
-
+    
         const auto& block = std::make_shared<CodeBlock>(*this);
-
+    
         if (!ft->ret->retDirectly()) {
             retvar = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->ret);
             retvar->llvm_value = fn->getArg(0);
@@ -75,7 +75,7 @@ namespace avl {
             args.push_back(var);
             lst->variables[ft->args[i].name->name] = var;
         }
-	}
+    }
 
     void Function::resetLocals() {
         if (lst->prev) {
