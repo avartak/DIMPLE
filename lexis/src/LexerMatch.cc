@@ -226,7 +226,7 @@ namespace avl {
         state = LEXER_STATE_WORD;
 
         for (std::size_t i = 1; i < token.length(); i++) {
-            if (letter.find(token[i]) == std::string::npos && dec.find(token[i])  == std::string::npos) {
+            if (token[i] != '_' && letter.find(token[i]) == std::string::npos && dec.find(token[i])  == std::string::npos) {
                 return false;
             }
         }   
