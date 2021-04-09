@@ -11,7 +11,6 @@
 #include <ExprNode.h>
 #include <Initializer.h>
 #include <BlockNode.h>
-#include <GST.h>
 #include <Value.h>
 #include <Variable.h>
 #include <Function.h>
@@ -27,7 +26,7 @@ namespace avl {
 
         std::shared_ptr<Function> currentFunction;
 
-        Translator(const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
+        Translator(const std::shared_ptr<InputManager>&, const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
 
         virtual void fail() override; 
         virtual bool run() override;

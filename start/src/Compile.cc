@@ -17,7 +17,7 @@ namespace avl {
         auto gst = std::make_shared<GST>();
 
         auto parser = std::make_shared<Parser>(input, ast);
-        auto translator = std::make_shared<Translator>(ast, gst);
+        auto translator = std::make_shared<Translator>(input, ast, gst);
         auto backend = std::make_shared<Backend>(srcfile, outfile);
 
         input->set(srcfile);
