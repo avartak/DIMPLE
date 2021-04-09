@@ -62,6 +62,7 @@ namespace avl {
 
         bool parseExpr(std::size_t);
         bool parseUnary(std::size_t);
+        bool parseUnaryNoRecast(std::size_t);
         bool parseLiteral(std::size_t);
         bool parsePreOpUnary(std::size_t);
         bool parsePostOpUnary(std::size_t);

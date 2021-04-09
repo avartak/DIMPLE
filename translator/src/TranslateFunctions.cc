@@ -43,6 +43,7 @@ namespace avl {
         }
 
         gst->functions[n] = std::make_shared<Function>(storage, n, type);
+        gst->functions[n]->declare();
         if (ast->definitions.find(n) != ast->definitions.end()) {
             if (!defineFunction(ast->definitions[n])) {
                 return error();

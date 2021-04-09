@@ -12,9 +12,20 @@ namespace avl {
         lst(std::make_shared<LST>()),
         freeze_block(nullptr)
     {
+    }
+
+    llvm::Value* Function::val() const {
+        return nullptr;
+    }
+
+    llvm::Value* Function::ptr() const {
+        return llvm_value;
+    }
+
+    void Function::declare() {
         auto ft = static_cast<FunctionType*>(type.get());
-        auto linkage = (s == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
-        auto fptr = llvm::Function::Create(llvm::cast<llvm::FunctionType>(type->llvm_type), linkage, n, *TheModule);
+        auto linkage = (storage == STORAGE_EXTERNAL ? llvm::GlobalVariable::ExternalLinkage : llvm::GlobalVariable::InternalLinkage);
+        auto fptr = llvm::Function::Create(llvm::cast<llvm::FunctionType>(type->llvm_type), linkage, name, *TheModule);
         if (!ft->ret->retDirectly()) {
             fptr->getArg(0)->addAttr(llvm::Attribute::StructRet);
             fptr->getArg(0)->addAttr(llvm::Attribute::NoAlias);
@@ -30,14 +41,6 @@ namespace avl {
             }
         }
         llvm_value = fptr;
-    }
-
-    llvm::Value* Function::val() const {
-        return nullptr;
-    }
-
-    llvm::Value* Function::ptr() const {
-        return llvm_value;
     }
 
 	void Function::init() {

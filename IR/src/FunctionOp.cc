@@ -67,7 +67,7 @@ namespace avl {
             }
         }
 
-        auto fptr = llvm::cast<llvm::Function>(func->ptr());
+        auto fptr = func->ptr();
         if (ft->ret->retDirectly()) {
             llvm::Value* lv;
             if (fargs.size() == 0) {

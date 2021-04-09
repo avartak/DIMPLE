@@ -60,19 +60,23 @@ namespace avl {
 
     /*
 
-    UNARY : UNARY_NO_RECAST | UNARY_NO_RECAST '=>' (TOKEN_IDENT | TYPE) 
-
     UNARY_NO_RECAST : '(' EXPR ')' | 
                       LITERAL      |
+                      TOKEN_IDENT  |
                       PREOP_UNARY  |
                       POSTOP_UNARY 
 
     */
 
-    bool Parser::parseUnary(std::size_t it) {
+    bool Parser::parseUnaryNoRecast(std::size_t it) {
 
         std::size_t n = 0;
         auto loc = tokens[it]->loc;
+
+        if (parseLiteral(it) || parsePreOpUnary(it)) {
+            n += nParsed;
+            return success(n);
+        }
 
         if (parseToken(it, TOKEN_ROUND_OPEN)) {
             n++;
@@ -87,28 +91,45 @@ namespace avl {
             result->loc = loc;
             n++;
         }
-        else if (parseLiteral(it)) {
-            n += nParsed;
-        }
-        else if (parsePreOpUnary(it)) {
-            n += nParsed;
-        }
         else if (parseToken(it, TOKEN_IDENT)) {
             result = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
             n++;
-            while (parseToken(it+n, TOKEN_DOT) ||
-                   parseToken(it+n, TOKEN_DEREF) ||
-                   parseToken(it+n, TOKEN_SQUARE_OPEN) ||
-                   parseToken(it+n, TOKEN_ROUND_OPEN))
-            {
-                if (!parsePostOpUnary(it+n)) {
-                    return error();
-                }
-                n += nParsed;
-            }
+        }
+        else {
+            return error();
         }
 
-        if (n > 0 && parseToken(it+n, TOKEN_CAST)) {
+        while (parseToken(it+n, TOKEN_DOT) ||
+               parseToken(it+n, TOKEN_DEREF) ||
+               parseToken(it+n, TOKEN_SQUARE_OPEN) ||
+               parseToken(it+n, TOKEN_ROUND_OPEN))
+        {
+            if (!parsePostOpUnary(it+n)) {
+                return error();
+            }
+            n += nParsed;
+        }
+
+        return success(n);
+
+    }
+
+    /*
+
+    UNARY : UNARY_NO_RECAST | UNARY_NO_RECAST '=>' (TOKEN_IDENT | TYPE) 
+
+    */
+
+    bool Parser::parseUnary(std::size_t it) {
+
+        std::size_t n = 0;
+
+        if (!parseUnaryNoRecast(it)) {
+            return error();
+        }
+        n += nParsed;
+
+        if (parseToken(it+n, TOKEN_CAST)) {
             auto e = result;
             std::shared_ptr<Node> cast;
             n++;
@@ -123,21 +144,16 @@ namespace avl {
             else {
                 return error(tokens[it+n], "Failed to parse recast type");
             }
-            loc.end = cast->loc.end;
             result = std::make_shared<BinaryExprNode>(BINARYOP_RECAST, e, cast);
-            result->loc = loc;
+            result->loc.end = cast->loc.end;
         }
 
-        if (n > 0) {
-            return success(n);
-        }
-        return error();
-
+        return success(n);
     }
 
     /*
 
-    PREOP_UNARY : '#' TYPE  | ('#' | '@' | '+' | '-' | '~' | '!') UNARY
+    PREOP_UNARY : '#' TYPE  | ('#' | '@' | '+' | '-' | '~' | '!') UNARY_NO_RECAST
 
     */
 
@@ -149,7 +165,7 @@ namespace avl {
         if (isUnaryOp(it)) {
             auto op = ExprNode::unopFromToken(tokens[it]->is);
             bool issizeop = parseToken(it, TOKEN_SIZE);
-            if ((issizeop && parseType(it+1)) || parseUnary(it+1)) {
+            if ((issizeop && parseType(it+1)) || parseUnaryNoRecast(it+1)) {
                 loc.end = result->loc.end;
                 result = std::make_shared<UnaryExprNode>(op, result);
                 result->loc = loc;
@@ -170,9 +186,9 @@ namespace avl {
 
     POSTOP_UNARY : POSTOP_UNARY_NO_CALL | POSTOP_UNARY_CALL
 
-    POSTOP_UNARY_NO_CALL : TOKEN_IDENT ONE_OR_MORE_POSTOPS_NO_CALL
+    POSTOP_UNARY_NO_CALL : ( TOKEN_IDENT | '(' EXPR ')' ) ONE_OR_MORE_POSTOPS_NO_CALL
 
-    POSTOP_UNARY_CALL : TOKEN_IDENT ONE_OR_MORE_POSTOPS_CALL
+    POSTOP_UNARY_CALL : ( TOKEN_IDENT | '(' EXPR ')' ) ONE_OR_MORE_POSTOPS_CALL
 
     ONE_OR_MORE_POSTOPS_NO_CALL : POSTOP_NO_CALL | (POSTOP_NO_CALL | POSTOP_CALL) ONE_OR_MORE_POSTOPS_NO_CALL
 
