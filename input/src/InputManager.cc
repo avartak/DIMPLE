@@ -59,9 +59,8 @@ namespace avl {
         }
         uint16_t idx = filenames.size();
         filenames.push_back(filename);
-        auto parsefile = new InputFile(this, idx);
-        open.push_back(parsefile);
-        currentInputFile = parsefile;
+        open.push_back(new InputFile(this, idx));
+        currentInputFile = open.back();
         return true;
     }
 
