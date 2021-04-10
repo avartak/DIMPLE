@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include <memory>
 #include <fstream>
 
 namespace avl {
@@ -56,7 +55,7 @@ namespace avl {
         int rule();
         int lex();
 
-        std::shared_ptr<int> match(bool);
+        int match(bool);
         bool isWS(bool);
         bool isOneLineComment(bool);
         bool isMultiLineComment(bool);

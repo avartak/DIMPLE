@@ -294,7 +294,7 @@ namespace avl {
         }
 
         auto m = match(false);
-		while (m) {
+		while (m != RULE_UNDEF) {
             read();    
             if (next == EOF) {
                 if (input_error) {
@@ -309,20 +309,20 @@ namespace avl {
         next_line = end_line;
         next_column = end_column;
 
-        if (!m) {
+        if (m == RULE_UNDEF) {
             token.erase(token.end()-1);
             end_line = last_line;
             end_column = last_column;
             m = match(true);
         }
 
-        if (!m && next != EOF) {
+        if (m == RULE_UNDEF && next != EOF) {
             append();
         }
         str = token;
         token = "";
         state = LEXER_STATE_INIT;
-        return (m ? *m : RULE_UNDEF);
+        return (m);
 
     }
 }

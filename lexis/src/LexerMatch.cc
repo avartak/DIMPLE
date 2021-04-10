@@ -2,69 +2,67 @@
 
 namespace avl {
 
-    std::shared_ptr<int> Lexer::match(bool exact) {
-
-        std::shared_ptr<int> m;
+    int Lexer::match(bool exact) {
 
         if (token == "") {
-            return m;
+            return RULE_UNDEF;
         }
 
         switch (state) {
             case LEXER_STATE_INCL :
-                return token.back() != '\n' ? std::make_shared<int>(RULE_FILENAME) : nullptr;
+                return token.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
             case LEXER_STATE_WS :
-                return isWS(exact) ? std::make_shared<int>(RULE_WS) : nullptr;
+                return isWS(exact) ? RULE_WS : RULE_UNDEF;
             case LEXER_STATE_ONELINE_COMMENT :
-                return isOneLineComment(exact) ? std::make_shared<int>(RULE_ONELINE_COMMENT) : nullptr;
+                return isOneLineComment(exact) ? RULE_ONELINE_COMMENT : RULE_UNDEF;
             case LEXER_STATE_MULTILINE_COMMENT :
-                return isMultiLineComment(exact) ? std::make_shared<int>(RULE_MULTILINE_COMMENT) : nullptr;
+                return isMultiLineComment(exact) ? RULE_MULTILINE_COMMENT : RULE_UNDEF;
             case LEXER_STATE_CHAR :
-                return isChar(exact) ? std::make_shared<int>(RULE_CHAR) : nullptr;
+                return isChar(exact) ? RULE_CHAR : RULE_UNDEF;
             case LEXER_STATE_STRING :
-                return isString(exact) ? std::make_shared<int>(RULE_STRING) : nullptr;
+                return isString(exact) ? RULE_STRING : RULE_UNDEF;
             case LEXER_STATE_INT :
-                return isInt(exact) ? std::make_shared<int>(RULE_INT) : nullptr;
+                return isInt(exact) ? RULE_INT : RULE_UNDEF;
             case LEXER_STATE_REAL :
-                return isReal(exact) ? std::make_shared<int>(RULE_REAL) : nullptr;
+                return isReal(exact) ? RULE_REAL : RULE_UNDEF;
             case LEXER_STATE_NUM :
                 if (isInt(exact)) {
-                    return std::make_shared<int>(RULE_INT);
+                    return RULE_INT;
                 }
                 else if (isReal(exact)) {
-                    return std::make_shared<int>(RULE_REAL);
+                    return RULE_REAL;
                 }
-                return nullptr;
+                return RULE_UNDEF;
             case LEXER_STATE_WORD :
                 for (const auto& keyword_pair : keywords) {
                     const auto& keyword = keyword_pair.second;
                     if (exact) {
                         if (token == keyword) {
-                            return std::make_shared<int>(keyword_pair.first);
+                            return keyword_pair.first;
                         }
                     }
                     else {
                         if (keyword.find(token) == 0) {
-                            return std::make_shared<int>(keyword_pair.first);
+                            return keyword_pair.first;
                         }
                     }
                 }
                 if (isIdentifier(exact)) {
-                    return std::make_shared<int>(RULE_IDENT);
+                    return RULE_IDENT;
                 }
-                return nullptr;
+                return RULE_UNDEF;
         }
 
         for (const auto& sym_pair : symbols) {
             const auto& sym = sym_pair.second;
             if (exact) {
                 if (token == sym) {
-                    return std::make_shared<int>(sym_pair.first);
+                    return sym_pair.first;
                 }
             }
             else {
                 if (sym.find(token) == 0) {
-                    return std::make_shared<int>(sym_pair.first);
+                    return sym_pair.first;
                 }
             }
         }
@@ -73,43 +71,43 @@ namespace avl {
             const auto& keyword = keyword_pair.second;
             if (exact) {
                 if (token == keyword) {
-                    return std::make_shared<int>(keyword_pair.first);
+                    return keyword_pair.first;
                 }
             }
             else {
                 if (keyword.find(token) == 0) {
                     state = LEXER_STATE_WORD;
-                    return std::make_shared<int>(keyword_pair.first);
+                    return keyword_pair.first;
                 }
             }
         }
 
         if (isIdentifier(exact)) {
-            return std::make_shared<int>(RULE_IDENT);
+            return RULE_IDENT;
         }
         else if (isInt(exact)) {
-            return std::make_shared<int>(RULE_INT);
+            return RULE_INT;
         }
         else if (isReal(exact)) {
-            return std::make_shared<int>(RULE_REAL);
+            return RULE_REAL;
         }
         else if (isChar(exact)) {
-            return std::make_shared<int>(RULE_CHAR);
+            return RULE_CHAR;
         }
         else if (isString(exact)) {
-            return std::make_shared<int>(RULE_STRING);
+            return RULE_STRING;
         }
         else if (isWS(exact)) {
-            return std::make_shared<int>(RULE_WS);
+            return RULE_WS;
         }
         else if (isOneLineComment(exact)) {
-            return std::make_shared<int>(RULE_ONELINE_COMMENT);
+            return RULE_ONELINE_COMMENT;
         }
         else if (isMultiLineComment(exact)) {
-            return std::make_shared<int>(RULE_MULTILINE_COMMENT);
+            return RULE_MULTILINE_COMMENT;
         }
 
-        return m;
+        return RULE_UNDEF;
 
     }
 
