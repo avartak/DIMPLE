@@ -12,9 +12,12 @@ namespace avl {
     struct InputManager {
 
         std::vector<std::string> filenames;
-        std::vector<std::shared_ptr<InputFile> > open;
-        std::vector<std::shared_ptr<InputFile> > closed;
-        std::shared_ptr<InputFile> currentInputFile;
+        std::vector<InputFile*> open;
+        std::vector<InputFile*> closed;
+        InputFile* currentInputFile;
+
+        InputManager();
+        ~InputManager();
 
         bool isProcessed(const std::string&) const;
         bool isActive(const std::string&) const;

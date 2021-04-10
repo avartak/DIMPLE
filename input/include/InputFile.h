@@ -3,7 +3,6 @@
 
 #include <string>
 #include <fstream>
-#include <memory>
 #include <Lexer.h>
 #include <InputManager.h>
 
@@ -14,9 +13,10 @@ namespace avl {
         const InputManager* manager;
         uint16_t index;
         std::ifstream file;
-        std::shared_ptr<Lexer> scanner;
+        Lexer* scanner;
 
         InputFile(const InputManager*, uint16_t);
+        ~InputFile();
 
         bool isOpen() const;
         std::string filename() const;

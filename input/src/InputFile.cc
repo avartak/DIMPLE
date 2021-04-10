@@ -4,13 +4,20 @@ namespace avl {
 
     InputFile::InputFile(const InputManager* mgr, uint16_t idx):
         manager(mgr),
-        index(idx)
+        index(idx),
+        scanner(nullptr)
     {
         if (mgr != nullptr && mgr->getFilePath(idx) != "") {
             file.open(mgr->getFilePath(idx), std::ifstream::in);
         }
         if (isOpen()) {
-            scanner = std::make_shared<Lexer>(file);
+            scanner = new Lexer(file);
+        }
+    }
+
+    InputFile::~InputFile() {
+        if (scanner != nullptr) {
+            delete scanner;
         }
     }
 

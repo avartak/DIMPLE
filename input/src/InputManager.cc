@@ -3,6 +3,20 @@
 
 namespace avl {
 
+    InputManager::InputManager():
+        currentInputFile(nullptr)
+    {
+    }
+
+    InputManager::~InputManager() {
+        for (auto iopen : open) {
+            delete iopen;
+        }
+        for (auto iclosed : closed) {
+            delete iclosed;
+        }
+    }
+
     bool InputManager::isActive(const std::string& filename) const {
         for (const auto& file : open) {
             if (file->filename() == filename) {
@@ -22,7 +36,7 @@ namespace avl {
     }
 
     bool InputManager::isValid() const {
-        return currentInputFile && currentInputFile->isOpen();
+        return (currentInputFile != nullptr) && currentInputFile->isOpen();
     }
 
     std::string InputManager::getFileName(uint16_t idx) const {
@@ -45,7 +59,7 @@ namespace avl {
         }
         uint16_t idx = filenames.size();
         filenames.push_back(filename);
-        auto parsefile = std::make_shared<InputFile>(this, idx);
+        auto parsefile = new InputFile(this, idx);
         open.push_back(parsefile);
         currentInputFile = parsefile;
         return true;
@@ -53,7 +67,7 @@ namespace avl {
 
     bool InputManager::reset() {
         if (open.size() == 0) {
-            currentInputFile.reset();
+            currentInputFile = nullptr;
             return false;
         }
 
@@ -63,7 +77,7 @@ namespace avl {
             currentInputFile = open.back();
         }
         else {
-            currentInputFile.reset();
+            currentInputFile = nullptr;
         }
         return true;
     }
