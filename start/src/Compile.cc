@@ -12,13 +12,13 @@ namespace avl {
 
     void compile(const std::string& srcfile, const std::string& outfile) {
 
-        auto input = std::make_shared<InputManager>();
-        auto ast = std::make_shared<AST>();
-        auto gst = std::make_shared<GST>();
+        auto input = std::make_unique<InputManager>();
+        auto ast   = std::make_unique<AST>();
+        auto gst   = std::make_unique<GST>();
 
-        auto parser = std::make_shared<Parser>(input, ast);
-        auto translator = std::make_shared<Translator>(input, ast, gst);
-        auto backend = std::make_shared<Backend>(srcfile, outfile);
+        auto parser     = std::make_unique<Parser>(input.get(), ast.get());
+        auto translator = std::make_unique<Translator>(input.get(), ast.get(), gst.get());
+        auto backend    = std::make_unique<Backend>(srcfile, outfile);
 
         input->set(srcfile);
         if (!input->isValid()) {

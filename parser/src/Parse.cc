@@ -7,7 +7,7 @@
   
 namespace avl {
 
-    Parser::Parser(const std::shared_ptr<InputManager>& in, const std::shared_ptr<AST>& tree):
+    Parser::Parser(InputManager* in, AST* tree):
         Pass(in, tree, nullptr)
     {
     }

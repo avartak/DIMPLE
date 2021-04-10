@@ -329,7 +329,7 @@ namespace avl {
         if (prev) {
             std::stringstream err;
             err << "Redefinition of " << nm << ". ";
-            err << "Previous occurence at " << prev->loc.filename(input.get()) << ":" << prev->loc.start.line;
+            err << "Previous occurence at " << prev->loc.filename(input) << ":" << prev->loc.start.line;
             return error(tokens[it], err.str());
         }
         return true;

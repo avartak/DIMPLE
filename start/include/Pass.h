@@ -13,13 +13,13 @@ namespace avl {
     template<typename T>
     struct Pass {
 
-        std::shared_ptr<InputManager> input;
-        std::shared_ptr<AST> ast;
-        std::shared_ptr<GST> gst;
+        InputManager* input;
+        AST* ast;
+        GST* gst;
         std::shared_ptr<T> result;
         std::vector<Error> errors;
 
-        Pass(const std::shared_ptr<InputManager>&, const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
+        Pass(InputManager*, AST*, GST*);
 
         virtual ~Pass() = default;
 

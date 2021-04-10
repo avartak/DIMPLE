@@ -26,7 +26,7 @@ namespace avl {
 
         std::shared_ptr<Function> currentFunction;
 
-        Translator(const std::shared_ptr<InputManager>&, const std::shared_ptr<AST>&, const std::shared_ptr<GST>&);
+        Translator(InputManager*, AST*, GST*);
 
         virtual void fail() override; 
         virtual bool run() override;

@@ -2,7 +2,7 @@
 
 namespace avl {
 
-    Translator::Translator(const std::shared_ptr<InputManager>& in, const std::shared_ptr<AST>& tree, const std::shared_ptr<GST>& sym):
+    Translator::Translator(InputManager* in, AST* tree, GST* sym):
         Pass(in, tree, sym)
     {
     }
