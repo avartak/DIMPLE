@@ -46,9 +46,14 @@ namespace avl {
     void Function::init() {
         auto fn = llvm::cast<llvm::Function>(ptr());
         auto ft = static_cast<FunctionType*>(type.get());
-    
-        const auto& block = std::make_shared<CodeBlock>(*this);
-    
+
+        // The entry_block is used for stack allocations (through Variable::declare())
+        auto entry_block = std::make_shared<CodeBlock>(*this);
+        // The start_block is the first execution block of the function
+        auto start_block = std::make_shared<CodeBlock>();
+        CodeBlock::jump(start_block);
+        CodeBlock::insert(start_block);    
+
         if (!ft->ret->retDirectly()) {
             retvar = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->ret);
             retvar->llvm_value = fn->getArg(0);

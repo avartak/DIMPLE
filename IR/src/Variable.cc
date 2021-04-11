@@ -41,7 +41,10 @@ namespace avl {
             llvm_value = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
         }
         else {
+            auto current_insert_pt = TheBuilder.saveIP();
+            TheBuilder.SetInsertPoint(TheBuilder.GetInsertBlock()->getParent()->getEntryBlock().getTerminator());
             llvm_value = TheBuilder.CreateAlloca(type->llvm_type);
+            TheBuilder.restoreIP(current_insert_pt);
         }
         align();
     }
