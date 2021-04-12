@@ -1,24 +1,12 @@
 # DIMPLE
 
-DIMPLE is a C-like imperative programming language. I started working on DIMPLE as a hobby project to learn about compilers and programming language design. The code base for the compiler frontend is relatively small (a little shy of 10,000 lines). In case you are interested, it should not be too daunting to go through various parts of the compiler code. The compiler frontend makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation (IR) of the source code, and then to produce machine-dependent object code. Here is a simple function written in DIMPLE that computes that factorial of its input argument
+DIMPLE is a C-like imperative programming language. I started working on DIMPLE as a hobby project to learn about compilers and programming language design. The code base for the compiler frontend is relatively small (a little shy of 10,000 lines). In case you are interested, it should not be too daunting to go through various parts of the compiler code. The compiler frontend makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation (IR) of the source code, and then to produce machine-dependent object code. 
 
-```
-factorial := func(i : int) -> int {
+The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). Here are some example programs written in DIMPLE. You can find them in the test folder of the repository.
 
-    if i < 0 {
-        return 0;
-    }
-    else if i == 0 {
-        return 1;
-    }
-    else {
-        return i * factorial(i-1);
-    }
-
-}
-```
-
-The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). 
+* [Hello World greeting](https://github.com/avartak/DIMPLE/blob/main/test/helloworld/helloworld.dmp)
+* [Factorial](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp)
+* [Dynamic binding of functions using vtables](https://github.com/avartak/DIMPLE/blob/main/test/vtable/polymorph.dmp) 
 
 # Installation
 
@@ -161,91 +149,11 @@ For those interested in browsing through the compiler code, here is a quick over
 * The [translator](https://github.com/avartak/DIMPLE/tree/main/translator) folder contains code that translates the AST to the IR. 
 * The [backend](https://github.com/avartak/DIMPLE/tree/main/backend) folder contains code that translates the IR to machine code. For now, this is a relatively straightforward plug into LLVM's backend functionalities. 
 
-# Example Program
+# Contributing
 
-This is an example program written in DIMPLE. It shows how to implement late binding of functions (also known as runtime polymorphism in object oriented programming). DIMPLE does not (as of now) natively support classes or runtime polymorphism.
+You are welcome to contribute to the development of DIMPLE. You can help in several ways
+* Report bugs in the code (and possible fixes)
+* Suggest implementation improvements if you feel some code can be written in a better way
+* Work on implementing new features to extend the language
 
-```
-/*
-
-An example of late binding functions using a vtable.
-
-*/
-
-`` Defining some representations for convenience
-char :: int8
-int  :: int64
-fnc  :: func(i : %I) -> char
-
-`` printChar is an externally defined function 
-`` It's basically a wrapper on fputc() from C standard library
-printChar : func(c : char)
-
-`` I is equivalent to an abstract base class with one virtual method
-I :: struct (
-    vptr : %%?
-)
-
-`` A is a child class of I
-A :: struct (
-    vptr : %%?
-)
-
-`` vtable of A that contains one function pointer (for the one virtual method of I)
-vtable_A := [1]%? {@f_A}
-
-`` init_A() is equivalent to the constructor of A
-init_A := func(this : %A) {
-    this$.vptr = @vtable_A[0];
-}
-
-`` virtual function that is overriden by A
-`` Returns character 'f'
-f_A := fnc {
-    return 'f';
-}
-
-`` B is another child class of I
-B :: struct (
-    vptr : %%?
-)
-
-`` vtable of B
-vtable_B := [1]%? {@f_B}
-
-`` Constructor of B; attaches the appropriate vtable to the vptr member
-init_B := func(this : %B) {
-    this$.vptr = @vtable_B[0];
-}
-
-`` virtual function overriden by B
-`` Returns character 'F'
-f_B := fnc {
-    return 'F';
-}
-
-`` print() function takes a pointer to I as an argument
-`` It prints either 'f' or 'F' depending on whether the argument is an instance of A or B
-print := func(i : %I) {
-    printChar((i$.vptr[0] => %fnc)$(i));
-    printChar('\n');
-}
-
-`` main() function
-`` Here we define an instance of A and B each
-`` We initialize these instances (set the vtables)
-`` Then we call the print() function on them (casting them to I)
-main := extern func(argc : int32, argv : %%char) -> int32 {
-
-    a := A{};
-    b := B{};
-
-    init_A(@a);
-    init_B(@b);
-
-    print(@a => %I);
-    print(@b => %I);
-
-    return 0 => int32;
-}
-```
+If you want to contribute changes to the source code, please submit a pull request. 
