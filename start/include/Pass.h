@@ -13,9 +13,9 @@ namespace avl {
     template<typename T>
     struct Pass {
 
-        InputManager* input;
-        AST* ast;
-        GST* gst;
+        InputManager* const input;
+        AST* const ast;
+        GST* const gst;
         std::shared_ptr<T> result;
         std::vector<Error> errors;
 
