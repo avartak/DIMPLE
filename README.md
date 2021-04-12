@@ -2,7 +2,7 @@
 
 DIMPLE is a C-like imperative programming language. I started working on DIMPLE as a hobby project to learn about compilers and programming language design. The code base for the compiler frontend is relatively small (less than 10,000 lines). The compiler frontend makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation (IR) of the source code, and then to produce machine-dependent object code. 
 
-The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). Here are some example programs written in DIMPLE. You can find them in the test folder of the repository.
+The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). Here are some example programs written in DIMPLE. You can find them in the [test](https://github.com/avartak/DIMPLE/tree/main/test) folder of the repository.
 
 * [Hello World greeting](https://github.com/avartak/DIMPLE/blob/main/test/helloworld/helloworld.dmp)
 * [Factorial](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp)
@@ -14,10 +14,9 @@ Interested in trying out DIMPLE? Here's what you need to do to build the compile
 
 ## Prerequisites
 
-* LLVM : DIMPLE uses the LLVM software infrastructure to compile the source code to the LLVM intermediate representation (IR). Therefore, LLVM libraries are needed to build DIMPLE. Please lookup the [LLVM docs](https://llvm.org/docs/CMake.html) to figure out the best way to install the software (version 11.0 is recommended). 
+* LLVM : Please lookup the [LLVM docs](https://llvm.org/docs/CMake.html) to figure out the best way to install the LLVM libraries (version 11.0 is recommended) on your machine. 
 
-* Clang : By default the clang++ compiler is used to compile the DIMPLE source code. If you wish to switch to another compiler (e.g. GCC)
- you will need to modify the [Makefile](https://github.com/avartak/DIMPLE/blob/main/Makefile) accordingly, and make sure that the LLVM libraries are correctly linked. 
+* Clang : You need a C++ compiler to build the DIMPLE source code. Clang is the current default choice. If you wish to switch to another compiler (e.g. GCC) you will need to modify the [Makefile](https://github.com/avartak/DIMPLE/blob/main/Makefile) accordingly, and make sure that the LLVM libraries are correctly linked. 
 
 ## Build DIMPLE
 
