@@ -27,7 +27,7 @@ namespace avl {
         virtual void declare() override;
         virtual void init() override;
 
-        void resetLocals();
+        void descope();
         void freeze();
         bool resume();
         bool checkTerminations();

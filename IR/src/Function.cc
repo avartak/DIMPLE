@@ -82,7 +82,7 @@ namespace avl {
         }
     }
 
-    void Function::resetLocals() {
+    void Function::descope() {
         if (lst->prev) {
             lst = lst->prev;
         }

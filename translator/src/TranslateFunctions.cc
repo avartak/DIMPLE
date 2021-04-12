@@ -288,7 +288,7 @@ namespace avl {
             if (!defineBlock(ifblock, start, end)) {
                 return error();
             }
-            currentFunction->resetLocals();
+            currentFunction->descope();
             
             CodeBlock::jump(mergeBB);
             if (i != block->body.size()-1) {
@@ -379,7 +379,7 @@ namespace avl {
         CodeBlock::jump(loopBB);
         CodeBlock::insert(mergeBB);
 
-        currentFunction->resetLocals();
+        currentFunction->descope();
         return success();
     }
 
