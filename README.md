@@ -1,10 +1,26 @@
 # DIMPLE
 
-DIMPLE is an imperative programming language. It's my hobby project to learn about writing compilers and creating a real-world programming language. DIMPLE supports a procedural paradigm, with many C-like features like structs, unions, pointers, etc. It is possible to write, compile and execute programs (only some simple ones have been tested so far). DIMPLE makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation of the source code and then to produce machine-dependent object code. 
+DIMPLE is a C-like imperative programming language. I started working on DIMPLE as a hobby project to learn about compilers and programming language design. The code base for the compiler frontend is relatively small (a little shy of 10,000 lines). In case you are interested, it should not be too daunting to go through various parts of the compiler code. The compiler frontend makes use of the [LLVM infrastructure](https://llvm.org/) to first generate an intermediate representation (IR) of the source code, and then to produce machine-dependent object code. Here is a simple function written in DIMPLE that computes that factorial of its input argument
 
-To get a flavor of how DIMPLE source code looks like, take a look at the [Hello World program](https://github.com/avartak/DIMPLE/blob/master/test/helloworld/helloworld.dmp) and the [Factorial program](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp). You can read more about DIMPLE on the [wiki page](https://github.com/avartak/DIMPLE/wiki). The instructions to build the DIMPLE source code can be found [here](https://github.com/avartak/DIMPLE/wiki/Building-DIMPLE). The DIMPLE syntax is explained on [this page](https://github.com/avartak/DIMPLE/wiki/Syntax). In particular, the lexis of the language (all possible lexemes that can be constructed) is described [here](https://github.com/avartak/DIMPLE/wiki/DIMPLE-Syntax#lexis), and the grammar of the language is detailed [here](https://github.com/avartak/DIMPLE/wiki/DIMPLE-Syntax#dimple-grammar)
+```
+factorial := func(i : int) -> int {
 
-# Some Features
+    if i < 0 {
+        return 0;
+    }
+    else if i == 0 {
+        return 1;
+    }
+    else {
+        return i * factorial(i-1);
+    }
+
+}
+```
+
+The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features below. 
+
+# Feature Overview
 
 DIMPLE supports simple primitive data types (integers, floating point variables), pointers as well as certain compound types such as structs, unions and arrays. The DIMPLE syntax shares many similarities with C, but is different in some ways. 
 
@@ -13,11 +29,11 @@ DIMPLE supports simple primitive data types (integers, floating point variables)
 A unique feature of DIMPLE is a _representation_. A representation _stands for_ a type or a compile-time constant expression. For example,
 
 ```
-C :: 2 + 3;
+C :: (2 + 3) | (1 << 4);
 BinOp :: func(a : int32, b: int32) -> int32;
 ```
 
-Here, ```C``` stands for the constant integer value 5, and ```BinOp``` stands for a _funtion type_ that takes two 32-bit integers as arguments and returns a 32-bit integer. The representation ```BinOp``` can be used as a stand-in replacement for all function types that have the _signature_ ```func(int32, int32) -> int32```. For instance, consider the following functions that perform operations on a pair of integers. 
+Here, ```C``` stands for the constant integer value 21, and ```BinOp``` stands for a _funtion type_ that takes two 32-bit integers as arguments and returns a 32-bit integer. The representation ```BinOp``` can be used as a stand-in replacement for all function types that have the _signature_ ```func(int32, int32) -> int32```. For instance, consider the following functions that perform operations on a pair of integers. 
 
 ```
 add := func(a : int32, b: int32) {
@@ -110,7 +126,6 @@ flip := func(@b : bool) {
 }
 ```
 
-Note, that unlike C++ DIMPLE does not support any explicit use of references (or aliases). 
 
 # Code Arrangement
 
