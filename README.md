@@ -18,7 +18,28 @@ factorial := func(i : int) -> int {
 }
 ```
 
-The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features below. 
+The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). 
+
+# Installation
+
+Interested in trying out DIMPLE? Here's what you need to do to build the compiler from its source code. 
+
+## Prerequisites
+
+* LLVM : DIMPLE uses the LLVM software infrastructure to compile the source code to the LLVM intermediate representation (IR). Therefore, LLVM libraries are needed to build DIMPLE. Please lookup the [LLVM docs](https://llvm.org/docs/CMake.html) to figure out the best way to install the software (version 11.0 is recommended). 
+
+* Clang : By default the clang++ compiler is used to compile the DIMPLE source code. If you wish to switch to another compiler (e.g. GCC)
+ you will need to modify the [Makefile](https://github.com/avartak/DIMPLE/blob/main/Makefile) accordingly, and make sure that the LLVM libraries are correctly linked. 
+
+## Build DIMPLE
+
+Clone the DIMPLE source code onto your machine with `git clone https://github.com/avartak/DIMPLE/`. You can build DIMPLE by running `make` in the top directory. You will need to adapt the following line in the Makefile according to your LLVM installation. 
+
+```
+LLVM     := /Users/adishvartak/Software/LLVM/install
+```
+
+Assuming all prerequisites are correctly installed, `make` should produce an executable called `dimple`. You can test it by running the examples in the `test/helloworld` and `test/factorial` folders (simply go to these folders and run make). 
 
 # Feature Overview
 
