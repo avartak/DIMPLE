@@ -4,8 +4,7 @@ DIMPLE is a C-like imperative programming language. I started working on DIMPLE 
 
 The DIMPLE syntax is explained in detail on this [wiki page](https://github.com/avartak/DIMPLE/wiki). You can find a quick overview of its features [below](https://github.com/avartak/DIMPLE/blob/main/README.md#feature-overview). Here are some example programs written in DIMPLE. You can find them in the [test](https://github.com/avartak/DIMPLE/tree/main/test) folder of the repository.
 
-* [Hello World greeting](https://github.com/avartak/DIMPLE/blob/main/test/helloworld/helloworld.dmp)
-* [Factorial](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp)
+* [Simple factorial computing program](https://github.com/avartak/DIMPLE/blob/main/test/factorial/factorial.dmp)
 * [Dynamic binding of functions using vtables](https://github.com/avartak/DIMPLE/blob/main/test/vtable/polymorph.dmp) 
 
 # Installation
