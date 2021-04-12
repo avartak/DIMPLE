@@ -70,7 +70,6 @@ namespace avl {
     std::string Pass<T>::errorPrintout() {
         std::string err;
         for (std::size_t i = errors.size(); i > 0; i--) {
-            //err += errors[i-1].print(input.get());
             err += errors[i-1].print(input);
         }
         return err;
