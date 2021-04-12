@@ -103,26 +103,26 @@ namespace avl {
     bool Function::checkTerminations() {
 
         auto fn = llvm::cast<llvm::Function>(ptr());
-		bool status = true;
+        bool status = true;
         freeze();
 
         if (retvar && retblock && retblock->block->getParent() == nullptr) {
             CodeBlock::insert(retblock);
-		    TheBuilder.CreateRet(retvar->val());
+            TheBuilder.CreateRet(retvar->val());
         }
 
         for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
             if (iter->getTerminator() != nullptr) {
                 continue;
             }
-			TheBuilder.SetInsertPoint(&*iter);
+            TheBuilder.SetInsertPoint(&*iter);
             if (fn->getReturnType()->isVoidTy()) {
                 TheBuilder.CreateRetVoid();
             }
             else if (retvar && freeze_block == &*iter) {
                 TheBuilder.CreateRet(retvar->val());
             }
-			else {
+            else {
                 status = false;
             }
         }
