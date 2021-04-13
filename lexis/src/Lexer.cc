@@ -115,8 +115,8 @@ namespace avl {
         last_column(1),
         next_line(1),
         next_column(1),
-        str(""),
-        token("")
+        token_string(""),
+        token_buffer("")
     {
         read();
     }
@@ -248,7 +248,7 @@ namespace avl {
 
     void Lexer::append() {
 
-        if (token == "") {
+        if (token_buffer == "") {
             start_line = next_line;
             start_column = next_column;
         }
@@ -258,7 +258,7 @@ namespace avl {
         end_column = next_column;
 
         if (next != EOF) {
-            token += char(next);
+            token_buffer += char(next);
         }
 
         switch (next) {
@@ -289,7 +289,7 @@ namespace avl {
         append();
 
         if (next == EOF) {
-            str = token = "";
+            token_string = token_buffer = "";
             return (input_error ? RULE_ERROR : RULE_EOF);
         }
 
@@ -310,7 +310,7 @@ namespace avl {
         next_column = end_column;
 
         if (m == RULE_UNDEF) {
-            token.erase(token.end()-1);
+            token_buffer.erase(token_buffer.end()-1);
             end_line = last_line;
             end_column = last_column;
             m = match(true);
@@ -319,8 +319,8 @@ namespace avl {
         if (m == RULE_UNDEF && next != EOF) {
             append();
         }
-        str = token;
-        token = "";
+        token_string = token_buffer;
+        token_buffer = "";
         state = LEXER_STATE_INIT;
         return (m);
 

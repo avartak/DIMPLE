@@ -45,8 +45,8 @@ namespace avl {
         uint16_t last_column;
         uint32_t next_line;
         uint16_t next_column;
-        std::string str;
-        std::string token;
+        std::string token_string;
+        std::string token_buffer;
 
         Lexer(std::ifstream&);
 

@@ -4,13 +4,13 @@ namespace avl {
 
     int Lexer::match(bool exact) {
 
-        if (token == "") {
+        if (token_buffer == "") {
             return RULE_UNDEF;
         }
 
         switch (state) {
             case LEXER_STATE_INCL :
-                return token.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
+                return token_buffer.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
             case LEXER_STATE_WS :
                 return isWS(exact) ? RULE_WS : RULE_UNDEF;
             case LEXER_STATE_ONELINE_COMMENT :
@@ -37,12 +37,12 @@ namespace avl {
                 for (const auto& keyword_pair : keywords) {
                     const auto& keyword = keyword_pair.second;
                     if (exact) {
-                        if (token == keyword) {
+                        if (token_buffer == keyword) {
                             return keyword_pair.first;
                         }
                     }
                     else {
-                        if (keyword.find(token) == 0) {
+                        if (keyword.find(token_buffer) == 0) {
                             return keyword_pair.first;
                         }
                     }
@@ -56,12 +56,12 @@ namespace avl {
         for (const auto& sym_pair : symbols) {
             const auto& sym = sym_pair.second;
             if (exact) {
-                if (token == sym) {
+                if (token_buffer == sym) {
                     return sym_pair.first;
                 }
             }
             else {
-                if (sym.find(token) == 0) {
+                if (sym.find(token_buffer) == 0) {
                     return sym_pair.first;
                 }
             }
@@ -70,12 +70,12 @@ namespace avl {
         for (const auto& keyword_pair : keywords) {
             const auto& keyword = keyword_pair.second;
             if (exact) {
-                if (token == keyword) {
+                if (token_buffer == keyword) {
                     return keyword_pair.first;
                 }
             }
             else {
-                if (keyword.find(token) == 0) {
+                if (keyword.find(token_buffer) == 0) {
                     state = LEXER_STATE_WORD;
                     return keyword_pair.first;
                 }
@@ -113,13 +113,13 @@ namespace avl {
 
     bool Lexer::isWS(bool) {
 
-        for (std::size_t i = 0; i < token.length(); i++) {
-            if (token[i] != ' '  &&
-                token[i] != '\t' &&
-                token[i] != '\n' &&
-                token[i] != '\r' &&
-                token[i] != '\v' &&
-                token[i] != '\f')
+        for (std::size_t i = 0; i < token_buffer.length(); i++) {
+            if (token_buffer[i] != ' '  &&
+                token_buffer[i] != '\t' &&
+                token_buffer[i] != '\n' &&
+                token_buffer[i] != '\r' &&
+                token_buffer[i] != '\v' &&
+                token_buffer[i] != '\f')
             {
                 return false;
             }
@@ -134,29 +134,29 @@ namespace avl {
     bool Lexer::isOneLineComment(bool exact) {
 
         if (exact) {
-            if (token.length() < 3) {
+            if (token_buffer.length() < 3) {
                 return false;
             }
     
-            if (token[0] != '`' || token[1] != '`' || token[token.length()-1] != '\n') {
+            if (token_buffer[0] != '`' || token_buffer[1] != '`' || token_buffer[token_buffer.length()-1] != '\n') {
                 return false;
             }
         }
 
         else {
-            if (token.length() == 1) {
-                if (token[0] != '`') {
+            if (token_buffer.length() == 1) {
+                if (token_buffer[0] != '`') {
                     return false;
                 }
             }
-            else if (token.length() == 2) {
-                if (token[0] != '`' || token[1] != '`') {
+            else if (token_buffer.length() == 2) {
+                if (token_buffer[0] != '`' || token_buffer[1] != '`') {
                     return false;
                 }
                 state = LEXER_STATE_ONELINE_COMMENT;
             }
             else if (state == LEXER_STATE_ONELINE_COMMENT) {
-                return *(token.end()-2) != '\n';
+                return *(token_buffer.end()-2) != '\n';
             }
             else {
                 return false;
@@ -169,44 +169,44 @@ namespace avl {
     bool Lexer::isMultiLineComment(bool exact) {
 
         if (exact) {
-            if (token.length() < 4) {
+            if (token_buffer.length() < 4) {
                 return false;
             }   
             
-            if (token[0] != '/' || token[1] != '*') {
+            if (token_buffer[0] != '/' || token_buffer[1] != '*') {
                 return false; 
             }   
-            if (token[token.length()-2] != '*' || token[token.length()-1] != '/') {
+            if (token_buffer[token_buffer.length()-2] != '*' || token_buffer[token_buffer.length()-1] != '/') {
                 return false;
             }   
         }   
 
         else { 
-            if (token.length() == 1) {
-                if (token[0] != '/') {
+            if (token_buffer.length() == 1) {
+                if (token_buffer[0] != '/') {
                     return false;
                 }
             }
-            else if (token.length() == 2) {
-                if (token[0] != '/' || token[1] != '*') {
+            else if (token_buffer.length() == 2) {
+                if (token_buffer[0] != '/' || token_buffer[1] != '*') {
                     return false;
                 }
                 state = LEXER_STATE_MULTILINE_COMMENT;
             }
             else if (state == LEXER_STATE_MULTILINE_COMMENT) {
-                if (token.length() < 3) {
+                if (token_buffer.length() < 3) {
                     return !exact;
                 }
-                return (*(token.end()-2) != '/') || (*(token.end()-3) != '*');
+                return (*(token_buffer.end()-2) != '/') || (*(token_buffer.end()-3) != '*');
             }
             else {
                 return false;
             } 
         }
 
-        for (std::size_t i = 2; i < token.length()-1; i++) {
-            if (token[i] == '*' && token[i+1] == '/') {
-                if (i != token.length()-2) {
+        for (std::size_t i = 2; i < token_buffer.length()-1; i++) {
+            if (token_buffer[i] == '*' && token_buffer[i+1] == '/') {
+                if (i != token_buffer.length()-2) {
                     return false;
                 }   
             }   
@@ -217,14 +217,14 @@ namespace avl {
 
     bool Lexer::isIdentifier(bool) {
 
-        if (token[0] != '_' && letter.find(token[0]) == std::string::npos) {
+        if (token_buffer[0] != '_' && letter.find(token_buffer[0]) == std::string::npos) {
             return false;
         }   
         
         state = LEXER_STATE_WORD;
 
-        for (std::size_t i = 1; i < token.length(); i++) {
-            if (token[i] != '_' && letter.find(token[i]) == std::string::npos && dec.find(token[i])  == std::string::npos) {
+        for (std::size_t i = 1; i < token_buffer.length(); i++) {
+            if (token_buffer[i] != '_' && letter.find(token_buffer[i]) == std::string::npos && dec.find(token_buffer[i])  == std::string::npos) {
                 return false;
             }
         }   
@@ -236,21 +236,21 @@ namespace avl {
 
         int base = 0;
 
-        if (dec.find(token[0]) == std::string::npos) {
+        if (dec.find(token_buffer[0]) == std::string::npos) {
             return false;
         }
 
         state = LEXER_STATE_NUM;
 
-        if (token.length() == 1) {
+        if (token_buffer.length() == 1) {
             return true;
         }
 
-        if (dec.find(token[1]) != std::string::npos) {
+        if (dec.find(token_buffer[1]) != std::string::npos) {
             base = 10;
         }
-        if (token[0] == '0') {
-            switch (token[1]) {
+        if (token_buffer[0] == '0') {
+            switch (token_buffer[1]) {
                 case 'b' : base =  2; state = LEXER_STATE_INT; break;
                 case 'o' : base =  8; state = LEXER_STATE_INT; break;
                 case 'x' : base = 16; state = LEXER_STATE_INT; break;
@@ -261,21 +261,21 @@ namespace avl {
             return false;
         }
 
-        if (token.length() < 3) {
+        if (token_buffer.length() < 3) {
             return (base == 10 ? true : !exact);
         }
 
-        for (std::size_t i = 2; i < token.length(); i++) {
-            if (base ==  2 && bin.find(token[i]) == std::string::npos) {
+        for (std::size_t i = 2; i < token_buffer.length(); i++) {
+            if (base ==  2 && bin.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
-            if (base ==  8 && oct.find(token[i]) == std::string::npos) {
+            if (base ==  8 && oct.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
-            if (base == 10 && dec.find(token[i]) == std::string::npos) {
+            if (base == 10 && dec.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
-            if (base == 16 && hex.find(token[i]) == std::string::npos) {
+            if (base == 16 && hex.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
         }
@@ -286,16 +286,16 @@ namespace avl {
 
     bool Lexer::isReal(bool exact) {
 
-        if (token == ".") {
+        if (token_buffer == ".") {
             return !exact;
         }
 
-        if (token[0] != '.' && dec.find(token[0]) == std::string::npos) {
+        if (token_buffer[0] != '.' && dec.find(token_buffer[0]) == std::string::npos) {
             return false;
         }
 
-        if (token.length() > 1) {
-            if (token[0] == '.' && dec.find(token[0]) == std::string::npos) {
+        if (token_buffer.length() > 1) {
+            if (token_buffer[0] == '.' && dec.find(token_buffer[0]) == std::string::npos) {
                 return false;
             }
         }
@@ -303,44 +303,44 @@ namespace avl {
         state = LEXER_STATE_NUM;
 
         std::size_t pos = 0;
-        while (pos < token.length() && dec.find(token[pos]) != std::string::npos) {
+        while (pos < token_buffer.length() && dec.find(token_buffer[pos]) != std::string::npos) {
             pos++;
         }
-        if (pos == token.length()) {
+        if (pos == token_buffer.length()) {
             return !exact;
         }
 
-        if (token[pos] == '.') {
+        if (token_buffer[pos] == '.') {
 
             state = LEXER_STATE_REAL;
 
             pos++;
-            while (pos < token.length() && dec.find(token[pos]) != std::string::npos) {
+            while (pos < token_buffer.length() && dec.find(token_buffer[pos]) != std::string::npos) {
                 pos++;
             }
-            if (pos == token.length()) {
+            if (pos == token_buffer.length()) {
                 return true;
             }
         }
 
-        if (token[pos] != 'e' && token[pos] != 'E') {
+        if (token_buffer[pos] != 'e' && token_buffer[pos] != 'E') {
             return false;
         }
 
         state = LEXER_STATE_REAL;
 
         pos++;
-        if (pos == token.length()) {
+        if (pos == token_buffer.length()) {
             return !exact;
         }
-        if (token[pos] == '+' || token[pos] == '-') {
+        if (token_buffer[pos] == '+' || token_buffer[pos] == '-') {
             pos++;
         }
-        if (pos == token.length()) {
+        if (pos == token_buffer.length()) {
             return !exact;
         }
-        while (pos < token.length()) {
-            if (dec.find(token[pos]) == std::string::npos) {
+        while (pos < token_buffer.length()) {
+            if (dec.find(token_buffer[pos]) == std::string::npos) {
                 return false;
             }
         }
@@ -349,27 +349,27 @@ namespace avl {
 
     bool Lexer::isChar(bool exact) {
 
-        if (token[0] != '\'') {
+        if (token_buffer[0] != '\'') {
             return false;
         }
 
         state = LEXER_STATE_CHAR;
 
-        if (token.length() == 1) {
+        if (token_buffer.length() == 1) {
             return !exact;
         }
 
         std::size_t i = 1;
-        while (i < token.length()) {
+        while (i < token_buffer.length()) {
             if (!nextChar(i, exact)) {
                 return false;
             }
             i++;
-            if (i == token.length()) {
+            if (i == token_buffer.length()) {
                 return !exact;
             }
-            else if (i == token.length()-1) {
-                return (token[i] == '\'') || !exact;
+            else if (i == token_buffer.length()-1) {
+                return (token_buffer[i] == '\'') || !exact;
             }
         }
 
@@ -378,31 +378,31 @@ namespace avl {
 
     bool Lexer::isString(bool exact) {
 
-        if (token[0] != '\"') {
+        if (token_buffer[0] != '\"') {
             return false;
         }
 
         state = LEXER_STATE_STRING;
 
-        if (token.length() == 1) {
+        if (token_buffer.length() == 1) {
             return !exact;
         }
 
-        if (token == "\"\"") {
+        if (token_buffer == "\"\"") {
             return true;
         }
 
         std::size_t i = 1;
-        while (i < token.length()) {
+        while (i < token_buffer.length()) {
             if (!nextChar(i, exact)) {
                 return false;
             }
             i++;
-            if (i == token.length()) {
+            if (i == token_buffer.length()) {
                 return !exact;
             }
-            else if (i == token.length()-1) {
-                return (token[i] == '\"') || !exact;
+            else if (i == token_buffer.length()-1) {
+                return (token_buffer[i] == '\"') || !exact;
             }
         }
 
@@ -411,60 +411,60 @@ namespace avl {
 
     bool Lexer::nextChar(std::size_t& i, bool exact) {
 
-        if (i >= token.length()) {
+        if (i >= token_buffer.length()) {
             return false;
         }
-        if (token[i] == '\'' || 
-            token[i] == '\"' ||
-            token[i] == '\f' || 
-            token[i] == '\n' ||
-            token[i] == '\r' ||
-            token[i] == '\v') 
+        if (token_buffer[i] == '\'' || 
+            token_buffer[i] == '\"' ||
+            token_buffer[i] == '\f' || 
+            token_buffer[i] == '\n' ||
+            token_buffer[i] == '\r' ||
+            token_buffer[i] == '\v') 
         {
             return false;
         }
 
 
-        if (token[i] != '\\') {
+        if (token_buffer[i] != '\\') {
             return true;
         }
 
-        if (i == token.length()-1) {
+        if (i == token_buffer.length()-1) {
             return !exact;
         }
         i++;
-        if (token[i] == 'a'  ||
-            token[i] == 'b'  ||
-            token[i] == 'f'  ||
-            token[i] == 'n'  ||
-            token[i] == 'r'  ||
-            token[i] == 't'  ||
-            token[i] == 'v'  ||
-            token[i] == '\\' ||
-            token[i] == '\'' ||
-            token[i] == '\"')
+        if (token_buffer[i] == 'a'  ||
+            token_buffer[i] == 'b'  ||
+            token_buffer[i] == 'f'  ||
+            token_buffer[i] == 'n'  ||
+            token_buffer[i] == 'r'  ||
+            token_buffer[i] == 't'  ||
+            token_buffer[i] == 'v'  ||
+            token_buffer[i] == '\\' ||
+            token_buffer[i] == '\'' ||
+            token_buffer[i] == '\"')
         {   
             return true;
         }
-        else if (token[i] == '0' ||
-                 token[i] == '1' ||
-                 token[i] == '2' ||
-                 token[i] == '3' ||
-                 token[i] == 'x')
+        else if (token_buffer[i] == '0' ||
+                 token_buffer[i] == '1' ||
+                 token_buffer[i] == '2' ||
+                 token_buffer[i] == '3' ||
+                 token_buffer[i] == 'x')
         {
-            const auto& digits = (token[i] == 'x' ? hex : oct);
-            if (i == token.length()-1) {
+            const auto& digits = (token_buffer[i] == 'x' ? hex : oct);
+            if (i == token_buffer.length()-1) {
                 return !exact;
             }
             i++;
-            if (digits.find(token[i]) == std::string::npos) {
+            if (digits.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
-            if (i == token.length()-1) {
+            if (i == token_buffer.length()-1) {
                 return !exact;
             }
             i++;
-            if (digits.find(token[i]) == std::string::npos) {
+            if (digits.find(token_buffer[i]) == std::string::npos) {
                 return false;
             }
             return true;
