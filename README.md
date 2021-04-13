@@ -31,7 +31,7 @@ Assuming all prerequisites are correctly installed, `make` should produce an exe
 
 DIMPLE supports simple primitive data types (integers, floating point variables), pointers as well as certain compound types such as structs, unions and arrays. The DIMPLE syntax shares many similarities with C, but is different in some ways. 
 
-## Location Invariance of Global Constructs
+## Location Invariance of global constructs
 
 A key distinction between DIMPLE and C is that the global constructs (i.e. global variables, functions and representations) can be used in a location invariant manner. In other words, DIMPLE does not require a global construct to be declared or defined before being used. This obviates the need for forward declarations. For example, the following is valid in DIMPLE. 
 
