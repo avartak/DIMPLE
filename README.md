@@ -31,6 +31,24 @@ Assuming all prerequisites are correctly installed, `make` should produce an exe
 
 DIMPLE supports simple primitive data types (integers, floating point variables), pointers as well as certain compound types such as structs, unions and arrays. The DIMPLE syntax shares many similarities with C, but is different in some ways. 
 
+## Location Invariance of Global Constructs
+
+A key distinction between DIMPLE and C is that the global constructs (i.e. global variables, functions and representations) can be used in a location invariant manner. In other words, DIMPLE does not require a global construct to be declared or defined before being used. This obviates the need for forward declarations. For example, the following is valid in DIMPLE. 
+
+```
+A :: struct (
+    i : int64,
+    p : %B
+)
+
+B :: struct (
+    d : real64,
+    p : %A
+)
+```
+
+In fact, the only reason to use declarations in DIMPLE is to link externally defined code (e.g. preexisting libraries). 
+
 ## Representation
 
 A unique feature of DIMPLE is a _representation_. A representation _stands for_ a type or a compile-time constant expression. For example,
