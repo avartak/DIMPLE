@@ -187,19 +187,31 @@ namespace avl {
             return error(definition->name, "\'" + n + "\' is also defined as a representation");
         }
 
-        if (!getType(definition->type)) {
-            return error(definition->name, "Unable to determine type of variable " + n);
+        std::shared_ptr<Variable> var;
+        if (!definition->type) {
+            if (!getValue(definition->def)) {
+                return error(definition->def, "Unable to determine the initial value of " + n);
+            }
+            auto init = std::static_pointer_cast<Value>(result);
+            var = std::make_shared<Variable>(STORAGE_LOCAL, n, init->type);
+            var->declare();
+            BinaryOp::assign(var, init);
         }
-        auto type = std::static_pointer_cast<Type>(result);
-        if (type->isFunction()) {
-            return error(definition, "Cannot use a function type to define a variable");
-        }
-        if (!type->isComplete()) {
-            return error(definition->type, "Variable type is not completely defined");
-        }
-        auto var = std::make_shared<Variable>(STORAGE_LOCAL, n, type);
-        if (!initLocal(var, definition)) {
-            return error(definition->name, "Unable to initialize variable " + n);
+        else {
+            if (!getType(definition->type)) {
+                return error(definition->type, "Unable to determine the type of " + n);
+            }
+            auto type = std::static_pointer_cast<Type>(result);
+            if (type->isFunction()) {
+                return error(definition, "Cannot use a function type to define a variable");
+            }
+            if (!type->isComplete()) {
+                return error(definition->type, "Variable type is not completely defined");
+            }
+            var = std::make_shared<Variable>(STORAGE_LOCAL, n, type);
+            if (!initLocal(var, definition)) {
+                return error(definition->name, "Unable to initialize variable " + n);
+            }
         }
 
         currentFunction->lst->variables[n] = var;

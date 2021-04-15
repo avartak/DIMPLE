@@ -63,34 +63,6 @@ namespace avl {
         return true;
     }
 
-    bool Parser::parseTerm(std::size_t it, bool strict) {
-
-        if (parseToken(it, TOKEN_UNDEF) || parseToken(it, TOKEN_ERROR)) {
-            return error();
-        }
-
-        if (strict) {
-            if (parseToken(it, TOKEN_SEMICOLON)) {
-                return success(1);
-            }
-            else {
-                return error(tokens[it-1], "Expect \';\' to terminate the statement");
-            }
-        }
-
-        if (parseToken(it, TOKEN_SEMICOLON)) {
-            return success(1);
-        }
-        else if (parseToken(it, TOKEN_EOF)) {
-            return success(0);
-        }
-        else if (tokens[it]->loc.start.line != tokens[it-1]->loc.start.line) {
-            return success(0);
-        }
-
-        return error(tokens[it-1], "Expect \';\' or a newline to terminate the statement");
-    }
-
     bool Parser::isUnaryOp(std::size_t it) {
 
         return (parseToken(it, TOKEN_PLUS)       || parseToken(it, TOKEN_MINUS) ||

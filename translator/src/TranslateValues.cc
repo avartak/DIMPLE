@@ -106,6 +106,10 @@ namespace avl {
             storage = ast->definitions[n]->storage;
         }
 
+        if (!tnode) {
+            return getGlobalVar(ident, storage, nullptr);
+        }
+
         auto tynode = tnode;
         if (tynode->kind == NODE_IDENTIFIER) {
             tynode = ast->getNonSynonymRepNode(std::static_pointer_cast<Identifier>(tnode));

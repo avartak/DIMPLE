@@ -16,9 +16,8 @@ printChar : func(c : char)
 `` Function definition
 hello := func() {
 
-    s := %char{"Hello World!\n"};
-
-    i := int{0};
+    s := "Hello World!\n";
+    i := 0;
 
     loop ; s[i] != (0 => char); i += 1 {
         printChar(s[i]);

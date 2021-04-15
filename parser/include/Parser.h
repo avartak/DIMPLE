@@ -35,7 +35,6 @@ namespace avl {
         bool isAvailable(std::size_t);
 
         bool parseToken(std::size_t, int);
-        bool parseTerm(std::size_t, bool);
 
         bool parseProg(std::size_t);
         bool parseEmpty(std::size_t);

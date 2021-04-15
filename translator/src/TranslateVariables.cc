@@ -18,15 +18,32 @@ namespace avl {
         }
 
         std::shared_ptr<Node> defn;
-        auto var = std::make_shared<Variable>(storage, n, type);
         if (ast->declarations.find(n) != ast->declarations.end()) {
             defn = std::make_shared<NullInit>(false);
         }
         else {
             defn = ast->definitions[n];
         }
-        if (!initGlobal(var, defn)) {
-            return error();
+
+        std::shared_ptr<Variable> var;
+        if (!type) {
+            auto def = static_cast<DefineStatement*>(defn.get())->def;
+            if (!getValue(def)) {
+                return error(def, "Unable to determine the initial value of global " + n);
+            }
+            auto init = std::static_pointer_cast<Value>(result);
+            if (!init->isConst()) {
+                return error(def, "Initial value of global " + n + " is not a constant");
+            }
+            var = std::make_shared<Variable>(storage, n, init->type);
+            var->declare();
+            var->initGlobal(std::static_pointer_cast<Value>(result));
+        }
+        else {
+            var = std::make_shared<Variable>(storage, n, type);
+            if (!initGlobal(var, defn)) {
+                return error();
+            }
         }
         result = gst->variables[n] = var;
         return success();

@@ -116,7 +116,7 @@ namespace avl {
 
     /*
 
-    REPRESENTATION : TOKEN_IDENT '::' (TYPE | EXPR) (';' | '\n' | TOKEN_EOF)
+    REPRESENTATION : TOKEN_IDENT '::' (TYPE | EXPR)
 
     */
 
@@ -145,16 +145,12 @@ namespace avl {
             return error(tokens[it+n], "Unable to parse the definition of representation " + nm);
         }
 
-        if (!parseTerm(it+n, false)) {
-            return error();
-        }
-        n += nParsed;
         return success(n);
     }
 
     /*
 
-    DECLARATION : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE) (';' | '\n' | TOKEN_EOF)
+    DECLARATION : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -190,16 +186,13 @@ namespace avl {
 
         ast->declarations[nm] = std::make_shared<NameNode>(name, type);
 
-        if (!parseTerm(it+n, false)) {
-            return error();
-        }
-        n += nParsed;
         return success(n);
     }
 
     /*
 
-    DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) (';' | '\n' | TOKEN_EOF)
+    DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) |
+                 ['extern'] TOKEN_IDENT ':=' EXPR
 
     */
 
@@ -236,6 +229,13 @@ namespace avl {
         }
         n++;
 
+        if (parseExpr(it+n) && !parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
+            n += nParsed;
+            def = result;
+            ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
+            return success(n);
+        }
+
         if (parseToken(it+n, TOKEN_IDENT)) {
             type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
             n++;
@@ -263,10 +263,6 @@ namespace avl {
 
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
-        if (!parseTerm(it+n, false)) {
-            return error();
-        }
-        n += nParsed;
         return success(n);
     }
 
