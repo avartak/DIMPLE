@@ -248,12 +248,12 @@ namespace avl {
             return error(tokens[it+n], "Unable to determine type of " + nm);
         }
 
-        if (parseFunc(it+n)) {
-        }
-        else if (parseInit(it+n)) {
+        if (parseInit(it+n)) {
             if (isMain) {
                 return error(tokens[it+n], "\'main\' can only be a function");
             }
+        }
+        else if (parseFunc(it+n)) {
         }
         else {
             return error(tokens[it], "Unable to parse the definition of " + nm);

@@ -15,6 +15,14 @@ namespace avl {
 
     bool Parser::parseFunc(std::size_t it) {
 
+        if (parseToken(it, TOKEN_CURLY_OPEN) && parseToken(it+1, TOKEN_CURLY_CLOSE)) {
+            auto nullinit = std::make_shared<NullInit>(true);
+            nullinit->loc = tokens[it]->loc;
+            nullinit->loc.end = tokens[it+1]->loc.end;
+            result = nullinit;
+            return success(2);
+        }
+
         std::shared_ptr<BlockNode> func = std::make_shared<FuncBlockNode>();
         if (parseBlock(it, func)) {
             result = func;
