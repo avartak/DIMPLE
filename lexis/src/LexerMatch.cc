@@ -9,7 +9,7 @@ namespace avl {
         }
 
         switch (state) {
-            case LEXER_STATE_INCL :
+            case LEXER_STATE_INCLUDE :
                 return token_buffer.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
             case LEXER_STATE_WS :
                 return isWS(exact) ? RULE_WS : RULE_UNDEF;
@@ -137,8 +137,10 @@ namespace avl {
             if (token_buffer.length() < 3) {
                 return false;
             }
-    
             if (token_buffer[0] != '`' || token_buffer[1] != '`' || token_buffer[token_buffer.length()-1] != '\n') {
+                return false;
+            }
+            if (token_buffer[token_buffer.length()-1] != '\n') {
                 return false;
             }
         }
@@ -172,7 +174,6 @@ namespace avl {
             if (token_buffer.length() < 4) {
                 return false;
             }   
-            
             if (token_buffer[0] != '/' || token_buffer[1] != '*') {
                 return false; 
             }   
@@ -194,24 +195,13 @@ namespace avl {
                 state = LEXER_STATE_MULTILINE_COMMENT;
             }
             else if (state == LEXER_STATE_MULTILINE_COMMENT) {
-                if (token_buffer.length() < 3) {
-                    return !exact;
-                }
-                return (*(token_buffer.end()-2) != '/') || (*(token_buffer.end()-3) != '*');
+                return (*(token_buffer.end()-3) != '*') || (*(token_buffer.end()-2) != '/');
             }
             else {
                 return false;
             } 
         }
 
-        for (std::size_t i = 2; i < token_buffer.length()-1; i++) {
-            if (token_buffer[i] == '*' && token_buffer[i+1] == '/') {
-                if (i != token_buffer.length()-2) {
-                    return false;
-                }   
-            }   
-        }
-        
         return true;
     }   
 

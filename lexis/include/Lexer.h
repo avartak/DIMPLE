@@ -10,7 +10,7 @@ namespace avl {
     enum Lexer_State_ID {
 
         LEXER_STATE_INIT,
-        LEXER_STATE_INCL,
+        LEXER_STATE_INCLUDE,
         LEXER_STATE_WS,
         LEXER_STATE_ONELINE_COMMENT,
         LEXER_STATE_MULTILINE_COMMENT,

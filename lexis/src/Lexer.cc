@@ -132,7 +132,7 @@ namespace avl {
                 case RULE_ERROR            : return TOKEN_ERROR;
                 case RULE_UNDEF            : return TOKEN_UNDEF;
             
-                case RULE_INCLUDE          : state = LEXER_STATE_INCL; return TOKEN_INCLUDE;
+                case RULE_INCLUDE          : state = LEXER_STATE_INCLUDE; return TOKEN_INCLUDE;
                 case RULE_FILENAME         : return TOKEN_FILENAME;
  
                 case RULE_WS               : break;
