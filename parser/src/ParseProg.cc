@@ -192,7 +192,7 @@ namespace avl {
     /*
 
     DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) |
-                 ['extern'] TOKEN_IDENT ':=' EXPR
+                 ['extern'] TOKEN_IDENT ':=' '{' EXPR '}'
 
     */
 
@@ -229,9 +229,17 @@ namespace avl {
         }
         n++;
 
-        if (parseExpr(it+n) && !parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
+        if (parseToken(it+n, TOKEN_CURLY_OPEN)) {
+            n++;
+            if (!parseExpr(it+n)) {
+                return error(tokens[it+n], "Unable to parse initial value expression for global variable " + nm);
+            }
             n += nParsed;
             def = result;
+            if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
+                return error(tokens[it+n], "Expect \'}\'");
+            }
+            n++;
             ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
             return success(n);
         }

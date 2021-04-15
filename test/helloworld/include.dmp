@@ -1,5 +1,5 @@
 `` Use this file to test the include functionality
 
 n := uint32{2.0 => uint32}
-m := 4 => int8
-p := "This is a string"
+m := {4 => int8}
+p := {"This is a string"}

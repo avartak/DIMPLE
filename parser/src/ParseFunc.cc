@@ -273,7 +273,7 @@ namespace avl {
 
     /*
 
-    LOCAL_VAR_DEF : TOKEN_IDENT ':=' EXPR |
+    LOCAL_VAR_DEF : TOKEN_IDENT ':=' '{' EXPR '}' |
                     TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) INITIALIZER
 
     */
@@ -289,13 +289,22 @@ namespace avl {
         if (!parseToken(it, TOKEN_IDENT) || !parseToken(it+1, TOKEN_DEFINE)) {
             return error();
         }
-        name = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+        name = std::make_shared<Identifier>(tokens[it]->str, tokens[it]->loc);
         n += 2;
 
-        if (parseExpr(it+n) && !parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
+        if (parseToken(it+n, TOKEN_CURLY_OPEN)) {
+            n++;
+            if (!parseExpr(it+n)) {
+                return error(tokens[it+n], "Unable to parse initial value expression for variable " + tokens[it]->str);
+            }
             n += nParsed;
             def = result;
+            if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
+                return error(tokens[it+n], "Expect \'}\'");
+            } 
+            n++;
         }
+
         else {
             if (parseToken(it+n, TOKEN_IDENT)) {
                 type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
