@@ -7,7 +7,6 @@ An example of late binding functions using a vtable.
 `` Defining some representations for convenience
 char :: int8
 int  :: int64
-fnc  :: func(i : %I) -> char
 
 `` printChar is an externally defined function 
 `` It's basically a wrapper on fputc() from C standard library
@@ -33,7 +32,7 @@ init_A := func(this : %A) {
 
 `` virtual function that is overriden by A
 `` Returns character 'f'
-f_A := fnc {
+f_A := func(a : %A) -> char {
     return 'f';
 }
 
@@ -52,14 +51,14 @@ init_B := func(this : %B) {
 
 `` virtual function overriden by B
 `` Returns character 'F'
-f_B := fnc {
+f_B := func(b : %B) -> char {
     return 'F';
 }
 
 `` print() function takes a pointer to I as an argument
 `` It prints either 'f' or 'F' depending on whether the argument is an instance of A or B
 print := func(i : %I) {
-    printChar((i$.vptr[0] => %fnc)$(i));
+    printChar((i$.vptr[0] => %func(i : %I) -> char)$(i));
     printChar('\n');
 }
 
