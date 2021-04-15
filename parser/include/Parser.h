@@ -32,7 +32,7 @@ namespace avl {
         bool isBinaryMathOp(std::size_t);
         bool isAssigner(std::size_t);
         bool isLiteral(std::size_t);
-        bool isDefined(std::size_t);
+        bool isAvailable(std::size_t);
 
         bool parseToken(std::size_t, int);
         bool parseTerm(std::size_t, bool);
@@ -43,7 +43,6 @@ namespace avl {
         bool parseRepresentation(std::size_t);
         bool parseDeclaration(std::size_t);
         bool parseDefinition(std::size_t);
-        bool parseMain(std::size_t);
 
         bool parseType(std::size_t);
         bool parseDataType(std::size_t);

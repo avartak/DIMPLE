@@ -28,8 +28,7 @@ namespace avl {
             parseInclude(it) ||
             parseRepresentation(it) ||
             parseDeclaration(it) ||
-            parseDefinition(it) ||
-            parseMain(it))
+            parseDefinition(it))
         {
             tokens.erase(tokens.begin()+it, tokens.begin()+it+nParsed);
             return parseProg(it);
@@ -131,7 +130,7 @@ namespace avl {
 
         std::shared_ptr<Identifier> name;
 
-        if (!isDefined(it)) {
+        if (!isAvailable(it)) {
             return error();
         }
         const auto& nm = tokens[it]->str;
@@ -170,7 +169,7 @@ namespace avl {
         std::shared_ptr<Identifier> name;
         std::shared_ptr<Node> type;
 
-        if (!isDefined(it)) {
+        if (!isAvailable(it)) {
             return error();
         }
         const auto& nm = tokens[it]->str;
@@ -200,7 +199,7 @@ namespace avl {
 
     /*
 
-    DEFINITION : TOKEN_IDENT ':=' ['extern'] (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) (';' | '\n' | TOKEN_EOF)
+    DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) (';' | '\n' | TOKEN_EOF)
 
     */
 
@@ -208,25 +207,34 @@ namespace avl {
 
         std::size_t n = 0;
 
-        if (!parseToken(it, TOKEN_IDENT) || !parseToken(it+1, TOKEN_DEFINE)) {
-            return error();
-        }
-
         uint16_t storage = STORAGE_INTERNAL;
         std::shared_ptr<Identifier> name;
         std::shared_ptr<Node> type;
         std::shared_ptr<Node> def;
+        bool isMain = false;
 
-        if (parseToken(it+2, TOKEN_EXTERN)) {
+        if (parseToken(it, TOKEN_EXTERN)) {
             storage = STORAGE_EXTERNAL;
+            n++;
         }
 
-        if (!isDefined(it)) {
+        if (!parseToken(it+n, TOKEN_IDENT) && !parseToken(it+n, TOKEN_MAIN)) {
+            return (storage == STORAGE_EXTERNAL ? error(tokens[it+n], "Expect global name after \'extern\'") : error());
+        }
+        if (parseToken(it+n, TOKEN_MAIN)) {
+            isMain = true;
+        }
+        const auto& nm = tokens[it+n]->str;
+        name = std::make_shared<Identifier>(nm, tokens[it+n]->loc);
+        n++;
+
+        if (!parseToken(it+n, TOKEN_DEFINE)) {
+            return (storage == STORAGE_INTERNAL ? error() : error(tokens[it+n], "Expect \':=\' after " + nm + " in global definition"));
+        }
+        if (!isAvailable(it+n-1)) {
             return error();
         }
-        const auto& nm = tokens[it]->str;
-        name = std::make_shared<Identifier>(nm, tokens[it]->loc);
-        n += (storage == STORAGE_INTERNAL ? 2 : 3);
+        n++;
 
         if (parseToken(it+n, TOKEN_IDENT)) {
             type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
@@ -236,15 +244,22 @@ namespace avl {
             type = result;
             n += nParsed;
         }
-
-        if (type && (parseInit(it+n) || parseFunc(it+n))) {
-            n += nParsed;
-            def = result;
+        else {
+            return error(tokens[it+n], "Unable to determine type of " + nm);
         }
 
-        if (!def) {
+        if (parseFunc(it+n)) {
+        }
+        else if (parseInit(it+n)) {
+            if (isMain) {
+                return error(tokens[it+n], "\'main\' can only be a function");
+            }
+        }
+        else {
             return error(tokens[it], "Unable to parse the definition of " + nm);
         }
+        n += nParsed;
+        def = result;
 
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
@@ -255,65 +270,7 @@ namespace avl {
         return success(n);
     }
 
-    /*
-
-    MAIN_FUNCTION : 'main' ':=' 'extern' (TOKEN_IDENT | TYPE) FUNCTION_BLOCK (';' | '\n' | TOKEN_EOF)
-
-    */
-
-    bool Parser::parseMain(std::size_t it) {
-
-        std::size_t n = 0;
-
-        if (!parseToken(it, TOKEN_MAIN)) {
-            return error();
-        }
-        if (!parseToken(it+1, TOKEN_DEFINE)) {
-            return error(tokens[it+1], "Expect \':=\' after \'main\'");
-        }
-        if (!parseToken(it+2, TOKEN_EXTERN)) {
-            return error(tokens[it+2], "Expect \'extern\' specifier for \'main\' after \':=\'");
-        }
-
-        std::shared_ptr<Identifier> name;
-        std::shared_ptr<Node> type;
-        std::shared_ptr<Node> def;
-
-        if (!isDefined(it)) {
-            return error();
-        }
-        const auto& nm = tokens[it]->str;
-        name = std::make_shared<Identifier>(nm, tokens[it]->loc);
-        n += 3;
-
-        if (parseToken(it+n, TOKEN_IDENT)) {
-            type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
-            n++;
-        }
-        else if (parseType(it+n)) {
-            type = result;
-            n += nParsed;
-        }
-
-        if (type && parseFunc(it+n)) {
-            n += nParsed;
-            def = result;
-        }
-
-        if (!def) {
-            return error(tokens[it], "Unable to parse the definition of " + nm);
-        }
-
-        ast->definitions[nm] = std::make_shared<DefineStatement>(STORAGE_EXTERNAL, name, type, def);
-
-        if (!parseTerm(it+n, false)) {
-            return error();
-        }
-        n += nParsed;
-        return success(n);
-    }
-
-    bool Parser::isDefined(std::size_t it) {
+    bool Parser::isAvailable(std::size_t it) {
 
         std::shared_ptr<Identifier> prev;
         const auto& nm = tokens[it]->str;

@@ -46,7 +46,7 @@ hello := func() {
 }
 
 `` The "main" function
-main := extern func(argc : int32, argv : %%char) -> int32 {
+extern main := func(argc : int32, argv : %%char) -> int32 {
 
     hello();
 

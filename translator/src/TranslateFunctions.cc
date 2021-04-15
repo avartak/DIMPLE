@@ -17,6 +17,9 @@ namespace avl {
         if (n == "main") {
             auto ftype = static_cast<FunctionType*>(type.get());
             bool sigisgood = true;
+            if (storage != STORAGE_EXTERNAL) {
+                return error(ident, "\'main\' function should be \'extern\'");
+            }
             if (ftype->ret->is != TYPE_INT32) {
                 sigisgood = false;
             }

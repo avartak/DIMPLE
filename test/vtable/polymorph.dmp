@@ -66,7 +66,7 @@ print := func(i : %I) {
 `` Here we define an instance of A and B each
 `` We initialize these instances (set the vtables)
 `` Then we call the print() function on them (casting them to I)
-main := extern func(argc : int32, argv : %%char) -> int32 {
+extern main := func(argc : int32, argv : %%char) -> int32 {
 
     a := A{};
     b := B{};
