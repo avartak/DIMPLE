@@ -74,7 +74,7 @@ namespace avl {
                 }
             }
             else {
-                var = std::make_shared<Variable>(STORAGE_UNDEFINED, "", ft->args[i].type);
+                var = std::make_shared<Variable>(STORAGE_REFERENCE, "", ft->args[i].type);
                 var->llvm_value = fn->getArg(idx);
             }
             args.push_back(var);

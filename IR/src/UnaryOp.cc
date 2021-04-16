@@ -90,7 +90,7 @@ namespace avl {
         }
         auto pt = static_cast<const PointerType*>(e->type.get());
         if (pt->points_to->isFunction()) {
-            auto func = std::make_shared<Function>(STORAGE_UNDEFINED, "", pt->points_to);
+            auto func = std::make_shared<Function>(STORAGE_REFERENCE, "", pt->points_to);
             func->llvm_value = e->val();
             ue = func;
         }
@@ -98,7 +98,7 @@ namespace avl {
             if (pt->points_to->size() == 0) {
                 return ue;   
             }
-            auto var = std::make_shared<Variable>(STORAGE_UNDEFINED, "", pt->points_to);
+            auto var = std::make_shared<Variable>(STORAGE_REFERENCE, "", pt->points_to);
             var->llvm_value = e->val(); // Should we align here as well ?
             ue = var;
         }

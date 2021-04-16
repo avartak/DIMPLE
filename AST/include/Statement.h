@@ -25,7 +25,7 @@ namespace avl {
 
     enum Storage_ID {
 
-        STORAGE_UNDEFINED,
+        STORAGE_REFERENCE,
         STORAGE_EXTERNAL,
         STORAGE_INTERNAL,
         STORAGE_STATIC,
