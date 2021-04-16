@@ -117,7 +117,7 @@ namespace avl {
 
     /*
 
-    REPRESENTATION : TOKEN_IDENT '::' (TYPE | EXPR)
+    REPRESENTATION : TOKEN_IDENT '::' (TYPE | EXPR) [';']
 
     */
 
@@ -146,12 +146,15 @@ namespace avl {
             return error(tokens[it+n], "Unable to parse the definition of representation " + nm);
         }
 
+        if (parseToken(it+n, TOKEN_SEMICOLON)) {
+            n++;
+        }
         return success(n);
     }
 
     /*
 
-    DECLARATION : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+    DECLARATION : TOKEN_IDENT ':' (TOKEN_IDENT | TYPE) [';']
 
     */
 
@@ -187,13 +190,16 @@ namespace avl {
 
         ast->declarations[nm] = std::make_shared<NameNode>(name, type);
 
+        if (parseToken(it+n, TOKEN_SEMICOLON)) {
+            n++;
+        }
         return success(n);
     }
 
     /*
 
-    DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) |
-                 ['extern'] TOKEN_IDENT ':=' '{' EXPR '}'
+    DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) [';'] |
+                 ['extern'] TOKEN_IDENT ':=' '{' EXPR '}' [';']
 
     */
 
@@ -241,43 +247,46 @@ namespace avl {
                 return error(tokens[it+n], "Expect \'}\'");
             }
             n++;
-            ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
-            return success(n);
         }
 
-        if (parseToken(it+n, TOKEN_IDENT)) {
-            type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
-            n++;
-        }
-        else if (parseType(it+n)) {
-            type = result;
-            n += nParsed;
-        }
         else {
-            return error(tokens[it+n], "Unable to determine type of " + nm);
-        }
-
-        if (parseInit(it+n)) {
-            if (isMain) {
-                return error(tokens[it+n], "\'main\' can only be a function");
+            if (parseToken(it+n, TOKEN_IDENT)) {
+                type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
+                n++;
             }
+            else if (parseType(it+n)) {
+                type = result;
+                n += nParsed;
+            }
+            else {
+                return error(tokens[it+n], "Unable to determine type of " + nm);
+            }
+
+            if (parseInit(it+n)) {
+                if (isMain) {
+                    return error(tokens[it+n], "\'main\' can only be a function");
+                }
+            }
+            else if (parseFunc(it+n)) {
+            }
+            else {
+                return error(tokens[it], "Unable to parse the definition of " + nm);
+            }
+            n += nParsed;
+            def = result;
         }
-        else if (parseFunc(it+n)) {
-        }
-        else {
-            return error(tokens[it], "Unable to parse the definition of " + nm);
-        }
-        n += nParsed;
-        def = result;
 
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
+        if (parseToken(it+n, TOKEN_SEMICOLON)) {
+            n++;
+        }
         return success(n);
     }
 
     /*
 
-    REF_DEF : '@' TOKEN_IDENT ':=' EXPR
+    REF_DEF : '@' TOKEN_IDENT ':=' EXPR [';']
 
     */
 
@@ -316,6 +325,10 @@ namespace avl {
         n += nParsed;
         def = result;
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
+
+        if (parseToken(it+n, TOKEN_SEMICOLON)) {
+            n++;
+        }
         return success(n);
     }
 
