@@ -49,7 +49,7 @@ B :: struct (
 
 In fact, the only reason to use declarations in DIMPLE is to link externally defined code (e.g. preexisting libraries). 
 
-## Representation
+## Representations
 
 A unique feature of DIMPLE is a _representation_. A representation _stands for_ a type or a compile-time constant expression. For example,
 
@@ -149,6 +149,17 @@ flip := func(@b : bool) {
         b = true;
     }
 }
+```
+
+## Aliases or references
+
+DIMPLE allows the use of _aliases_ or references. An alias is basically another name for a given memory instance. This instance can be a variable, a function, or even a member of a compound variable. In case of variables, modifying the content of an alias will also change the content of the corresponding instance.  
+
+```
+a := [4]int8
+@i := a[2]
+p := int32{0}
+@q := p
 ```
 
 
