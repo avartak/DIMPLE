@@ -118,7 +118,7 @@ namespace avl {
 
     /*
 
-    NULLINIT : '{' '}'
+    NULLINIT : '{' '}' | '{' '~' '}'
 
     INITIALIZER : '{' (UNTAGGED_INITIALIZER | TAGGED_INITIALIZER) '}'
 
@@ -135,18 +135,24 @@ namespace avl {
 
         if (parseToken(it+n, TOKEN_CURLY_CLOSE)) {
             result = std::make_shared<NullInit>(true);
+            n++;
+        }
+        else if (parseToken(it+n, TOKEN_COMPLEMENT) && parseToken(it+n+1, TOKEN_CURLY_CLOSE)) {
+            result = std::make_shared<NullInit>(false);
+            n += 2;
         }
         else if (parseUntaggedInitSet(it+n) || 
                  parseTaggedInitSet(it+n)) 
         {
             n += nParsed;
+            if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
+                return error(tokens[it+n], "Expect \'}\' at the end of initializer set");
+            }
+            n++;
         } 
-        else return error();
-
-        if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
-            return error(tokens[it+n], "Expect \'}\' at the end of initializer set");
+        else {
+            return error();
         }
-        n++;
 
         auto loc = tokens[it]->loc;
         loc.end = tokens[it+n-1]->loc.end;

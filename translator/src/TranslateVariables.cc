@@ -45,6 +45,9 @@ namespace avl {
                 return error();
             }
         }
+        if (ast->declarations.find(n) != ast->declarations.end()) {
+            var->initExternal();
+        }
         result = gst->variables[n] = var;
         return success();
     }

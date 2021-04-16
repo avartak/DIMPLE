@@ -69,6 +69,12 @@ namespace avl {
         }
     }
 
+    void Variable::initExternal() {
+        if (isGlobal() && llvm_value != nullptr) {
+            llvm::cast<llvm::GlobalVariable>(llvm_value)->setExternallyInitialized(true);
+        }
+    }
+
     bool Variable::align() {
         std::size_t al = type->alignment();
         if (al == 0 || llvm_value == nullptr) {

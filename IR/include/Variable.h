@@ -16,6 +16,7 @@ namespace avl {
         virtual void init() override;
 
         void initGlobal(const std::shared_ptr<Value>&);
+        void initExternal();
         bool align();
 
         inline bool isGlobal() {

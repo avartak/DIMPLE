@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 #include <Parser.h>
 #include <TokenID.h>
@@ -276,7 +277,7 @@ namespace avl {
 
     /*
 
-    LOCAL_VAR_DEF : TOKEN_IDENT ':=' '{' EXPR '}' |
+    LOCAL_VAR_DEF : TOKEN_IDENT ':=' EXPR |
                     TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) INITIALIZER
 
     */
@@ -299,20 +300,7 @@ namespace avl {
         name = std::make_shared<Identifier>(nm, tokens[it]->loc);
         n += 2;
 
-        if (parseToken(it+n, TOKEN_CURLY_OPEN)) {
-            n++;
-            if (!parseExpr(it+n)) {
-                return error(tokens[it+n], "Unable to parse initial value expression for variable " + nm);
-            }
-            n += nParsed;
-            def = result;
-            if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
-                return error(tokens[it+n], "Expect \'}\'");
-            } 
-            n++;
-        }
-
-        else {
+        if (!parseExpr(it+n) || parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
             if (parseToken(it+n, TOKEN_IDENT)) {
                 type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 n++;
@@ -322,21 +310,16 @@ namespace avl {
                 n += nParsed;
             }
             else {
-                return error(tokens[it+n], "Failed to determine type of local variable " + nm);
+                return error(tokens[it+n], "Unable to parse the definition of local variable " + nm);
             }
 
-            if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
-                def = std::make_shared<NullInit>(false);
-            }
-            else if (parseInit(it+n)) {
-                n += nParsed;
-                def = result;
-            }
-            else {
-                return error(tokens[it+n], "Failed to parse initializer of local variable " + nm);
+            if (!parseInit(it+n)) {
+                return error(tokens[it+n], "Unable to parse initializer of local variable " + nm);
             }
         }
 
+        n += nParsed;
+        def = result;
         auto vdef = std::make_shared<DefineStatement>(STORAGE_LOCAL, name, type, def);
         b->symbols[nm] = vdef->name;
 

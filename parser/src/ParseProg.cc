@@ -199,7 +199,7 @@ namespace avl {
     /*
 
     DEFINITION : ['extern'] TOKEN_IDENT ':=' (TOKEN_IDENT | TYPE) (INITIALIZER | FUNCTION_BLOCK) [';'] |
-                 ['extern'] TOKEN_IDENT ':=' '{' EXPR '}' [';']
+                 ['extern'] TOKEN_IDENT ':=' EXPR [';']
 
     */
 
@@ -236,20 +236,7 @@ namespace avl {
         }
         n++;
 
-        if (parseToken(it+n, TOKEN_CURLY_OPEN)) {
-            n++;
-            if (!parseExpr(it+n)) {
-                return error(tokens[it+n], "Unable to parse initial value expression for global variable " + nm);
-            }
-            n += nParsed;
-            def = result;
-            if (!parseToken(it+n, TOKEN_CURLY_CLOSE)) {
-                return error(tokens[it+n], "Expect \'}\'");
-            }
-            n++;
-        }
-
-        else {
+        if (!parseExpr(it+n) || parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
             if (parseToken(it+n, TOKEN_IDENT)) {
                 type = std::make_shared<Identifier>(tokens[it+n]->str, tokens[it+n]->loc);
                 n++;
@@ -259,7 +246,7 @@ namespace avl {
                 n += nParsed;
             }
             else {
-                return error(tokens[it+n], "Unable to determine type of " + nm);
+                return error(tokens[it+n], "Unable to parse the definition of " + nm);
             }
 
             if (parseInit(it+n)) {
@@ -270,12 +257,12 @@ namespace avl {
             else if (parseFunc(it+n)) {
             }
             else {
-                return error(tokens[it], "Unable to parse the definition of " + nm);
+                return error(tokens[it+n], "Unable to parse the definition of " + nm);
             }
-            n += nParsed;
-            def = result;
         }
 
+        n += nParsed;
+        def = result;
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
         if (parseToken(it+n, TOKEN_SEMICOLON)) {
