@@ -4,6 +4,7 @@
 #include <PrimitiveType.h>
 #include <Statement.h>
 #include <CodeBlock.h>
+#include <LST.h>
 #include <Globals.h>
 
 namespace avl {

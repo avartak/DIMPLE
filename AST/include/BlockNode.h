@@ -13,7 +13,7 @@ namespace avl {
 
         std::shared_ptr<BlockNode> parent;
         std::vector<std::shared_ptr<Statement> > body;
-        std::map<std::string, std::shared_ptr<Identifier> > vars;
+        std::map<std::string, std::shared_ptr<Identifier> > symbols;
 
         BlockNode(uint16_t, const std::shared_ptr<BlockNode>& = nullptr);
 

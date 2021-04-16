@@ -52,4 +52,3 @@ extern main := func(argc : int32, argv : %%char) -> int32 {
     return 0 => int32;
 
 }
-

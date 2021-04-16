@@ -5,12 +5,12 @@
 #include <vector>
 #include <llvm/IR/BasicBlock.h>
 #include <Instance.h>
-#include <LST.h>
 #include <Variable.h>
 
 namespace avl {
 
     struct CodeBlock;
+    struct LST;
 
     struct Function : public Instance {
 

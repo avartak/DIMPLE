@@ -2,6 +2,7 @@
 #include <Function.h>
 #include <FunctionType.h>
 #include <CodeBlock.h>
+#include <LST.h>
 #include <Statement.h>
 #include <Globals.h>
 

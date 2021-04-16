@@ -33,6 +33,7 @@ namespace avl {
         bool isAssigner(std::size_t);
         bool isLiteral(std::size_t);
         bool isAvailable(std::size_t);
+        bool isAvailableLocally(std::size_t, const std::shared_ptr<BlockNode>&);
 
         bool parseToken(std::size_t, int);
 
@@ -42,6 +43,7 @@ namespace avl {
         bool parseRepresentation(std::size_t);
         bool parseDeclaration(std::size_t);
         bool parseDefinition(std::size_t);
+        bool parseRefDef(std::size_t);
 
         bool parseType(std::size_t);
         bool parseDataType(std::size_t);
@@ -70,6 +72,7 @@ namespace avl {
         bool parseStatement(std::size_t, const std::shared_ptr<BlockNode>&);
         bool parseBlock(std::size_t, const std::shared_ptr<BlockNode>&);
         bool parseLocalVarDef(std::size_t, const std::shared_ptr<BlockNode>&);
+        bool parseLocalRefDef(std::size_t, const std::shared_ptr<BlockNode>&);
         bool parseIf(std::size_t, const std::shared_ptr<BlockNode>&);
         bool parseLoop(std::size_t, const std::shared_ptr<BlockNode>&);
 

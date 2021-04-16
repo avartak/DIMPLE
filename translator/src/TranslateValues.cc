@@ -7,6 +7,7 @@
 #include <StructType.h>
 #include <UnionType.h>
 #include <CodeBlock.h>
+#include <LST.h>
 
 namespace avl {
 
@@ -18,7 +19,7 @@ namespace avl {
                 return error(ident, "Invalid use of \'main\'");
             }
             if (currentFunction && currentFunction->lst->isDefined(n)) {
-                result = currentFunction->lst->getVariable(n);
+                result = currentFunction->lst->getInstance(n);
             }
             else if (ast->representations.find(n) != ast->representations.end() ||
                      ast->declarations.find(n) != ast->declarations.end() ||
@@ -76,14 +77,14 @@ namespace avl {
 
         if (gst->functions.find(n) != gst->functions.end()) {
             if (!gst->functions[n]) {
-                return error("Unable to completely define function " + n);
+                return error("Unable to completely define " + n);
             }
             result = gst->functions[n];
             return success();
         }
         else if (gst->variables.find(n) != gst->variables.end()) {
             if (!gst->variables[n]) {
-                return error("Unable to completely define variable " + n);
+                return error("Unable to completely define " + n);
             }
             result = gst->variables[n];
             return success();
@@ -98,12 +99,15 @@ namespace avl {
         std::shared_ptr<Node> tnode;
         uint16_t storage = (ast->definitions.find(n) != ast->definitions.end() ? ast->definitions[n]->storage : STORAGE_EXTERNAL);
 
+        if (storage == STORAGE_REFERENCE) {
+            return getGlobalRef(ident);
+        }
+
         if (ast->declarations.find(n) != ast->declarations.end()) {
             tnode = ast->declarations[n]->node;
         }
         else {
             tnode = ast->definitions[n]->type;
-            storage = ast->definitions[n]->storage;
         }
 
         if (!tnode) {
@@ -136,6 +140,39 @@ namespace avl {
         }
 
         return ( type->isFunction() ? getFunction(ident, storage, type) : getGlobalVar(ident, storage, type) );
+    }
+
+    bool Translator::getGlobalRef(const std::shared_ptr<Identifier>& ident) {
+
+        const auto& n = ident->name;
+        const auto& defn = ast->definitions[n];
+        const auto& def = defn->def;
+
+        // I can't think of a better way to 'mark' the reference than declaring it both as a variable and a function
+        gst->functions[n] = std::shared_ptr<Function>();
+        gst->variables[n] = std::shared_ptr<Variable>();
+
+        if (!getValue(def)) {
+            return error(def, "Unable to determine the referee of global reference " + n);
+        }
+        auto referee = std::static_pointer_cast<Value>(result);
+        if (!referee->isInstance()) {
+            return error(def, "Referee of " + n + " is not an instance");
+        }
+        if (referee->isVar()) {
+            auto var = std::make_shared<Variable>(STORAGE_REFERENCE, n, referee->type);
+            var->llvm_value = static_cast<Variable*>(referee.get())->ptr();
+            result = gst->variables[n] = var;
+            gst->functions.erase(gst->functions.find(n));
+        }
+        else {
+            auto func = std::make_shared<Function>(STORAGE_REFERENCE, n, referee->type);
+            func->llvm_value = static_cast<Function*>(referee.get())->ptr();
+            result = gst->functions[n] = func;
+            gst->variables.erase(gst->variables.find(n));
+        }
+
+        return success();
     }
 
     bool Translator::literal(const std::shared_ptr<ExprNode>& expr) {

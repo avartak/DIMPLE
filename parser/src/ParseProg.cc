@@ -14,7 +14,7 @@ namespace avl {
            REPRESENTATION |
            DECLARATION    |
            DEFINITION     |
-           MAIN_FUNCTION
+           REF_DEF
 
     */
 
@@ -28,7 +28,8 @@ namespace avl {
             parseInclude(it) ||
             parseRepresentation(it) ||
             parseDeclaration(it) ||
-            parseDefinition(it))
+            parseDefinition(it) ||
+            parseRefDef(it))
         {
             tokens.erase(tokens.begin()+it, tokens.begin()+it+nParsed);
             return parseProg(it);
@@ -271,6 +272,50 @@ namespace avl {
 
         ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
 
+        return success(n);
+    }
+
+    /*
+
+    REF_DEF : '@' TOKEN_IDENT ':=' EXPR
+
+    */
+
+    bool Parser::parseRefDef(std::size_t it) {
+
+        std::size_t n = 0;
+
+        uint16_t storage = STORAGE_REFERENCE;
+        std::shared_ptr<Identifier> name;
+        std::shared_ptr<Node> type;
+        std::shared_ptr<Node> def;
+
+        if (!parseToken(it, TOKEN_ADDRESS)) {
+            return error();
+        }
+        n++;
+
+        if (!parseToken(it+n, TOKEN_IDENT)) {
+            return error(tokens[it+n], "Expect identifier after \'@\'");
+        }
+        const auto& nm = tokens[it+n]->str;
+        name = std::make_shared<Identifier>(nm, tokens[it+n]->loc);
+        n++;
+
+        if (!parseToken(it+n, TOKEN_DEFINE)) {
+            return (storage == STORAGE_INTERNAL ? error() : error(tokens[it+n], "Expect \':=\' after " + nm + " in global definition"));
+        }
+        if (!isAvailable(it+n-1)) {
+            return error();
+        }
+        n++;
+
+        if (!parseExpr(it+n)) {
+            return error(tokens[it+n], "Unable to parse the referee of global reference " + nm);
+        }
+        n += nParsed;
+        def = result;
+        ast->definitions[nm] = std::make_shared<DefineStatement>(storage, name, type, def);
         return success(n);
     }
 

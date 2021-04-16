@@ -45,6 +45,7 @@ namespace avl {
         bool getValue(const std::shared_ptr<Node>&);
         bool getConstRep(const std::shared_ptr<Identifier>&);
         bool getGlobalInstance(const std::shared_ptr<Identifier>&);
+        bool getGlobalRef(const std::shared_ptr<Identifier>&);
         bool literal(const std::shared_ptr<ExprNode>&);
         bool unary(const std::shared_ptr<UnaryExprNode>&);
         bool recast(const std::shared_ptr<BinaryExprNode>&);
@@ -71,6 +72,7 @@ namespace avl {
         bool getFunction(const std::shared_ptr<Identifier>&, uint16_t, const std::shared_ptr<Type>&);
         bool defineFunction(const std::shared_ptr<DefineStatement>&);
         bool defineLocalVar(const std::shared_ptr<DefineStatement>&);
+        bool defineLocalRef(const std::shared_ptr<DefineStatement>&);
         bool defineBlock(const std::shared_ptr<BlockNode>&, std::shared_ptr<CodeBlock> = nullptr, std::shared_ptr<CodeBlock> = nullptr);
         bool defineIfBlock(const std::shared_ptr<IfBlockNode>&, std::shared_ptr<CodeBlock>, std::shared_ptr<CodeBlock>);
         bool defineLoopBlock(const std::shared_ptr<LoopBlockNode>&);

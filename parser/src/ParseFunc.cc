@@ -93,7 +93,7 @@ namespace avl {
 
     /*
 
-    STATEMENT : 'continue' | 'break' | 'return' | 'return' EXPR | LOCAL_VAR_DEF | ASSIGN_STATEMENT | CALL_STATEMENT
+    STATEMENT : 'continue' | 'break' | 'return' | 'return' EXPR | LOCAL_VAR_DEF | LOCAL_REF_DEF | ASSIGN_STATEMENT | CALL_STATEMENT
 
     ASSIGN_STATEMENT : EXPR_ASSIGN
 
@@ -123,6 +123,9 @@ namespace avl {
             result = std::make_shared<ReturnStatement>(retval);
         }
         else if (parseLocalVarDef(it, b)) {
+            n += nParsed;
+        }
+        else if (parseLocalRefDef(it, b)) {
             n += nParsed;
         }
         else if (parseExpr(it)) {
@@ -289,13 +292,17 @@ namespace avl {
         if (!parseToken(it, TOKEN_IDENT) || !parseToken(it+1, TOKEN_DEFINE)) {
             return error();
         }
-        name = std::make_shared<Identifier>(tokens[it]->str, tokens[it]->loc);
+        const auto& nm = tokens[it]->str;
+        if (!isAvailableLocally(it, b)) {
+            return error();
+        }
+        name = std::make_shared<Identifier>(nm, tokens[it]->loc);
         n += 2;
 
         if (parseToken(it+n, TOKEN_CURLY_OPEN)) {
             n++;
             if (!parseExpr(it+n)) {
-                return error(tokens[it+n], "Unable to parse initial value expression for variable " + tokens[it]->str);
+                return error(tokens[it+n], "Unable to parse initial value expression for variable " + nm);
             }
             n += nParsed;
             def = result;
@@ -315,7 +322,7 @@ namespace avl {
                 n += nParsed;
             }
             else {
-                return error(tokens[it+n], "Failed to determine type of local variable " + tokens[it]->str);
+                return error(tokens[it+n], "Failed to determine type of local variable " + nm);
             }
 
             if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
@@ -326,22 +333,72 @@ namespace avl {
                 def = result;
             }
             else {
-                return error(tokens[it+n], "Failed to parse initializer of local variable " + tokens[it]->str);
+                return error(tokens[it+n], "Failed to parse initializer of local variable " + nm);
             }
         }
 
         auto vdef = std::make_shared<DefineStatement>(STORAGE_LOCAL, name, type, def);
-        auto vname = vdef->name->name;
-        if (b->vars.find(vdef->name->name) != b->vars.end()) {
-            std::stringstream err;
-            err << "Redefinition of " << vname << ". " << "Previous occurence at ";
-            err << b->vars[vname]->loc.filename(input) << ":" << b->vars[vname]->loc.start.line;
-            return error(vdef->name, err.str());
-        }
-        b->vars[vname] = vdef->name;
+        b->symbols[nm] = vdef->name;
 
         result = vdef;
         return success(n);
     }
 
+    /*
+
+    LOCAL_REF_DEF : TOKEN_IDENT ':=' EXPR
+
+    */
+
+    bool Parser::parseLocalRefDef(std::size_t it, const std::shared_ptr<BlockNode>& b) {
+
+        std::size_t n = 0;
+
+        std::shared_ptr<Identifier> name;
+        std::shared_ptr<Node> def;
+
+        if (!parseToken(it, TOKEN_ADDRESS)) {
+            return error();
+        }
+        n++;
+        if (!parseToken(it+n, TOKEN_IDENT) || !parseToken(it+n+1, TOKEN_DEFINE)) {
+            if (!parseToken(it+n, TOKEN_IDENT)) {
+                return error(tokens[it+n], "Expect identifier after \'@\'");
+            }
+            else {
+                return error(tokens[it+n], "Expect \':=\' after " + tokens[it+n]->str);
+            }
+        }
+        const auto& nm = tokens[it+n]->str;
+        if (!isAvailableLocally(it+n, b)) {
+            return error();
+        }
+        name = std::make_shared<Identifier>(nm, tokens[it+n]->loc);
+        n += 2;
+
+        if (!parseExpr(it+n)) {
+            return error(tokens[it+n], "Unable to parse referee expression for " + nm);
+        }
+        n += nParsed;
+        def = result;
+
+        auto vdef = std::make_shared<DefineStatement>(STORAGE_REFERENCE, name, nullptr, def);
+        b->symbols[nm] = vdef->name;
+
+        result = vdef;
+        return success(n);
+    }
+
+    bool Parser::isAvailableLocally(std::size_t it, const std::shared_ptr<BlockNode>& b) {
+
+        const auto& nm = tokens[it]->str;
+        if (b->symbols.find(nm) != b->symbols.end()) {
+            std::stringstream err;
+            err << "Redefinition of " << nm << ". " << "Previous occurence at ";
+            err << b->symbols[nm]->loc.filename(input) << ":" << b->symbols[nm]->loc.start.line;
+            return error(tokens[it], err.str());
+        }
+
+        return true;
+    }
 }

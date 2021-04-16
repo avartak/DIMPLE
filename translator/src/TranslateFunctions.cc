@@ -6,6 +6,7 @@
 #include <Statement.h>
 #include <BlockNode.h>
 #include <CodeBlock.h>
+#include <LST.h>
 #include <Globals.h>
 
 namespace avl {
@@ -180,8 +181,8 @@ namespace avl {
                 return error(definition->name, "Cannot define variable with argument name " + n);
             }
         }
-        if (currentFunction->lst->variables.find(n) != currentFunction->lst->variables.find(n)) {
-            return error(definition->name, "Cannot redefine variable with name " + n);
+        if (currentFunction->lst->isDefinedInThisScope(n)) {
+            return error(definition->name, "Cannot define variable with name " + n + ". Symbol name is already in use in this scope");
         }
         if (ast->representations.find(n) != ast->representations.end()) {
             return error(definition->name, "\'" + n + "\' is also defined as a representation");
@@ -219,6 +220,47 @@ namespace avl {
         return success();
     }
 
+    bool Translator::defineLocalRef(const std::shared_ptr<DefineStatement>& definition) {
+
+        const auto& n = definition->name->name;
+
+        auto ft = static_cast<FunctionType*>(currentFunction->type.get());
+        for (std::size_t i = 0; i < ft->args.size(); i++) {
+            if (ft->args[i].name && ft->args[i].name->name == n) {
+                return error(definition->name, "Cannot define reference with argument name " + n);
+            }
+        }
+        if (currentFunction->lst->isDefinedInThisScope(n)) {
+            return error(definition->name, "Cannot define reference with name " + n + ". Symbol name is already in use in this scope");
+        }
+        if (ast->representations.find(n) != ast->representations.end()) {
+            return error(definition->name, "\'" + n + "\' is also defined as a representation");
+        }
+
+        std::shared_ptr<Variable> var;
+        if (!getValue(definition->def)) {
+            return error(definition->def, "Unable to determine the referee of " + n);
+        }
+        auto referee = std::static_pointer_cast<Value>(result);
+        if (!referee->isInstance()) {
+            return error(definition->def, "Referee of " + n + " is not an instance");
+        }
+        if (referee->isVar()) {
+            auto var = std::make_shared<Variable>(STORAGE_REFERENCE, n, referee->type);
+            var->llvm_value = static_cast<Variable*>(referee.get())->ptr();
+            currentFunction->lst->variables[n] = var;
+            result = var;
+        }
+        else {
+            auto func = std::make_shared<Function>(STORAGE_REFERENCE, n, referee->type);
+            func->llvm_value = static_cast<Function*>(referee.get())->ptr();
+            currentFunction->lst->functions[n] = func;
+            result = func;
+        }
+
+        return success();
+    }
+
     bool Translator::defineBlock(const std::shared_ptr<BlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
 
         for (const auto& statement : block->body) {
@@ -252,8 +294,16 @@ namespace avl {
                 }
             }
             else if (statement->is == STATEMENT_DEFINE) {
-                if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(statement))) {
-                    return error();
+                auto defstat = std::static_pointer_cast<DefineStatement>(statement);
+                if (defstat->storage == STORAGE_REFERENCE) {
+                    if (!defineLocalRef(defstat)) {
+                        return error();
+                    }
+                }
+                else {
+                    if (!defineLocalVar(defstat)) {
+                        return error();
+                    }
                 }
             }
             else if (statement->is == BLOCK_IF) {
@@ -328,8 +378,16 @@ namespace avl {
 
         if (init) {
             if (init->is == STATEMENT_DEFINE) {
-                if (!defineLocalVar(std::static_pointer_cast<DefineStatement>(init))) {
-                    return error();
+                auto defstat = std::static_pointer_cast<DefineStatement>(init);
+                if (defstat->storage == STORAGE_REFERENCE) {
+                    if (!defineLocalRef(defstat)) {
+                        return error();
+                    }
+                }
+                else {
+                    if (!defineLocalVar(defstat)) {
+                        return error();
+                    }
                 }
             }
             else if (init->is == STATEMENT_ASSIGN) {
