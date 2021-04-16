@@ -136,6 +136,9 @@ namespace avl {
     bool Translator::getStructType(const std::shared_ptr<StructTypeNode>& stnode, bool includeOpaquePtr) {
 
         std::vector<NameType> members;
+        if (!checkDuplicateNames(stnode->members)) {
+            return error();
+        }
         bool packed = stnode->isPacked();
         for (std::size_t i = 0; i < stnode->members->set.size(); i++) {
             const NameNode& m = stnode->members->set[i];
@@ -159,6 +162,9 @@ namespace avl {
     bool Translator::getUnionType(const std::shared_ptr<UnionTypeNode>& utnode, bool includeOpaquePtr) {
 
         std::vector<NameType> members;
+        if (!checkDuplicateNames(utnode->members)) {
+            return error();
+        }
         for (std::size_t i = 0; i < utnode->members->set.size(); i++) {
             const NameNode& m = utnode->members->set[i];
             if (m.name && ast->representations.find(m.name->name) != ast->representations.end()) {
@@ -181,6 +187,9 @@ namespace avl {
     bool Translator::getFunctionType(const std::shared_ptr<FunctionTypeNode>& ftnode, bool includeOpaquePtr) {
 
         std::vector<NameType> args;
+        if (!checkDuplicateNames(ftnode->args)) {
+            return error();
+        }
         for (std::size_t i = 0; i < ftnode->args->set.size(); i++) {
             const NameNode& a = ftnode->args->set[i];
             if (ast->representations.find(a.name->name) != ast->representations.end()) {
@@ -206,4 +215,23 @@ namespace avl {
         return success();
     }
 
+    bool Translator::checkDuplicateNames(const std::shared_ptr<NameNodeSet>& nns) {
+
+        const auto& set = nns->set;
+        for (std::size_t i = 0; i < set.size(); i++) {
+            if (!set[i].name) {
+                continue;
+            }
+            for (std::size_t j = i+1; j < set.size(); j++) {
+                if (!set[j].name) {
+                    continue;
+                }
+                if (set[i].name->name == set[j].name->name) {
+                    return error(set[j].name, "Duplicate member name \'" + set[j].name->name + "\'");
+                }
+            }
+        }
+
+        return true;
+    }
 }

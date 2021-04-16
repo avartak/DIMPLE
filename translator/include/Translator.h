@@ -41,6 +41,7 @@ namespace avl {
         bool getStructType(const std::shared_ptr<StructTypeNode>&, bool includeOpaquePtr);
         bool getUnionType(const std::shared_ptr<UnionTypeNode>&, bool includeOpaquePtr);
         bool getFunctionType(const std::shared_ptr<FunctionTypeNode>&, bool includeOpaquePtr);
+        bool checkDuplicateNames(const std::shared_ptr<NameNodeSet>&);
 
         bool getValue(const std::shared_ptr<Node>&);
         bool getConstRep(const std::shared_ptr<Identifier>&);
