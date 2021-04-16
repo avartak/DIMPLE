@@ -105,19 +105,19 @@ S :: struct (
 There are some interesting and unique ways of using representations, which don't have natural counterparts in C. For example, one may construct a self-referencing pointer type
 
 ```
-P :: %P
+P :: %P;
 ```
 
 Or one could construct an array whose element type is it's own pointer
 
 ```
-A :: [4]%A
+A :: [4]%A;
 ```
 
 One could also construct a function that takes as an argument (or returns) a pointer to it's own type
 
 ```
-F :: func(%F)
+F :: func(%F);
 ```
 
 ## Anonymous members 
@@ -156,10 +156,10 @@ flip := func(@b : bool) {
 DIMPLE allows the use of _aliases_ or references. An alias is basically another name for a given memory instance. This instance can be a variable, a function, or even a member of a compound variable. In case of variables, modifying the content of an alias will also change the content of the corresponding instance.  
 
 ```
-a := [4]int8
-@i := a[2]
-p := int32{0}
-@q := p
+a := [4]int8;
+@i := a[2];
+p := int32{0};
+@q := p;
 ```
 
 
