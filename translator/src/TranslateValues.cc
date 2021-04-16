@@ -314,6 +314,21 @@ namespace avl {
                 return error(binary, "Element operation cannot be performed on a pointer to unknown type");
             }
         }
+        else if (lhs->type->isArray()) {
+            if (rhs->isConst()) {
+                if (!rhs->isConstNoRelocation()) {
+                    return error(binary, "Element index is not a determinate constant");
+                }
+                if (!rhs->isConstNonNegativeInt()) {
+                    return error(binary, "Element index is not a non-negative integer constant");
+                }
+                auto idx = rhs->getUInt64ValueOrZero();
+                auto at = static_cast<ArrayType*>(lhs->type.get());
+                if (idx >= at->nelements) {
+                    return error(binary, "Element index beyond the array size");
+                }
+            }
+        }
         auto var = std::static_pointer_cast<Variable>(lhs);
         result = BinaryOp::element(var, rhs);
         if (!result) {
