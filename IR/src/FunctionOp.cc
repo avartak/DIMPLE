@@ -150,10 +150,7 @@ namespace avl {
                 auto ty = ft->ret->isCompound() ? std::make_shared<PrimitiveType>(TYPE_UINT64) : ft->ret;
                 func->retvar = std::make_shared<Variable>(STORAGE_LOCAL, "", ty);
                 func->retblock = std::make_shared<CodeBlock>();
-                //auto current_insert_pt = TheBuilder.saveIP();
-                //TheBuilder.SetInsertPoint(fn->getEntryBlock().getFirstNonPHIOrDbgOrLifetime());
                 func->retvar->declare();
-                //TheBuilder.restoreIP(current_insert_pt);
             }
             TheBuilder.CreateStore(v, func->retvar->ptr());
             CodeBlock::jump(func->retblock);

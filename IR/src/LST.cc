@@ -5,8 +5,8 @@ namespace avl {
     LST::LST() {
     }
 
-    LST::LST(const std::shared_ptr<LST>& p):
-        prev(p)
+    LST::LST(const Function& f):
+        prev(f.lst)
     {
     }
 

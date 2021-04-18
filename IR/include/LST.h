@@ -16,7 +16,7 @@ namespace avl {
         std::map<std::string, std::shared_ptr<Function> > functions;
 
         LST();
-        LST(const std::shared_ptr<LST>&);
+        LST(const Function&);
 
         bool isDefined(const std::string&);
         bool isDefinedInThisScope(const std::string&);

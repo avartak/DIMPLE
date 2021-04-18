@@ -347,9 +347,7 @@ namespace avl {
                 CodeBlock::insert(ifBB);
             }
             
-            auto newlst = std::make_shared<LST>();
-            newlst->prev = currentFunction->lst;
-            currentFunction->lst = newlst;
+            auto newlst = std::make_shared<LST>(*currentFunction);
             if (!defineBlock(ifblock, start, end)) {
                 return error();
             }
@@ -367,9 +365,7 @@ namespace avl {
 
     bool Translator::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
 
-        auto newlst = std::make_shared<LST>();
-        newlst->prev = currentFunction->lst;
-        currentFunction->lst = newlst;
+        auto newlst = std::make_shared<LST>(*currentFunction);
 
         const auto& init = block->body[0];
         const auto& loop = block->body[1];
