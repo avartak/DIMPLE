@@ -9,8 +9,7 @@ namespace avl {
         }
         auto next_node = representations[ident->name]->node;
         while (next_node->kind == NODE_IDENTIFIER) {
-            auto next_ident = std::static_pointer_cast<Identifier>(next_node);
-            const auto& nm = next_ident->name;
+            const auto& nm = static_cast<Identifier*>(next_node.get())->name;
             if (representations.find(nm) == representations.end()) {
                 break;
             }
