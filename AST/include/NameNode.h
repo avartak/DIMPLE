@@ -8,6 +8,13 @@
 
 namespace avl {
 
+    enum Argument_Attribute_ID {
+
+        PASS_BY_VALUE = 0,
+        PASS_BY_REFERENCE = 1
+
+    };
+
     struct NameNode : public Node {
 
         std::shared_ptr<Identifier> name;

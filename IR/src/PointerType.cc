@@ -44,7 +44,7 @@ namespace avl {
 
     std::shared_ptr<Type> PointerType::clone() const {
         auto pt = std::make_shared<PointerType>(points_to); // Cloning points_to may cause a feedback loop
-        pt->flags = flags;
+        pt->attr = attr;
         pt->name = name;
         pt->llvm_type = llvm_type;
         pt->complete = complete;

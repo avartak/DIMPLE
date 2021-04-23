@@ -20,7 +20,7 @@ namespace avl {
 
     std::shared_ptr<Type> VoidType::clone() const {
         auto t = std::make_shared<VoidType>();
-        t->flags = flags;
+        t->attr = attr;
         t->name = name;
         t->complete = complete;
         return t;

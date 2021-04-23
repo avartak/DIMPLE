@@ -43,7 +43,7 @@ namespace avl {
 
     std::shared_ptr<Type> PrimitiveType::clone() const {
         auto t = std::make_shared<PrimitiveType>(is);
-        t->flags = flags;
+        t->attr = attr;
         t->name = name;
         t->complete = complete;
         return t;

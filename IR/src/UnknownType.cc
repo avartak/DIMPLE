@@ -20,7 +20,7 @@ namespace avl {
 
     std::shared_ptr<Type> UnknownType::clone() const {
         auto t = std::make_shared<UnknownType>();
-        t->flags = flags;
+        t->attr = attr;
         t->name = name;
         t->complete = complete;
         return t;

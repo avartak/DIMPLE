@@ -79,7 +79,7 @@ namespace avl {
             ntv.push_back(NameType(m.name, m.type->clone(), m.attr));
         }
         auto ut = std::make_shared<UnionType>(ntv);
-        ut->flags = flags;
+        ut->attr = attr;
         ut->name = name;
         ut->llvm_type = llvm_type;
         ut->complete = complete;

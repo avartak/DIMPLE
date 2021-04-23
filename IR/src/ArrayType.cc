@@ -47,7 +47,7 @@ namespace avl {
  
     std::shared_ptr<Type> ArrayType::clone() const {
         auto at = std::make_shared<ArrayType>(array_of->clone(), nelements);
-        at->flags = flags;
+        at->attr = attr;
         at->name = name;
         at->llvm_type = llvm_type;
         at->complete = complete;

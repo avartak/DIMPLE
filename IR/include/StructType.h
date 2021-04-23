@@ -23,7 +23,7 @@ namespace avl {
         virtual std::shared_ptr<Type> clone() const override;
 
         inline bool isPacked() const {
-            return (flags & 1) > 0;
+            return (attr & 1) > 0;
         }
 
         static std::shared_ptr<Value> initConst(const std::shared_ptr<StructType>&, const std::map<std::size_t, std::shared_ptr<Value> >&);

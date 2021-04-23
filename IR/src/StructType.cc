@@ -7,7 +7,7 @@ namespace avl {
         Type(TYPE_STRUCT, n)
     {
         if (p) {
-            flags |= 1;
+            attr |= 1;
         }
     }
 
@@ -16,7 +16,7 @@ namespace avl {
         members(m)
     {
         if (p) {
-            flags |= 1;
+            attr |= 1;
         }
         std::vector<llvm::Type*> tv;
         for (const auto& im : m) {
@@ -84,7 +84,7 @@ namespace avl {
             ntv.push_back(NameType(m.name, m.type->clone(), m.attr));
         }
         auto st = std::make_shared<StructType>(ntv, isPacked());
-        st->flags = flags;
+        st->attr = attr;
         st->name = name;
         st->llvm_type = llvm_type;
         st->complete = complete;

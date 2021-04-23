@@ -83,7 +83,7 @@ namespace avl {
             ntv.push_back(NameType(a.name, a.type->clone(), a.attr));
         }
         auto ft = std::make_shared<FunctionType>(ntv, ret->clone());
-        ft->flags = flags;
+        ft->attr = attr;
         ft->name = name;
         ft->llvm_type = llvm_type;
         ft->complete = complete;

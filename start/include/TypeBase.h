@@ -31,7 +31,7 @@ namespace avl {
     struct TypeBase {
 
         uint16_t is;
-        uint16_t flags;
+        uint16_t attr;
 
         TypeBase(uint16_t);
 

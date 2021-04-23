@@ -41,12 +41,12 @@ namespace avl {
         members(m)
     {
         if (p) {
-            flags |= 1;
+            attr |= 1;
         }
     }
 
     bool StructTypeNode::isPacked() const {
-        return (flags & 1) > 0;
+        return (attr & 1) > 0;
     }
 
     UnionTypeNode::UnionTypeNode(const std::shared_ptr<NameNodeSet>& m):

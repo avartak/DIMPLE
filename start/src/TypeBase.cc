@@ -4,7 +4,7 @@ namespace avl {
 
     TypeBase::TypeBase(uint16_t t):
         is(t),
-        flags(0)
+        attr(0)
     {
     }
 
