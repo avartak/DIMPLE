@@ -8,17 +8,6 @@ namespace avl {
     {
     }
 
-    bool BlockNode::isInLoop() const {
-        auto p = parent;
-        while (p) {
-            if (p->is == BLOCK_LOOP) {
-                return true;
-            }
-            p = p->parent;
-        }        
-        return false;
-    }
-
     CondBlockNode::CondBlockNode(const std::shared_ptr<BlockNode>& p):
         BlockNode(BLOCK_COND, p)
     {

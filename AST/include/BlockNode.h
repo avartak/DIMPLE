@@ -17,7 +17,6 @@ namespace avl {
 
         BlockNode(uint16_t, const std::shared_ptr<BlockNode>& = nullptr);
 
-        bool isInLoop() const;
     };
 
     struct CondBlockNode : public BlockNode {
