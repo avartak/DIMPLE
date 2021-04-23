@@ -24,7 +24,7 @@ namespace avl {
             return success(2);
         }
 
-        std::shared_ptr<BlockNode> func = std::make_shared<FuncBlockNode>();
+        std::shared_ptr<BlockNode> func = std::make_shared<BlockNode>(BLOCK_FUNCTION);
         if (parseBlock(it, func)) {
             result = func;
             return true;       

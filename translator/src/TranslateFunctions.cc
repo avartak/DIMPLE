@@ -80,7 +80,7 @@ namespace avl {
             if (stmt->is != BLOCK_FUNCTION) {
                 return error(stmt, "Invalid function body");
             }
-            if (!defineBlock(std::static_pointer_cast<FuncBlockNode>(defn->def))) {
+            if (!defineBlock(std::static_pointer_cast<BlockNode>(defn->def))) {
                 return error(defn->name, "Unable to define \'" + defn->name->name + "\'");
             }
             if (!currentFunction->checkTerminations()) {

@@ -112,15 +112,20 @@ namespace avl {
             TheBuilder.CreateRet(retvar->val());
         }
 
-        for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
-            if (iter->getTerminator() != nullptr) {
+        //for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
+        for (auto& BB : make_early_inc_range(*fn)) {
+            if (BB.getTerminator() != nullptr) {
                 continue;
             }
-            TheBuilder.SetInsertPoint(&*iter);
+            if (BB.empty() && !BB.hasNPredecessorsOrMore(1)) {
+                BB.eraseFromParent();
+                continue;
+            }
+            TheBuilder.SetInsertPoint(&BB);
             if (fn->getReturnType()->isVoidTy()) {
                 TheBuilder.CreateRetVoid();
             }
-            else if (retvar && freeze_block == &*iter) {
+            else if (retvar && freeze_block == &BB) {
                 TheBuilder.CreateRet(retvar->val());
             }
             else {
