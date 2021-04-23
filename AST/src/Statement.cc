@@ -49,4 +49,15 @@ namespace avl {
         loc.end = def->loc.end;
     }
 
+    BlockNode::BlockNode(uint16_t t, const std::shared_ptr<BlockNode>& p):
+        Statement(t),
+        parent(p)
+    {
+    }
+
+    CondBlockNode::CondBlockNode(const std::shared_ptr<BlockNode>& p):
+        BlockNode(BLOCK_COND, p)
+    {
+    }
+
 }

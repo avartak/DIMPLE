@@ -91,6 +91,24 @@ namespace avl {
 
     };
 
+    struct BlockNode : public Statement {
+
+        std::shared_ptr<BlockNode> parent;
+        std::vector<std::shared_ptr<Statement> > body;
+        std::map<std::string, std::shared_ptr<Identifier> > symbols;
+
+        BlockNode(uint16_t, const std::shared_ptr<BlockNode>& = nullptr);
+
+    };
+
+    struct CondBlockNode : public BlockNode {
+
+        std::shared_ptr<Node> condition;
+
+        CondBlockNode(const std::shared_ptr<BlockNode>&);
+
+    };
+
 }
 
 #endif

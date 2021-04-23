@@ -3,8 +3,6 @@
 #include <Parser.h>
 #include <TokenID.h>
 #include <Initializer.h>
-#include <Statement.h>
-#include <BlockNode.h>
 
 namespace avl {
 
@@ -167,7 +165,8 @@ namespace avl {
         std::size_t n = 0;
 
         bool if_done = false;
-        auto ifblock = std::make_shared<IfBlockNode>(b);
+        //auto ifblock = std::make_shared<IfBlockNode>(b);
+        auto ifblock = std::make_shared<BlockNode>(BLOCK_IF, b);
         while (true) {
             auto loc = tokens[it+n]->loc;
             std::shared_ptr<Node> ifcond;
@@ -216,7 +215,8 @@ namespace avl {
         
         std::size_t n = 0;
        
-        auto loop = std::make_shared<LoopBlockNode>(b);
+        //auto loop = std::make_shared<LoopBlockNode>(b);
+        auto loop = std::make_shared<BlockNode>(BLOCK_LOOP, b);
         auto cond_block = std::make_shared<CondBlockNode>(loop);
         std::shared_ptr<Statement> init;
         std::shared_ptr<Statement> update;

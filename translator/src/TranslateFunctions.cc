@@ -4,7 +4,6 @@
 #include <BinaryOp.h>
 #include <FunctionOp.h>
 #include <Statement.h>
-#include <BlockNode.h>
 #include <CodeBlock.h>
 #include <LST.h>
 #include <Globals.h>
@@ -307,12 +306,12 @@ namespace avl {
                 }
             }
             else if (statement->is == BLOCK_IF) {
-                if (!defineIfBlock(std::static_pointer_cast<IfBlockNode>(statement), start, end)) {
+                if (!defineIfBlock(std::static_pointer_cast<BlockNode>(statement), start, end)) {
                     return error();
                 }
             }
             else if (statement->is == BLOCK_LOOP) {
-                if (!defineLoopBlock(std::static_pointer_cast<LoopBlockNode>(statement))) {
+                if (!defineLoopBlock(std::static_pointer_cast<BlockNode>(statement))) {
                     return error();
                 }
             }
@@ -324,7 +323,7 @@ namespace avl {
         return success();
     }
 
-    bool Translator::defineIfBlock(const std::shared_ptr<IfBlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
+    bool Translator::defineIfBlock(const std::shared_ptr<BlockNode>& block, std::shared_ptr<CodeBlock> start, std::shared_ptr<CodeBlock> end) {
 
         auto mergeBB = std::make_shared<CodeBlock>();
 
@@ -363,7 +362,7 @@ namespace avl {
         return success();
     }
 
-    bool Translator::defineLoopBlock(const std::shared_ptr<LoopBlockNode>& block) {
+    bool Translator::defineLoopBlock(const std::shared_ptr<BlockNode>& block) {
 
         auto newlst = std::make_shared<LST>(*currentFunction);
 

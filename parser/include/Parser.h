@@ -10,7 +10,6 @@
 #include <AST.h>
 #include <Identifier.h>
 #include <Statement.h>
-#include <BlockNode.h>
 
 namespace avl {
 
