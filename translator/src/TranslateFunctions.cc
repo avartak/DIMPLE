@@ -85,7 +85,7 @@ namespace avl {
             if (!currentFunction->checkTerminations()) {
                 return error(defn->name, "Function \'" + defn->name->name + "\' does not always return");
             }
-            currentFunction->simplify();
+            // Possible to simplify the IR here: currentFunction->simplify();
         }
         else {
             return error(defn->def, "Invalid function body");
@@ -371,6 +371,7 @@ namespace avl {
         const auto& updt = block->body[2];
         auto loopblock = std::static_pointer_cast<CondBlockNode>(loop);
 
+        auto phdrBB  = std::make_shared<CodeBlock>();
         auto loopBB  = std::make_shared<CodeBlock>();
         auto updtBB  = std::make_shared<CodeBlock>();
         auto mergeBB = std::make_shared<CodeBlock>();
@@ -414,11 +415,15 @@ namespace avl {
             if (!ex->type->isBool()) {
                 return error(loopblock->condition, "Loop condition statement does not evaluate to a boolean");
             }
-            CodeBlock::branch(ex, loopBB, mergeBB);
+            CodeBlock::branch(ex, phdrBB, mergeBB);
         }
         else {
-            CodeBlock::jump(loopBB);
+            CodeBlock::jump(phdrBB);
         }
+
+        CodeBlock::jump(phdrBB);
+        CodeBlock::insert(phdrBB);
+        CodeBlock::jump(loopBB);
 
         CodeBlock::insert(loopBB);
         if (!defineBlock(loopblock, updtBB, mergeBB)) {
