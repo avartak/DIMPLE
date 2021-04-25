@@ -371,6 +371,10 @@ namespace avl {
         const auto& updt = block->body[2];
         auto loopblock = std::static_pointer_cast<CondBlockNode>(loop);
 
+        auto loopBB  = std::make_shared<CodeBlock>();
+        auto updtBB  = std::make_shared<CodeBlock>();
+        auto mergeBB = std::make_shared<CodeBlock>();
+
         if (init) {
             if (init->is == STATEMENT_DEFINE) {
                 auto defstat = std::static_pointer_cast<DefineStatement>(init);
@@ -402,13 +406,6 @@ namespace avl {
             }
         }
 
-        auto loopBB  = std::make_shared<CodeBlock>();
-        auto whileBB = std::make_shared<CodeBlock>();
-        auto updtBB  = std::make_shared<CodeBlock>();
-        auto mergeBB = std::make_shared<CodeBlock>();
-
-        CodeBlock::jump(loopBB);
-        CodeBlock::insert(loopBB);
         if (loopblock->condition) {
             if (!getValue(loopblock->condition)) {
                 return error(loopblock->condition, "Unable to evaluate the loop condition");
@@ -417,14 +414,18 @@ namespace avl {
             if (!ex->type->isBool()) {
                 return error(loopblock->condition, "Loop condition statement does not evaluate to a boolean");
             }
-            CodeBlock::branch(ex, whileBB, mergeBB);
-            CodeBlock::insert(whileBB);
+            CodeBlock::branch(ex, loopBB, mergeBB);
         }
-        if (!defineBlock(loopblock, loopBB, mergeBB)) {
-            return error();
+        else {
+            CodeBlock::jump(loopBB);
         }
 
+        CodeBlock::insert(loopBB);
+        if (!defineBlock(loopblock, updtBB, mergeBB)) {
+            return error();
+        }
         CodeBlock::jump(updtBB);
+
         CodeBlock::insert(updtBB);
         if (updt) {
             if (updt->is == STATEMENT_ASSIGN) {
@@ -443,12 +444,20 @@ namespace avl {
                 return error(updt, "Invalid loop update statement");
             }
         }
+        if (loopblock->condition) {
+            getValue(loopblock->condition);
+            auto ex = std::static_pointer_cast<Value>(result);
+            CodeBlock::branch(ex, loopBB, mergeBB);
+        }
+        else {
+            CodeBlock::jump(loopBB);
+        }
 
-        CodeBlock::jump(loopBB);
         CodeBlock::insert(mergeBB);
 
         currentFunction->descope();
         return success();
+
     }
 
 }
