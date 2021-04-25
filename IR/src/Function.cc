@@ -112,12 +112,11 @@ namespace avl {
             TheBuilder.CreateRet(retvar->val());
         }
 
-        //for (auto iter = fn->getBasicBlockList().begin(); iter != fn->getBasicBlockList().end(); iter++) {
         for (auto& BB : make_early_inc_range(*fn)) {
             if (BB.getTerminator() != nullptr) {
                 continue;
             }
-            if (BB.empty() && !BB.hasNPredecessorsOrMore(1)) {
+            if (&BB != &fn->getEntryBlock() && BB.empty() && !BB.hasNPredecessorsOrMore(1)) {
                 BB.eraseFromParent();
                 continue;
             }
