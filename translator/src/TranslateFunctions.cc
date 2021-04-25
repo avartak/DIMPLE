@@ -423,7 +423,6 @@ namespace avl {
             CodeBlock::jump(phdrBB);
         }
 
-        CodeBlock::jump(phdrBB);
         CodeBlock::insert(phdrBB);
         CodeBlock::jump(loopBB);
 
