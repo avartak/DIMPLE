@@ -371,10 +371,12 @@ namespace avl {
         const auto& updt = block->body[2];
         auto loopblock = std::static_pointer_cast<CondBlockNode>(loop);
 
-        auto phdrBB  = std::make_shared<CodeBlock>();
-        auto loopBB  = std::make_shared<CodeBlock>();
-        auto updtBB  = std::make_shared<CodeBlock>();
-        auto mergeBB = std::make_shared<CodeBlock>();
+        // Attempting to make the loop IR as canonical as possible
+        auto phdrBB  = std::make_shared<CodeBlock>(); // Preheader
+        auto loopBB  = std::make_shared<CodeBlock>(); // Header
+        auto updtBB  = std::make_shared<CodeBlock>(); // Update of iteratable and termination check 
+        auto exitBB  = std::make_shared<CodeBlock>(); // Exit block
+        auto mergeBB = std::make_shared<CodeBlock>(); // Merge block out of the loop 
 
         if (init) {
             if (init->is == STATEMENT_DEFINE) {
@@ -426,7 +428,7 @@ namespace avl {
         CodeBlock::jump(loopBB);
 
         CodeBlock::insert(loopBB);
-        if (!defineBlock(loopblock, updtBB, mergeBB)) {
+        if (!defineBlock(loopblock, updtBB, exitBB)) {
             return error();
         }
         CodeBlock::jump(updtBB);
@@ -452,12 +454,14 @@ namespace avl {
         if (loopblock->condition) {
             getValue(loopblock->condition);
             auto ex = std::static_pointer_cast<Value>(result);
-            CodeBlock::branch(ex, loopBB, mergeBB);
+            CodeBlock::branch(ex, loopBB, exitBB);
         }
         else {
             CodeBlock::jump(loopBB);
         }
 
+        CodeBlock::insert(exitBB);
+        CodeBlock::jump(mergeBB);
         CodeBlock::insert(mergeBB);
 
         currentFunction->descope();

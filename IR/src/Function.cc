@@ -138,7 +138,6 @@ namespace avl {
 
     /*
     Taken from : https://github.com/llvm/llvm-project/blob/main/llvm/examples/IRTransforms/SimplifyCFG.cpp
-    This code does not preserve the DominatorTree
     */
 
     void Function::simplify() {
