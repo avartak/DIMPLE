@@ -31,7 +31,7 @@ namespace avl {
     std::size_t Type::size() const {
         if (isUnknown() || isVoid() || isFunction() || !isComplete()) return 0;
         if (llvm_type == nullptr) return 0;
-        return TheModule->getDataLayout().getTypeAllocSize(llvm_type).getFixedSize();
+        return TheModule->getDataLayout().getTypeAllocSize(llvm_type).getFixedValue();
     }
 
     std::size_t Type::alignment() const {

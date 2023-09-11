@@ -23,12 +23,12 @@ namespace avl {
             return llvm_value;
         }
         else if (llvm::isa<llvm::GlobalVariable>(llvm_value)) {
-            if (llvm::cast<llvm::GlobalVariable>(llvm_value)->getType()->getElementType() != type->llvm_type) {
+            if (llvm::cast<llvm::GlobalVariable>(llvm_value)->getValueType() != type->llvm_type) {
                 return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
             }
         }
         else if (llvm::isa<llvm::AllocaInst>(llvm_value)) {
-            if (llvm::cast<llvm::AllocaInst>(llvm_value)->getType()->getElementType() != type->llvm_type) {
+            if (llvm::cast<llvm::AllocaInst>(llvm_value)->getAllocatedType() != type->llvm_type) {
                 return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
             }
         }
