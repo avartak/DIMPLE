@@ -325,7 +325,7 @@ namespace avl {
                 if (idx >= st->members.size()) {
                     return ret;
                 }
-                auto gep = TheBuilder.CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
+                auto gep = TheBuilder.CreateStructGEP(var->ptr(), idx);
                 auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", st->members[idx].type);
                 v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
@@ -390,7 +390,7 @@ namespace avl {
             if (!found) {
                 return ret;
             }
-            auto gep = TheBuilder.CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
+            auto gep = TheBuilder.CreateStructGEP(var->ptr(), idx);
             auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", st->members[idx].type);
             v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
             ret = v;

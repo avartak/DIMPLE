@@ -1,10 +1,9 @@
-#include <llvm/MC/TargetRegistry.h>
+#include <llvm/Support/Host.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Target/TargetMachine.h>
+#include <llvm/Support/TargetRegistry.h>
 #include <llvm/Target/TargetOptions.h>
-#include <llvm/TargetParser/Host.h>
+#include <llvm/Target/TargetMachine.h>
 #include <llvm/IR/LegacyPassManager.h>
 
 #include <Backend.h>
@@ -35,7 +34,7 @@ namespace avl {
             auto CPU = llvm::sys::getHostCPUName();
             auto features = "";
             llvm::TargetOptions options;
-            auto reloc_model = std::optional<llvm::Reloc::Model>();
+            auto reloc_model = llvm::Optional<llvm::Reloc::Model>();
             
             machine = target->createTargetMachine(triple, CPU, features, options, reloc_model);
 
