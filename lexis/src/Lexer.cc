@@ -294,7 +294,7 @@ namespace avl {
         }
 
         auto m = match(false);
-		while (m != RULE_UNDEF) {
+        while (m != RULE_UNDEF) {
             read();    
             if (next == EOF) {
                 if (input_error) {
