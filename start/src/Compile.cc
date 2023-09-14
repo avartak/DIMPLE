@@ -12,6 +12,8 @@ namespace avl {
 
     void compile(const std::string& srcfile, const std::string& outfile) {
 
+        TheModule = std::make_unique<llvm::Module>("AVL module", avl::TheContext);
+
         auto input = std::make_unique<InputManager>();
         auto ast   = std::make_unique<AST>();
         auto gst   = std::make_unique<GST>();
@@ -27,18 +29,17 @@ namespace avl {
 
         if (!parser->run()) {
             std::cerr << parser->errorPrintout();
-            return;
         }
 
-        if (!translator->run()) {
+	else if (!translator->run()) {
             std::cerr << translator->errorPrintout();
-            return;
         }
 
-        if (!backend->run()) {
+	else if (!backend->run()) {
             std::cerr << backend->errorPrintout();
-            return;
         }
+
+	TheModule.reset();
     }
 
 }

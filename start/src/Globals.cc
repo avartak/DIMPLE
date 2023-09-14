@@ -3,7 +3,7 @@
 namespace avl {
 
     llvm::LLVMContext TheContext;
-    std::unique_ptr<llvm::Module> TheModule = std::make_unique<llvm::Module>("AVL module", TheContext);
+    std::unique_ptr<llvm::Module> TheModule;
     llvm::IRBuilder<> TheBuilder(TheContext);
 
 }
