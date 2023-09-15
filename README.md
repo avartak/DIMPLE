@@ -22,7 +22,7 @@ Interested in trying out DIMPLE? Here's what you need to do to build the compile
 Clone the DIMPLE source code onto your machine with `git clone https://github.com/avartak/DIMPLE/`. You can build DIMPLE by running `make` in the top directory. You will need to adapt the following line in the Makefile according to your LLVM installation. 
 
 ```
-LLVM     := /Users/adishvartak/Software/LLVM/install
+LLVM     := /mnt/c/Users/adishvar/Work/Software/LLVM/Install
 ```
 
 Assuming all prerequisites are correctly installed, `make` should produce an executable called `dimple`. You can test it by running the examples in the `test/helloworld` and `test/factorial` folders (simply go to these folders and run make). 
