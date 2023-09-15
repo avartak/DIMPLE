@@ -12,11 +12,11 @@ namespace avl {
 
     void compile(const std::string& srcfile, const std::string& outfile) {
 
-        TheModule = std::make_unique<llvm::Module>("AVL module", avl::TheContext);
+        TheModule       = std::make_unique<llvm::Module>("AVL module", avl::TheContext);
 
-        auto input = std::make_unique<InputManager>();
-        auto ast   = std::make_unique<AST>();
-        auto gst   = std::make_unique<GST>();
+        auto input      = std::make_unique<InputManager>();
+        auto ast        = std::make_unique<AST>();
+        auto gst        = std::make_unique<GST>();
 
         auto parser     = std::make_unique<Parser>(input.get(), ast.get());
         auto translator = std::make_unique<Translator>(input.get(), ast.get(), gst.get());
@@ -27,7 +27,7 @@ namespace avl {
             std::cerr << "Unable to open source file " + srcfile;
         }
 
-        if (!parser->run()) {
+	else if (!parser->run()) {
             std::cerr << parser->errorPrintout();
         }
 
