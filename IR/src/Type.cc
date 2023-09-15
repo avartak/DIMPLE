@@ -18,7 +18,7 @@ namespace avl {
         Entity(ENTITY_TYPE),
         TypeBase(t),
         name(n),
-        llvm_type(llvm::StructType::create(TheContext, n)),
+        llvm_type(llvm::StructType::create(*TheContext, n)),
         complete(false)
     {
     }

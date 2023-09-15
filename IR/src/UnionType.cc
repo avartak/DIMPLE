@@ -24,7 +24,7 @@ namespace avl {
 
         std::vector<llvm::Type*> tv;
         tv.push_back(imax.type->llvm_type);
-        llvm_type = llvm::StructType::get(TheContext, tv, true);
+        llvm_type = llvm::StructType::get(*TheContext, tv, true);
         complete = true;
     }
 
@@ -96,12 +96,12 @@ namespace avl {
         std::size_t size1 = cv->type->size();
         std::size_t size2 = t->size() - size1;
         if (size2 > 0) {
-            auto at = llvm::ArrayType::get(TheBuilder.getInt8Ty(), size2);
+            auto at = llvm::ArrayType::get(TheBuilder->getInt8Ty(), size2);
             csv.push_back(llvm::Constant::getNullValue(at));
             tsv.push_back(at);
         }
 
-        t->llvm_type = llvm::StructType::get(TheContext, tsv, true);
+        t->llvm_type = llvm::StructType::get(*TheContext, tsv, true);
         return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
     }
 

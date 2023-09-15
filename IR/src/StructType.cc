@@ -22,7 +22,7 @@ namespace avl {
         for (const auto& im : m) {
             tv.push_back(im.type->llvm_type);
         }
-        llvm_type = llvm::StructType::get(TheContext, tv, p);
+        llvm_type = llvm::StructType::get(*TheContext, tv, p);
         complete = true;
     }
 
@@ -109,7 +109,7 @@ namespace avl {
             csv.push_back(llvm::cast<llvm::Constant>(c->llvm_value));
         }
 
-        t->llvm_type = llvm::StructType::get(TheContext, tsv, t->isPacked());
+        t->llvm_type = llvm::StructType::get(*TheContext, tsv, t->isPacked());
         return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), csv));
     }
 

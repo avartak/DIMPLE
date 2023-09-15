@@ -70,21 +70,21 @@ namespace avl {
         if (ft->ret->retDirectly()) {
             llvm::Value* lv;
             if (fargs.size() == 0) {
-                lv = TheBuilder.CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr);
+                lv = TheBuilder->CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr);
             }
             else {
-                lv = TheBuilder.CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr, fargs);
+                lv = TheBuilder->CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr, fargs);
             }
             if (!ft->ret->isCompound()) {
                 ex = std::make_shared<Value>(ft->ret, lv);
             }
             else {
-                auto ptr = TheBuilder.CreateBitCast(retv->ptr(), TheBuilder.getInt64Ty());
-                TheBuilder.CreateStore(lv, ptr);
+                auto ptr = TheBuilder->CreateBitCast(retv->ptr(), TheBuilder->getInt64Ty());
+                TheBuilder->CreateStore(lv, ptr);
             }
         }
         else {
-            TheBuilder.CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr, fargs);
+            TheBuilder->CreateCall(llvm::cast<llvm::FunctionType>(ft->llvm_type), fptr, fargs);
         }
         if (!ft->ret->retDirectly() || ft->ret->isCompound()) {
             ex = retv;
@@ -104,7 +104,7 @@ namespace avl {
         }
         
         if (ft->ret->isVoid()) {
-            TheBuilder.CreateRetVoid();
+            TheBuilder->CreateRetVoid();
             return true;
         }
         
@@ -118,7 +118,7 @@ namespace avl {
             if (!BinaryOp::assign(func->retvar, retval)) {
                 return false;
             }
-            TheBuilder.CreateRetVoid();
+            TheBuilder->CreateRetVoid();
             return true;
         }
         
@@ -128,21 +128,21 @@ namespace avl {
                 return false;
             }
             auto retvar = std::static_pointer_cast<Variable>(retval);
-            auto ptr = TheBuilder.CreateBitCast(retvar->ptr(), TheBuilder.getInt64Ty());
-            v = TheBuilder.CreateAlignedLoad(TheBuilder.getInt64Ty(), ptr, llvm::MaybeAlign(8));
+            auto ptr = TheBuilder->CreateBitCast(retvar->ptr(), TheBuilder->getInt64Ty());
+            v = TheBuilder->CreateAlignedLoad(TheBuilder->getInt64Ty(), ptr, llvm::MaybeAlign(8));
         }
         else {
             v = retval->val();
         }
         if (!func->lst->prev) {
             if (func->retvar) {
-                TheBuilder.CreateStore(v, func->retvar->ptr());
+                TheBuilder->CreateStore(v, func->retvar->ptr());
                 CodeBlock::jump(func->retblock);
                 CodeBlock::insert(func->retblock);
-                TheBuilder.CreateRet(func->retvar->val());
+                TheBuilder->CreateRet(func->retvar->val());
             }
             else {
-                TheBuilder.CreateRet(v);
+                TheBuilder->CreateRet(v);
             }
         }
         else {
@@ -152,7 +152,7 @@ namespace avl {
                 func->retblock = std::make_shared<CodeBlock>();
                 func->retvar->declare();
             }
-            TheBuilder.CreateStore(v, func->retvar->ptr());
+            TheBuilder->CreateStore(v, func->retvar->ptr());
             CodeBlock::jump(func->retblock);
         }
         return true;

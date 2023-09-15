@@ -4,12 +4,12 @@
 namespace avl {
 
     bool MemoryOp::memset(Variable* var, uint8_t v) {
-        TheBuilder.CreateMemSet(var->ptr(), TheBuilder.getInt8(v), var->type->size(), llvm::MaybeAlign(0));
+        TheBuilder->CreateMemSet(var->ptr(), TheBuilder->getInt8(v), var->type->size(), llvm::MaybeAlign(0));
         return true;
     }
 
     bool MemoryOp::memset(const std::shared_ptr<Variable>& var, uint8_t v) {
-        TheBuilder.CreateMemSet(var->ptr(), TheBuilder.getInt8(v), var->type->size(), llvm::MaybeAlign(0));
+        TheBuilder->CreateMemSet(var->ptr(), TheBuilder->getInt8(v), var->type->size(), llvm::MaybeAlign(0));
         return true;
     }
 
@@ -20,8 +20,8 @@ namespace avl {
             return false;
         }
 
-		TheBuilder.CreateMemCpy(dest->ptr(), llvm::MaybeAlign(0), source->ptr(), llvm::MaybeAlign(0), source->type->size());
-		return true;
+        TheBuilder->CreateMemCpy(dest->ptr(), llvm::MaybeAlign(0), source->ptr(), llvm::MaybeAlign(0), source->type->size());
+        return true;
     }
 
 }

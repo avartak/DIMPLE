@@ -6,7 +6,7 @@ namespace avl {
     UnknownType::UnknownType():
         Type(TYPE_UNKNOWN)
     {
-        llvm_type = TheBuilder.getInt8Ty();
+        llvm_type = TheBuilder->getInt8Ty();
         complete = true;
     }
 

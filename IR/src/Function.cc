@@ -34,11 +34,11 @@ namespace avl {
         for (std::size_t i = 0; i < ft->args.size(); i++) {
             auto idx = ft->ret->retDirectly() ? i : i+1;
             if (ft->args[i].passByRef()) {
-                fptr->getArg(idx)->addAttr(llvm::Attribute::getWithDereferenceableBytes(TheContext, ft->args[i].type->size()));
+                fptr->getArg(idx)->addAttr(llvm::Attribute::getWithDereferenceableBytes(*TheContext, ft->args[i].type->size()));
             }
             else if (!ft->args[i].type->passDirectly()) {
                 fptr->getArg(idx)->addAttr(llvm::Attribute::ByVal);
-                fptr->getArg(idx)->addAttr(llvm::Attribute::getWithAlignment(TheContext, llvm::Align(8)));
+                fptr->getArg(idx)->addAttr(llvm::Attribute::getWithAlignment(*TheContext, llvm::Align(8)));
             }
         }
         llvm_value = fptr;
@@ -67,11 +67,11 @@ namespace avl {
                 var = std::make_shared<Variable>(STORAGE_LOCAL, "", ft->args[i].type);
                 var->declare();
                 if (var->type->isCompound()) {
-                    auto u64 = TheBuilder.CreateBitCast(var->ptr(), TheBuilder.getInt64Ty());
-                    TheBuilder.CreateStore(fn->getArg(idx), u64);
+                    auto u64 = TheBuilder->CreateBitCast(var->ptr(), TheBuilder->getInt64Ty());
+                    TheBuilder->CreateStore(fn->getArg(idx), u64);
                 }
                 else {
-                    TheBuilder.CreateStore(fn->getArg(idx), var->ptr());
+                    TheBuilder->CreateStore(fn->getArg(idx), var->ptr());
                 }
             }
             else {
@@ -90,12 +90,12 @@ namespace avl {
     }
 
     void Function::freeze() {
-        freeze_block = TheBuilder.GetInsertBlock();
+        freeze_block = TheBuilder->GetInsertBlock();
     }
 
     bool Function::resume() {
         if (freeze_block != nullptr) {
-            TheBuilder.SetInsertPoint(freeze_block);
+            TheBuilder->SetInsertPoint(freeze_block);
             return true;
         }
         return false;
@@ -109,7 +109,7 @@ namespace avl {
 
         if (retvar && retblock && retblock->block->getParent() == nullptr) {
             CodeBlock::insert(retblock);
-            TheBuilder.CreateRet(retvar->val());
+            TheBuilder->CreateRet(retvar->val());
         }
 
         for (auto& BB : make_early_inc_range(*fn)) {
@@ -120,12 +120,12 @@ namespace avl {
                 BB.eraseFromParent();
                 continue;
             }
-            TheBuilder.SetInsertPoint(&BB);
+            TheBuilder->SetInsertPoint(&BB);
             if (fn->getReturnType()->isVoidTy()) {
-                TheBuilder.CreateRetVoid();
+                TheBuilder->CreateRetVoid();
             }
             else if (retvar && freeze_block == &BB) {
-                TheBuilder.CreateRet(retvar->val());
+                TheBuilder->CreateRet(retvar->val());
             }
             else {
                 status = false;

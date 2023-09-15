@@ -9,9 +9,9 @@
 
 namespace avl {
 
-    extern llvm::LLVMContext TheContext;
+    extern std::unique_ptr<llvm::LLVMContext> TheContext;
     extern std::unique_ptr<llvm::Module> TheModule;
-    extern llvm::IRBuilder<> TheBuilder;
+    extern std::unique_ptr<llvm::IRBuilder<> > TheBuilder;
 
 }
 

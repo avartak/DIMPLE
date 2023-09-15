@@ -15,7 +15,7 @@ namespace avl {
         for (const auto& a : args) {
             if (!a.passByRef() && a.type->passDirectly()) {
                 if (a.type->isCompound()) {
-				    tv.push_back(TheBuilder.getInt64Ty());
+				    tv.push_back(TheBuilder->getInt64Ty());
                 }
                 else {
                     tv.push_back(a.type->llvm_type);
@@ -27,11 +27,11 @@ namespace avl {
         }
         llvm::Type* ret_lt;
         if (!ret->retDirectly()) {
-            ret_lt = TheBuilder.getVoidTy();
+            ret_lt = TheBuilder->getVoidTy();
         }
         else {
             if (ret->isCompound()) {
-                ret_lt = TheBuilder.getInt64Ty();
+                ret_lt = TheBuilder->getInt64Ty();
             }
             else {
                 ret_lt = ret->llvm_type;

@@ -18,10 +18,10 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateAdd(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateAdd(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateFAdd(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateFAdd(le->val(), re->val()));
         }
         return ret;
     }
@@ -32,10 +32,10 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateSub(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateSub(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateFSub(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateFSub(le->val(), re->val()));
         }
         return ret;
     }
@@ -46,10 +46,10 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateMul(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateMul(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateFMul(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateFMul(le->val(), re->val()));
         }
         return ret;
     }
@@ -64,14 +64,14 @@ namespace avl {
         }
         if (le->type->isInt()) {
             if (le->type->isUnsignedInt()) {
-                return std::make_shared<Value>(le->type, TheBuilder.CreateUDiv(le->val(), re->val()));
+                return std::make_shared<Value>(le->type, TheBuilder->CreateUDiv(le->val(), re->val()));
             }
             else {
-                return std::make_shared<Value>(le->type, TheBuilder.CreateSDiv(le->val(), re->val()));
+                return std::make_shared<Value>(le->type, TheBuilder->CreateSDiv(le->val(), re->val()));
             }
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateFDiv(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateFDiv(le->val(), re->val()));
         }
         return ret;
     }
@@ -86,14 +86,14 @@ namespace avl {
         }
         if (le->type->isInt()) {
             if (le->type->isUnsignedInt()) {
-                return std::make_shared<Value>(le->type, TheBuilder.CreateURem(le->val(), re->val()));
+                return std::make_shared<Value>(le->type, TheBuilder->CreateURem(le->val(), re->val()));
             }
             else {
-                return std::make_shared<Value>(le->type, TheBuilder.CreateSRem(le->val(), re->val()));
+                return std::make_shared<Value>(le->type, TheBuilder->CreateSRem(le->val(), re->val()));
             }
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateFRem(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateFRem(le->val(), re->val()));
         }
         return ret;
     }
@@ -105,18 +105,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isBool()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpEQ(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpEQ(le->val(), re->val()));
         }
         else if (le->type->isInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpEQ(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpEQ(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOEQ(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpOEQ(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpEQ(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpEQ(li->val(), ri->val()));
         }
         return ret;
     }
@@ -128,18 +128,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isBool()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpNE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpNE(le->val(), re->val()));
         }
         else if (le->type->isInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpNE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpNE(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpUNE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpUNE(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpNE(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpNE(li->val(), ri->val()));
         }
         return ret;
     }
@@ -151,18 +151,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isUnsignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpUGT(le->val(), re->val()));
         }
         else if (le->type->isSignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpSGT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpSGT(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOGT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpOGT(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGT(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpUGT(li->val(), ri->val()));
         }
         return ret;
     }
@@ -174,18 +174,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isUnsignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpULT(le->val(), re->val()));
         }
         else if (le->type->isSignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpSLT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpSLT(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOLT(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpOLT(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULT(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpULT(li->val(), ri->val()));
         }
         return ret;
     }
@@ -197,18 +197,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isUnsignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpUGE(le->val(), re->val()));
         }
         else if (le->type->isSignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpSGE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpSGE(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOGE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpOGE(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpUGE(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpUGE(li->val(), ri->val()));
         }
         return ret;
     }
@@ -220,18 +220,18 @@ namespace avl {
         }
         auto ty = std::make_shared<PrimitiveType>(TYPE_BOOL);
         if (le->type->isUnsignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpULE(le->val(), re->val()));
         }
         else if (le->type->isSignedInt()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpSLE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpSLE(le->val(), re->val()));
         }
         else if (le->type->isReal()) {
-            return std::make_shared<Value>(ty, TheBuilder.CreateFCmpOLE(le->val(), re->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateFCmpOLE(le->val(), re->val()));
         }
         else if (le->type->isPtr()) {
             auto li = recast(le, std::make_shared<PrimitiveType>(TYPE_UINT64));
             auto ri = recast(re, std::make_shared<PrimitiveType>(TYPE_UINT64));
-            return std::make_shared<Value>(ty, TheBuilder.CreateICmpULE(li->val(), ri->val()));
+            return std::make_shared<Value>(ty, TheBuilder->CreateICmpULE(li->val(), ri->val()));
         }
         return ret;
     }
@@ -242,7 +242,7 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateShl(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateShl(le->val(), re->val()));
         }
         return ret;
     }
@@ -253,7 +253,7 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateLShr(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateLShr(le->val(), re->val()));
         }
         return ret;
     }
@@ -264,7 +264,7 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateAnd(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateAnd(le->val(), re->val()));
         }
         return ret;
     }
@@ -275,7 +275,7 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateXor(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateXor(le->val(), re->val()));
         }
         return ret;
     }
@@ -286,7 +286,7 @@ namespace avl {
             return ret;
         }
         if (le->type->isInt()) {
-            return std::make_shared<Value>(le->type, TheBuilder.CreateOr(le->val(), re->val()));
+            return std::make_shared<Value>(le->type, TheBuilder->CreateOr(le->val(), re->val()));
         }
         return ret;
     }
@@ -296,7 +296,7 @@ namespace avl {
         if (!le->type->isBool() || !re->type->isBool()) {
             return ret;
         }
-        return std::make_shared<Value>(le->type, TheBuilder.CreateAnd(le->val(), re->val()));
+        return std::make_shared<Value>(le->type, TheBuilder->CreateAnd(le->val(), re->val()));
     }
 
     std::shared_ptr<Value> BinaryOp::logOr(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
@@ -304,7 +304,7 @@ namespace avl {
         if (!le->type->isBool() || !re->type->isBool()) {
             return ret;
         }
-        return std::make_shared<Value>(le->type, TheBuilder.CreateOr(le->val(), re->val()));
+        return std::make_shared<Value>(le->type, TheBuilder->CreateOr(le->val(), re->val()));
     }
 
     std::shared_ptr<Value> BinaryOp::element(const std::shared_ptr<Variable>& var, const std::shared_ptr<Value>& i) {
@@ -325,9 +325,9 @@ namespace avl {
                 if (idx >= st->members.size()) {
                     return ret;
                 }
-                auto gep = TheBuilder.CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
+                auto gep = TheBuilder->CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
                 auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", st->members[idx].type);
-                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder->CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
             else if (var->type->isUnion()) {
@@ -337,7 +337,7 @@ namespace avl {
                 }
                 auto t = std::make_shared<PointerType>(ut->members[idx].type);
                 auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", t->points_to);
-                v->llvm_value = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
+                v->llvm_value = TheBuilder->CreateBitCast(var->ptr(), t->llvm_type);
                 ret = v;
             }
         }
@@ -347,21 +347,21 @@ namespace avl {
             if (var->type->isArray()) {
                 auto at = static_cast<ArrayType*>(var->type.get());
                 std::vector<llvm::Value*> vidx;
-                vidx.push_back(TheBuilder.getInt32(0));
+                vidx.push_back(TheBuilder->getInt32(0));
                 if (at->name != "" && llvm::isa<llvm::StructType>(at->llvm_type)) {
-                    vidx.push_back(TheBuilder.getInt32(0));
+                    vidx.push_back(TheBuilder->getInt32(0));
                 }
                 vidx.push_back(i->val());
-                auto gep = TheBuilder.CreateInBoundsGEP(var->type->llvm_type, var->ptr(), vidx);
+                auto gep = TheBuilder->CreateInBoundsGEP(var->type->llvm_type, var->ptr(), vidx);
                 auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", at->array_of);
-                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder->CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
             else if (var->type->isPtr()) {
                 auto pt = static_cast<PointerType*>(var->type.get());
-                auto gep = TheBuilder.CreateInBoundsGEP(pt->points_to->llvm_type, var->val(), i->val());
+                auto gep = TheBuilder->CreateInBoundsGEP(pt->points_to->llvm_type, var->val(), i->val());
                 auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", pt->points_to);
-                v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+                v->llvm_value = TheBuilder->CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
                 ret = v;
             }
         }
@@ -390,9 +390,9 @@ namespace avl {
             if (!found) {
                 return ret;
             }
-            auto gep = TheBuilder.CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
+            auto gep = TheBuilder->CreateStructGEP(var->type->llvm_type, var->ptr(), idx);
             auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", st->members[idx].type);
-            v->llvm_value = TheBuilder.CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
+            v->llvm_value = TheBuilder->CreateBitCast(gep, llvm::PointerType::get(v->type->llvm_type, 0));
             ret = v;
         }
         else if (var->type->isUnion()) {
@@ -411,7 +411,7 @@ namespace avl {
             }
             auto t = std::make_shared<PointerType>(ut->members[idx].type);
             auto v = std::make_shared<Variable>(STORAGE_REFERENCE, "", t->points_to);
-            v->llvm_value = TheBuilder.CreateBitCast(var->ptr(), t->llvm_type);
+            v->llvm_value = TheBuilder->CreateBitCast(var->ptr(), t->llvm_type);
             ret = v;
         }
 
@@ -435,80 +435,80 @@ namespace avl {
 
         if (t->isInt()) {
             if (e->type->isPtr()) {
-                v = TheBuilder.CreatePtrToInt(e->val(), lt);
+                v = TheBuilder->CreatePtrToInt(e->val(), lt);
             }
             else if (e->type->isBool()) {
-                v = TheBuilder.CreateZExt(e->val(), lt);
+                v = TheBuilder->CreateZExt(e->val(), lt);
             }
             else if (e->type->isInt()) {
                 if (e->type->isSignedInt()) {
-                    v = TheBuilder.CreateSExtOrTrunc(e->val(), lt);
+                    v = TheBuilder->CreateSExtOrTrunc(e->val(), lt);
                 }
                 else {
-                    v = TheBuilder.CreateZExtOrTrunc(e->val(), lt);
+                    v = TheBuilder->CreateZExtOrTrunc(e->val(), lt);
                 }
             }
             else if (e->type->isReal()) {
                 if (t->isSignedInt()) {
-                    v = TheBuilder.CreateFPToSI(e->val(), lt);
+                    v = TheBuilder->CreateFPToSI(e->val(), lt);
                 }
                 else {
-                    v = TheBuilder.CreateFPToUI(e->val(), lt);
+                    v = TheBuilder->CreateFPToUI(e->val(), lt);
                 }
             }
         }
 
         else if (t->isReal()) {
             if (e->type->isPtr()) {
-                v = TheBuilder.CreatePtrToInt(e->val(), TheBuilder.getInt64Ty());
-                v = TheBuilder.CreateUIToFP(v, lt);
+                v = TheBuilder->CreatePtrToInt(e->val(), TheBuilder->getInt64Ty());
+                v = TheBuilder->CreateUIToFP(v, lt);
             }
             else if (e->type->isBool()) {
-                v = TheBuilder.CreateUIToFP(v, lt);
+                v = TheBuilder->CreateUIToFP(v, lt);
             }
             else if (e->type->isInt()) {
                 if (e->type->isSignedInt()) {
-                    v = TheBuilder.CreateSIToFP(e->val(), lt);
+                    v = TheBuilder->CreateSIToFP(e->val(), lt);
                 }
                 else {
-                    v = TheBuilder.CreateUIToFP(e->val(), lt);
+                    v = TheBuilder->CreateUIToFP(e->val(), lt);
                 }
             }
             else if (e->type->isReal()) {
                 if (e->type->is == TYPE_REAL64 && t->is == TYPE_REAL32) {
-                    v = TheBuilder.CreateFPTrunc(e->val(), lt);
+                    v = TheBuilder->CreateFPTrunc(e->val(), lt);
                 }
                 else if (e->type->is == TYPE_REAL32 && t->is == TYPE_REAL64) {
-                    v = TheBuilder.CreateFPExt(e->val(), lt);
+                    v = TheBuilder->CreateFPExt(e->val(), lt);
                 }
             }
         }
 
         else if (t->isPtr()) {
             if (e->type->isPtr()) {
-                v = TheBuilder.CreateBitCast(e->val(), lt);
+                v = TheBuilder->CreateBitCast(e->val(), lt);
             }
             else if (e->type->isBool() || e->type->isInt()) {
-                v = TheBuilder.CreateIntToPtr(e->val(), lt);
+                v = TheBuilder->CreateIntToPtr(e->val(), lt);
             }
             else if (e->type->isReal()) {
-                v = TheBuilder.CreateFPToUI(e->val(), TheBuilder.getInt64Ty());
-                v = TheBuilder.CreateIntToPtr(v, lt);
+                v = TheBuilder->CreateFPToUI(e->val(), TheBuilder->getInt64Ty());
+                v = TheBuilder->CreateIntToPtr(v, lt);
             }
         }
 
         else if (t->isBool()) {
             if (e->type->isPtr()) {
-                v  = TheBuilder.CreateICmpNE(e->val(), llvm::Constant::getNullValue(e->type->llvm_type));
+                v  = TheBuilder->CreateICmpNE(e->val(), llvm::Constant::getNullValue(e->type->llvm_type));
             }
             else if (e->type->isBool()) {
                 v = e->val();
             }
             else if (e->type->isInt()) {
-                v = TheBuilder.CreateICmpNE(e->val(), TheBuilder.getFalse());
+                v = TheBuilder->CreateICmpNE(e->val(), TheBuilder->getFalse());
             }
             else if (e->type->isReal()) {
-                v = TheBuilder.CreateFCmpUNE(e->val(), llvm::ConstantFP::get(e->type->llvm_type, 0));  // UNE : unordered (NAN) or not equal ; NAN --> true
+                v = TheBuilder->CreateFCmpUNE(e->val(), llvm::ConstantFP::get(e->type->llvm_type, 0));  // UNE : unordered (NAN) or not equal ; NAN --> true
             }
         }
 
@@ -547,7 +547,7 @@ namespace avl {
         }
 
         if (ex->type->moveDirectly()) {
-            TheBuilder.CreateStore(ex->val(), var->ptr());
+            TheBuilder->CreateStore(ex->val(), var->ptr());
             return var;
         }
 

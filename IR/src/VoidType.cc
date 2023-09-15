@@ -6,7 +6,7 @@ namespace avl {
     VoidType::VoidType():
         Type(TYPE_VOID)
     {
-        llvm_type = TheBuilder.getVoidTy();
+        llvm_type = TheBuilder->getVoidTy();
         complete = true;
     }
 

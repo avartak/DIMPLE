@@ -27,11 +27,11 @@ namespace avl {
         }
         else if (e->type->isInt()) {
             auto zero = llvm::ConstantInt::get(e->type->llvm_type, 0);
-            return std::make_shared<Value>(e->type, TheBuilder.CreateSub(zero, e->val()));
+            return std::make_shared<Value>(e->type, TheBuilder->CreateSub(zero, e->val()));
         }
         else {
             auto zero = llvm::ConstantFP::get(e->type->llvm_type, 0);
-            return std::make_shared<Value>(e->type, TheBuilder.CreateFSub(zero, e->val()));
+            return std::make_shared<Value>(e->type, TheBuilder->CreateFSub(zero, e->val()));
         }
     }
 
@@ -41,7 +41,7 @@ namespace avl {
             return ue;
         }
         auto zero = llvm::ConstantInt::get(e->type->llvm_type, 0);
-        return std::make_shared<Value>(e->type, TheBuilder.CreateICmpEQ(zero, e->val()));
+        return std::make_shared<Value>(e->type, TheBuilder->CreateICmpEQ(zero, e->val()));
     }
 
     std::shared_ptr<Value> UnaryOp::complement(const std::shared_ptr<Value>& e) {
@@ -50,7 +50,7 @@ namespace avl {
             return ue;
         }
         auto mone = llvm::ConstantInt::get(e->type->llvm_type, -1);
-        return std::make_shared<Value>(e->type, TheBuilder.CreateXor(mone, e->val()));
+        return std::make_shared<Value>(e->type, TheBuilder->CreateXor(mone, e->val()));
     }
 
     std::shared_ptr<Value> UnaryOp::size(const std::shared_ptr<Type>& t) {
@@ -112,7 +112,7 @@ namespace avl {
             return ue;
         }
         auto zero = llvm::ConstantInt::get(e->type->llvm_type, 0);
-        return std::make_shared<Value>(e->type, TheBuilder.CreateICmpNE(zero, e->val()));
+        return std::make_shared<Value>(e->type, TheBuilder->CreateICmpNE(zero, e->val()));
     }
 
     std::shared_ptr<Value> UnaryOp::isFalse(const std::shared_ptr<Value>& e) {

@@ -12,7 +12,7 @@ namespace avl {
 
     llvm::Value* Variable::val() const {
         if (llvm_value != nullptr) {
-            return TheBuilder.CreateAlignedLoad(type->llvm_type, ptr(), llvm::MaybeAlign(type->alignment()));
+            return TheBuilder->CreateAlignedLoad(type->llvm_type, ptr(), llvm::MaybeAlign(type->alignment()));
         }
         return nullptr;
     }
@@ -24,12 +24,12 @@ namespace avl {
         }
         else if (llvm::isa<llvm::GlobalVariable>(llvm_value)) {
             if (llvm::cast<llvm::GlobalVariable>(llvm_value)->getValueType() != type->llvm_type) {
-                return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
+                return TheBuilder->CreateBitCast(llvm_value, t->llvm_type);
             }
         }
         else if (llvm::isa<llvm::AllocaInst>(llvm_value)) {
             if (llvm::cast<llvm::AllocaInst>(llvm_value)->getAllocatedType() != type->llvm_type) {
-                return TheBuilder.CreateBitCast(llvm_value, t->llvm_type);
+                return TheBuilder->CreateBitCast(llvm_value, t->llvm_type);
             }
         }
         return llvm_value;
@@ -41,10 +41,10 @@ namespace avl {
             llvm_value = new llvm::GlobalVariable(*TheModule, type->llvm_type, false, linkage, nullptr, name);
         }
         else {
-            auto current_insert_pt = TheBuilder.saveIP();
-            TheBuilder.SetInsertPoint(TheBuilder.GetInsertBlock()->getParent()->getEntryBlock().getTerminator());
-            llvm_value = TheBuilder.CreateAlloca(type->llvm_type);
-            TheBuilder.restoreIP(current_insert_pt);
+            auto current_insert_pt = TheBuilder->saveIP();
+            TheBuilder->SetInsertPoint(TheBuilder->GetInsertBlock()->getParent()->getEntryBlock().getTerminator());
+            llvm_value = TheBuilder->CreateAlloca(type->llvm_type);
+            TheBuilder->restoreIP(current_insert_pt);
         }
         align();
     }
@@ -58,7 +58,7 @@ namespace avl {
                 MemoryOp::memset(this, 0);
             }
             else {
-                TheBuilder.CreateStore(llvm::Constant::getNullValue(type->llvm_type), ptr());
+                TheBuilder->CreateStore(llvm::Constant::getNullValue(type->llvm_type), ptr());
             }
         }
     }

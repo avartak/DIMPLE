@@ -2,8 +2,8 @@
 
 namespace avl {
 
-    llvm::LLVMContext TheContext;
+    std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;
-    llvm::IRBuilder<> TheBuilder(TheContext);
+    std::unique_ptr<llvm::IRBuilder<> > TheBuilder;
 
 }

@@ -12,7 +12,9 @@ namespace avl {
 
     void compile(const std::string& srcfile, const std::string& outfile) {
 
-        TheModule       = std::make_unique<llvm::Module>("AVL module", avl::TheContext);
+        TheContext      = std::make_unique<llvm::LLVMContext>();
+        TheModule       = std::make_unique<llvm::Module>("AVL module", *TheContext);
+        TheBuilder      = std::make_unique<llvm::IRBuilder<> >(*TheContext);
 
         auto input      = std::make_unique<InputManager>();
         auto ast        = std::make_unique<AST>();
@@ -40,6 +42,8 @@ namespace avl {
         }
 
 	TheModule.reset();
+	TheContext.reset();
+	TheBuilder.reset();
     }
 
 }

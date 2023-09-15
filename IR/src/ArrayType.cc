@@ -91,7 +91,7 @@ namespace avl {
             }
         }
 
-        t->llvm_type = llvm::StructType::get(TheContext, tv, true);
+        t->llvm_type = llvm::StructType::get(*TheContext, tv, true);
         return std::make_shared<Value>(t, llvm::ConstantStruct::get(llvm::cast<llvm::StructType>(t->llvm_type), cv));
     }
 }
