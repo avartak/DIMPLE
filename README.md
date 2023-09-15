@@ -13,7 +13,7 @@ Interested in trying out DIMPLE? Here's what you need to do to build the compile
 
 ## Prerequisites
 
-* LLVM : Please lookup the [LLVM docs](https://llvm.org/docs/CMake.html) to figure out the best way to install the LLVM libraries (version 11.0 is recommended) on your machine. 
+* LLVM : Please lookup the [LLVM docs](https://llvm.org/docs/CMake.html) to figure out the best way to install the LLVM libraries (version 18.0 is recommended) on your machine. 
 
 * Clang : You need a C++ compiler to build the DIMPLE source code. Clang is the current default choice. If you wish to switch to another compiler (e.g. GCC) you will need to modify the [Makefile](https://github.com/avartak/DIMPLE/blob/main/Makefile) accordingly, and make sure that the LLVM libraries are correctly linked. 
 
@@ -126,7 +126,7 @@ AVL provides two ways to access members of structs and unions. The members may h
 
 ```
 S :: struct (
-    int32
+    int32,
     d : real64
 )
 
