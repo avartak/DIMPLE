@@ -23,7 +23,6 @@ namespace avl {
         bool isActive(const std::string&) const;
         bool isValid() const;
         std::string getFileName(uint16_t) const;
-        std::string getFilePath(uint16_t) const;
 
         bool set(const std::string&);
         bool reset();

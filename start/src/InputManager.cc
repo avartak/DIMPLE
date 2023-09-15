@@ -46,13 +46,6 @@ namespace avl {
         return "";
     }
 
-    std::string InputManager::getFilePath(uint16_t idx) const {
-        if (idx < filenames.size()) {
-            return filenames[idx];
-        }
-        return "";
-    }
-
     bool InputManager::set(const std::string& filename) {
         if (isActive(filename) || isProcessed(filename)) {
             return false;

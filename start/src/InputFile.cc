@@ -7,8 +7,8 @@ namespace avl {
         index(idx),
         scanner(nullptr)
     {
-        if (mgr != nullptr && mgr->getFilePath(idx) != "") {
-            file.open(mgr->getFilePath(idx), std::ifstream::in);
+        if (mgr != nullptr && mgr->getFileName(idx) != "") {
+            file.open(mgr->getFileName(idx), std::ifstream::in);
         }
         if (isOpen()) {
             scanner = new Lexer(file);
