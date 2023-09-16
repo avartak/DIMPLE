@@ -5,7 +5,7 @@
 #include <string>
 #include <Value.h>
 
-namespace avl {
+namespace dmp {
 
     struct IntLiteral : public Value {
 

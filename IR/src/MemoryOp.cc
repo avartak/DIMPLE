@@ -1,7 +1,7 @@
 #include <MemoryOp.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     bool MemoryOp::memset(Variable* var, uint8_t v) {
         TheBuilder->CreateMemSet(var->ptr(), TheBuilder->getInt8(v), var->type->size(), llvm::MaybeAlign(0));

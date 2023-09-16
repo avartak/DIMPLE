@@ -1,7 +1,7 @@
 #include <Location.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     Coordinate::Coordinate():
         line(0),

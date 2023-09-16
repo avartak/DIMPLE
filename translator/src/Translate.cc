@@ -1,6 +1,6 @@
 #include <Translator.h>
 
-namespace avl {
+namespace dmp {
 
     Translator::Translator(InputManager* in, AST* tree, GST* sym):
         Pass(in, tree, sym)

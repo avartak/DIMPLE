@@ -6,7 +6,7 @@
 #include <memory>
 #include <Node.h>
 
-namespace avl {
+namespace dmp {
 
     enum Expr_ID {
 

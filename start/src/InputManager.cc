@@ -1,7 +1,7 @@
 #include <InputManager.h>
 #include <InputFile.h>
 
-namespace avl {
+namespace dmp {
 
     InputManager::InputManager():
         currentInputFile(nullptr)

@@ -7,7 +7,7 @@
 #include <Variable.h>
 #include <Function.h>
 
-namespace avl {
+namespace dmp {
 
     struct LST {
 

@@ -8,7 +8,7 @@
 #include <Value.h>
 #include <NameType.h>
 
-namespace avl {
+namespace dmp {
 
     class StructType : public Type {
 

@@ -1,6 +1,6 @@
 #include <Node.h>
 
-namespace avl {
+namespace dmp {
 
     Node::Node(uint16_t k):
         kind(k),

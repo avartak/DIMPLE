@@ -1,6 +1,6 @@
 #include <NameType.h>
 
-namespace avl {
+namespace dmp {
 
     NameType::NameType():
         attr(0)

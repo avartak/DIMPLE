@@ -7,7 +7,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 
-namespace avl {
+namespace dmp {
 
     extern std::unique_ptr<llvm::LLVMContext> TheContext;
     extern std::unique_ptr<llvm::Module> TheModule;

@@ -1,7 +1,7 @@
 #include <PrimitiveType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     PrimitiveType::PrimitiveType(int t):
         Type(t)

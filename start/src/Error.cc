@@ -1,7 +1,7 @@
 #include <sstream>
 #include <Error.h>
 
-namespace avl {
+namespace dmp {
 
     Error::Error(const std::string& m):
         location(),

@@ -7,7 +7,7 @@
 #include <Entity.h>
 #include <TypeBase.h>
 
-namespace avl {
+namespace dmp {
 
     struct Type : public Entity, public TypeBase {
 

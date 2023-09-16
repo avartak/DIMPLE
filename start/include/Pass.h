@@ -8,7 +8,7 @@
 #include <Error.h>
 #include <Node.h>
 
-namespace avl {
+namespace dmp {
 
     template<typename T>
     struct Pass {

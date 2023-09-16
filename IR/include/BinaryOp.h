@@ -6,7 +6,7 @@
 #include <Variable.h>
 #include <Literal.h>
 
-namespace avl {
+namespace dmp {
 
     enum UB_ID {
 

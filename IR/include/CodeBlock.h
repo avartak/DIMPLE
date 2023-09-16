@@ -6,7 +6,7 @@
 #include <Value.h>
 #include <Function.h>
 
-namespace avl {
+namespace dmp {
 
     struct CodeBlock {
 

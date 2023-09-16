@@ -1,6 +1,6 @@
 #include <AST.h>
 
-namespace avl {
+namespace dmp {
 
     std::shared_ptr<Node> AST::getNonSynonymRepNode(const std::shared_ptr<Identifier>& ident) {
 

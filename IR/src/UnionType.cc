@@ -1,7 +1,7 @@
 #include <UnionType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     UnionType::UnionType(const std::string& n):
         Type(TYPE_UNION, n)

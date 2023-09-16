@@ -6,7 +6,7 @@
 #include <Type.h>
 #include <TypeNode.h>
 
-namespace avl {
+namespace dmp {
 
     struct NameType {
 

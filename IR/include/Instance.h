@@ -4,7 +4,7 @@
 #include <string>
 #include <Value.h>
 
-namespace avl {
+namespace dmp {
 
     struct Instance : public Value {
 

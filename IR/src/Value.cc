@@ -2,7 +2,7 @@
 #include <Value.h>
 #include <PointerType.h>
 
-namespace avl {
+namespace dmp {
 
     Value::Value(uint16_t i, const std::shared_ptr<Type>& t, llvm::Value* v):
         Entity(ENTITY_VALUE),

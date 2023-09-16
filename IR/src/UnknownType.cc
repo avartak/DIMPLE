@@ -1,7 +1,7 @@
 #include <UnknownType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     UnknownType::UnknownType():
         Type(TYPE_UNKNOWN)

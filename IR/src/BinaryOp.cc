@@ -10,7 +10,7 @@
 #include <Statement.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     std::shared_ptr<Value> BinaryOp::add(const std::shared_ptr<Value>& le, const std::shared_ptr<Value>& re) {
         std::shared_ptr<Value> ret;

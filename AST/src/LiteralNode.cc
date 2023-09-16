@@ -3,7 +3,7 @@
 #include <LiteralNode.h>
 #include <TokenID.h>
 
-namespace avl {
+namespace dmp {
 
     BoolNode::BoolNode(const std::shared_ptr<Token>& t, bool b):
         ExprNode(EXPR_BOOL),

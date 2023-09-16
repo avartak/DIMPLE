@@ -1,6 +1,6 @@
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     std::unique_ptr<llvm::LLVMContext> TheContext;
     std::unique_ptr<llvm::Module> TheModule;

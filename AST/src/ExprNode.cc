@@ -2,7 +2,7 @@
 #include <Token.h>
 #include <TokenID.h>
 
-namespace avl {
+namespace dmp {
 
     std::map<int, uint16_t> ExprNode::unopsmap = {
         {TOKEN_DEREF     , UNARYOP_DEREFERENCE},

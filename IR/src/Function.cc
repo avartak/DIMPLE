@@ -6,7 +6,7 @@
 #include <Statement.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     Function::Function(int s, const std::string& n, const std::shared_ptr<Type>& t):
         Instance(VALUE_FUNC, s, n, t),

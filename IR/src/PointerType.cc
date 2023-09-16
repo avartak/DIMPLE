@@ -1,7 +1,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <PointerType.h>
 
-namespace avl {
+namespace dmp {
 
     PointerType::PointerType(const std::string& n):
         Type(TYPE_POINTER, n)

@@ -5,7 +5,7 @@
 #include <string>
 #include <InputManager.h>
 
-namespace avl {
+namespace dmp {
 
     struct Coordinate {
 

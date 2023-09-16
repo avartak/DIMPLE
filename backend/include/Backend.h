@@ -5,7 +5,7 @@
 #include <llvm/Target/TargetMachine.h>
 #include <Pass.h>
 
-namespace avl {
+namespace dmp {
 
     struct Backend : public Pass<void> {
 

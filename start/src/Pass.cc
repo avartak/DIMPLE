@@ -1,7 +1,7 @@
 #include <Pass.h>
 #include <Entity.h>
 
-namespace avl {
+namespace dmp {
 
     template<typename T>
     Pass<T>::Pass(InputManager* in, AST* tree, GST* sym):

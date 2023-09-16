@@ -3,7 +3,7 @@
 
 #include <Type.h>
 
-namespace avl {
+namespace dmp {
 
     struct VoidType : public Type {
 

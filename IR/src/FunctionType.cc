@@ -1,7 +1,7 @@
 #include <FunctionType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     FunctionType::FunctionType(const std::vector<NameType>& a, const std::shared_ptr<Type>& r):
         Type(TYPE_FUNCTION),

@@ -1,7 +1,7 @@
 #include <StructType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     StructType::StructType(const std::string& n, bool p):
         Type(TYPE_STRUCT, n)

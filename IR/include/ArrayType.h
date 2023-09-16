@@ -7,7 +7,7 @@
 #include <Type.h>
 #include <Value.h>
 
-namespace avl {
+namespace dmp {
 
     struct ArrayType : public Type {
 

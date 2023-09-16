@@ -4,7 +4,7 @@
 #include <Instance.h>
 #include <Statement.h>
 
-namespace avl {
+namespace dmp {
 
     struct Variable : public Instance {
 

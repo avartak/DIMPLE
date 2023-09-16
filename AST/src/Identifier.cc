@@ -1,6 +1,6 @@
 #include <Identifier.h>
 
-namespace avl {
+namespace dmp {
 
     Identifier::Identifier():
         Node(NODE_IDENTIFIER),

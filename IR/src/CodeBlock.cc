@@ -1,7 +1,7 @@
 #include <CodeBlock.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     CodeBlock::CodeBlock() {
         block = llvm::BasicBlock::Create(*TheContext);

@@ -1,7 +1,7 @@
 #include <Type.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     std::vector<std::pair<const Type*, const Type*> > Type::being_compared;
 

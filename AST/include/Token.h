@@ -4,7 +4,7 @@
 #include <string>
 #include <Node.h>
 
-namespace avl {
+namespace dmp {
 
     struct Token : public Node {
 

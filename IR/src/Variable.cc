@@ -3,7 +3,7 @@
 #include <MemoryOp.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     Variable::Variable(int s, const std::string& n, const std::shared_ptr<Type>& t):
         Instance(VALUE_VAR, s, n, t)

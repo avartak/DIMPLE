@@ -6,7 +6,7 @@
 #include <ExprNode.h>
 #include <Token.h>
 
-namespace avl {
+namespace dmp {
 
     struct BoolNode : public ExprNode {
 

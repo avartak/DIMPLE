@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace avl {
+namespace dmp {
 
     void compile(const std::string&, const std::string&);
         

@@ -10,7 +10,7 @@
 #include <FunctionType.h>
 #include <Value.h>
 
-namespace avl {
+namespace dmp {
 
     bool Translator::getType(const std::shared_ptr<Node>& node, bool includeOpaquePtr) {
 

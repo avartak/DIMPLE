@@ -5,7 +5,7 @@
 #include <InputFile.h>
 #include <Globals.h>
   
-namespace avl {
+namespace dmp {
 
     Parser::Parser(InputManager* in, AST* tree):
         Pass(in, tree, nullptr)

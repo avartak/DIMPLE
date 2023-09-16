@@ -1,6 +1,6 @@
 #include <Lexer.h>
 
-namespace avl {
+namespace dmp {
 
     int Lexer::match(bool exact) {
 

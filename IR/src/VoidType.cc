@@ -1,7 +1,7 @@
 #include <VoidType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     VoidType::VoidType():
         Type(TYPE_VOID)

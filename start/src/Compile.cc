@@ -8,12 +8,12 @@
 #include <Backend.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     void compile(const std::string& srcfile, const std::string& outfile) {
 
         TheContext      = std::make_unique<llvm::LLVMContext>();
-        TheModule       = std::make_unique<llvm::Module>("AVL module", *TheContext);
+        TheModule       = std::make_unique<llvm::Module>("DIMPLE module", *TheContext);
         TheBuilder      = std::make_unique<llvm::IRBuilder<> >(*TheContext);
 
         auto input      = std::make_unique<InputManager>();

@@ -1,6 +1,6 @@
 #include <NameNode.h>
 
-namespace avl {
+namespace dmp {
 
     NameNode::NameNode():
         Node(NODE_NAMENODE),

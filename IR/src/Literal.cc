@@ -7,7 +7,7 @@
 #include <ArrayType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     IntLiteral::IntLiteral(uint64_t i):
         Value(VALUE_INT, std::make_shared<PrimitiveType>(TYPE_INT64), TheBuilder->getInt64(i)),

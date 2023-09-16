@@ -1,7 +1,7 @@
 #include <Lexer.h>
 #include <TokenID.h>
 
-namespace avl {
+namespace dmp {
 
     std::string Lexer::bin    = "01";
     std::string Lexer::oct    = "01234567";

@@ -9,7 +9,7 @@
 #include <CodeBlock.h>
 #include <LST.h>
 
-namespace avl {
+namespace dmp {
 
     bool Translator::getValue(const std::shared_ptr<Node>& node) {
         if (node->kind == NODE_IDENTIFIER) {

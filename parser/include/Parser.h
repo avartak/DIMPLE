@@ -11,7 +11,7 @@
 #include <Identifier.h>
 #include <Statement.h>
 
-namespace avl {
+namespace dmp {
 
     struct Parser : public Pass<Node> {
 

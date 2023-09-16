@@ -7,7 +7,7 @@
 #include <Instance.h>
 #include <Variable.h>
 
-namespace avl {
+namespace dmp {
 
     struct CodeBlock;
     struct LST;

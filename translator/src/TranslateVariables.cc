@@ -8,7 +8,7 @@
 #include <Literal.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     bool Translator::getGlobalVar(const std::shared_ptr<Identifier>& ident, uint16_t storage, const std::shared_ptr<Type>& type) {
 

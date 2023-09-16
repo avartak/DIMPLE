@@ -10,7 +10,7 @@
 #include <Variable.h>
 #include <Function.h>
 
-namespace avl {
+namespace dmp {
 
     struct GST {
         std::map<std::string, std::shared_ptr<Type> > types;

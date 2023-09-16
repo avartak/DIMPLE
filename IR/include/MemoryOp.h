@@ -3,7 +3,7 @@
 
 #include <Variable.h>
 
-namespace avl {
+namespace dmp {
 
     struct MemoryOp {
 

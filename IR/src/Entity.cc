@@ -1,6 +1,6 @@
 #include <Entity.h>
 
-namespace avl {
+namespace dmp {
 
     Entity::Entity(uint16_t k):
         kind(k)

@@ -1,6 +1,6 @@
 #include <TypeNode.h>
 
-namespace avl {
+namespace dmp {
 
     TypeNode::TypeNode(uint16_t t):
         Node(NODE_TYPENODE),

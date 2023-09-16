@@ -1,7 +1,7 @@
 #ifndef TOKENID_H
 #define TOKENID_H
 
-namespace avl {
+namespace dmp {
 
     enum TokenID {
 

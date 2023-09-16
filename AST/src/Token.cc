@@ -1,7 +1,7 @@
 #include <Token.h>
 #include <TokenID.h>
 
-namespace avl {
+namespace dmp {
 
     Token::Token():
         Node(NODE_TOKEN),

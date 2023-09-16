@@ -2,7 +2,7 @@
 #include <ArrayType.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     ArrayType::ArrayType(const std::string& n):
         Type(TYPE_ARRAY, n)

@@ -7,7 +7,7 @@
 #include <TypeBase.h>
 #include <NameNode.h>
 
-namespace avl {
+namespace dmp {
 
     struct TypeNode : public Node, public TypeBase {
 

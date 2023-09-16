@@ -7,7 +7,7 @@
 #include <LST.h>
 #include <Globals.h>
 
-namespace avl {
+namespace dmp {
 
     std::shared_ptr<Value> FunctionOp::call(const std::shared_ptr<Function>& func, const std::vector<std::shared_ptr<Value> >& args) {
 

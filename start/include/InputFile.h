@@ -6,7 +6,7 @@
 #include <Lexer.h>
 #include <InputManager.h>
 
-namespace avl {
+namespace dmp {
 
     struct InputFile {
 

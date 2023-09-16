@@ -7,7 +7,7 @@
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Constants.h>
 
-namespace avl {
+namespace dmp {
 
     enum Value_ID {
 

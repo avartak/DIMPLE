@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 
-namespace avl {
+namespace dmp {
 
     enum Lexer_State_ID {
 

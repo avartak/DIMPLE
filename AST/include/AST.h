@@ -9,7 +9,7 @@
 #include <Statement.h>
 #include <Identifier.h>
 
-namespace avl {
+namespace dmp {
 
     struct AST {
         std::map<std::string, std::shared_ptr<NameNode> > representations;

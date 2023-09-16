@@ -20,7 +20,7 @@
 #include <StructType.h>
 #include <UnionType.h>
 
-namespace avl {
+namespace dmp {
 
     struct Translator : public Pass<Entity> {
 

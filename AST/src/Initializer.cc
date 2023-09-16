@@ -1,6 +1,6 @@
 #include <Initializer.h>
 
-namespace avl {
+namespace dmp {
 
     InitElement::InitElement(const std::shared_ptr<Node>& v):
         Node(NODE_INITELEMENT),
