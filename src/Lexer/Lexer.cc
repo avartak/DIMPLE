@@ -245,13 +245,10 @@ namespace dmp {
     void Lexer::append() {
 
         if (token_buffer == "") {
-            start.line = next.line;
-            start.column = next.column;
+            start = next;
         }
-        last.line = end.line;
-        last.column = end.column;
-        end.line = next.line;
-        end.column = next.column;
+	last = end;
+	end = next;
 
         if (next_char != EOF) {
             token_buffer += char(next_char);
@@ -302,13 +299,11 @@ namespace dmp {
             m = match(false);
         }
 
-        next.line = end.line;
-        next.column = end.column;
+        next = end;
 
         if (m == RULE_UNDEF) {
             token_buffer.erase(token_buffer.end()-1);
-            end.line = last.line;
-            end.column = last.column;
+	    end = last;
             m = match(true);
         }
 
