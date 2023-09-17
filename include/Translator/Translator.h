@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include <Start/Pass.h>
+#include <Common/Pass.h>
 #include <AST/Node.h>
 #include <AST/TypeNode.h>
 #include <AST/ExprNode.h>

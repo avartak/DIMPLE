@@ -2,8 +2,8 @@
 #define PASS_H
 
 #include <memory>
-#include <Start/InputManager.h>
-#include <Start/Error.h>
+#include <IO/InputManager.h>
+#include <Common/Error.h>
 #include <AST/AST.h>
 #include <AST/Node.h>
 #include <IR/GST.h>

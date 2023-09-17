@@ -1,4 +1,4 @@
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/FunctionOp.h>
 #include <IR/BinaryOp.h>
 #include <IR/FunctionType.h>

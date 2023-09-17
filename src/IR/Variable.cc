@@ -1,4 +1,4 @@
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/Variable.h>
 #include <IR/PointerType.h>
 #include <IR/MemoryOp.h>

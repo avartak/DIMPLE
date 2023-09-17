@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <string>
-#include <Start/TypeBase.h>
+#include <Common/TypeBase.h>
 #include <AST/Node.h>
 #include <AST/NameNode.h>
 

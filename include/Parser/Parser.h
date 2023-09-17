@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-#include <Start/Pass.h>
+#include <Common/Pass.h>
 #include <AST/Token.h>
 #include <AST/AST.h>
 #include <AST/Identifier.h>

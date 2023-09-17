@@ -3,7 +3,7 @@
 
 #include <string>
 #include <llvm/Target/TargetMachine.h>
-#include <Start/Pass.h>
+#include <Common/Pass.h>
 
 namespace dmp {
 

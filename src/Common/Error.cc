@@ -1,5 +1,5 @@
 #include <sstream>
-#include <Start/Error.h>
+#include <Common/Error.h>
 
 namespace dmp {
 
@@ -18,7 +18,7 @@ namespace dmp {
     std::string Error::print(const InputManager* in) const {
 
         std::stringstream out;
-        out << "[AVL error]";
+        out << "[DIMPLE error]";
         if (location.filename(in) != "") {
             out << " " << location.filename(in);
             if (location.start.line > 0) {

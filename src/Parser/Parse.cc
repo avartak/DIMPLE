@@ -1,6 +1,6 @@
 #include <fstream>
-#include <Start/Location.h>
-#include <Start/InputFile.h>
+#include <IO/Location.h>
+#include <IO/InputFile.h>
 #include <Parser/Parser.h>
 #include <Lexer/TokenID.h>
   

@@ -1,5 +1,5 @@
-#include <Start/Location.h>
-#include <Start/Globals.h>
+#include <IO/Location.h>
+#include <Common/Globals.h>
 
 namespace dmp {
 

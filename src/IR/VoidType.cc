@@ -1,4 +1,4 @@
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/VoidType.h>
 
 namespace dmp {

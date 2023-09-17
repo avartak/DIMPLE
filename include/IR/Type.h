@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 #include <llvm/IR/Type.h>
-#include <Start/TypeBase.h>
+#include <Common/TypeBase.h>
 #include <IR/Entity.h>
 
 namespace dmp {

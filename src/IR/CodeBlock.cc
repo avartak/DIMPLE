@@ -1,4 +1,4 @@
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/CodeBlock.h>
 
 namespace dmp {

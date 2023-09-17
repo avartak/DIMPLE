@@ -1,5 +1,5 @@
 #include <llvm/IR/DerivedTypes.h>
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/ArrayType.h>
 
 namespace dmp {

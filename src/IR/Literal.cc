@@ -1,7 +1,7 @@
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/GlobalVariable.h>
 
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/Literal.h>
 #include <IR/PrimitiveType.h>
 #include <IR/PointerType.h>

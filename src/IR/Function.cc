@@ -1,5 +1,5 @@
 #include <llvm/IR/CFG.h>
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/Function.h>
 #include <IR/FunctionType.h>
 #include <IR/CodeBlock.h>

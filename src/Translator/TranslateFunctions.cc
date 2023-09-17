@@ -1,4 +1,4 @@
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <Translator/Translator.h>
 #include <AST/Statement.h>
 #include <IR/FunctionType.h>

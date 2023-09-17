@@ -1,5 +1,5 @@
 #include <llvm/IR/Constants.h>
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <IR/UnaryOp.h>
 #include <IR/BinaryOp.h>
 #include <IR/Literal.h>

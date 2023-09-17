@@ -1,4 +1,4 @@
-#include <Start/Pass.h>
+#include <Common/Pass.h>
 #include <IR/Entity.h>
 
 namespace dmp {

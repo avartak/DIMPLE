@@ -1,7 +1,7 @@
 #include <iostream>
-#include <Start/Globals.h>
+#include <Common/Globals.h>
 #include <Start/Compile.h>
-#include <Start/InputManager.h>
+#include <IO/InputManager.h>
 #include <AST/AST.h>
 #include <IR/GST.h>
 #include <Parser/Parser.h>

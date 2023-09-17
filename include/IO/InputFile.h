@@ -3,7 +3,7 @@
 
 #include <string>
 #include <fstream>
-#include <Start/InputManager.h>
+#include <IO/InputManager.h>
 #include <Lexer/Lexer.h>
 
 namespace dmp {

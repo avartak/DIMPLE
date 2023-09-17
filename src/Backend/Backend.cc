@@ -6,7 +6,7 @@
 #include <llvm/TargetParser/Host.h>
 #include <llvm/IR/LegacyPassManager.h>
 
-#include <Start/Globals.h>
+#include <common/Globals.h>
 #include <Backend/Backend.h>
 
 namespace dmp {
