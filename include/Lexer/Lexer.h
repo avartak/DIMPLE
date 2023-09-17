@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <IO/Coordinate.h>
 
 namespace dmp {
 
@@ -35,16 +36,12 @@ namespace dmp {
 
         std::ifstream& file;
         bool input_error;
-        int next;
+        int next_char;
         int state;
-        uint32_t start_line;
-        uint16_t start_column;
-        uint32_t end_line;
-        uint16_t end_column;
-        uint32_t last_line;
-        uint16_t last_column;
-        uint32_t next_line;
-        uint16_t next_column;
+	Coordinate start;
+	Coordinate end;
+	Coordinate last;
+	Coordinate next;
         std::string token_string;
         std::string token_buffer;
 

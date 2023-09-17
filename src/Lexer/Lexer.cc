@@ -105,16 +105,12 @@ namespace dmp {
     Lexer::Lexer(std::ifstream& f):
         file(f),
         input_error(false),
-        next(0),
+        next_char(0),
         state(LEXER_STATE_INIT),
-        start_line(1),
-        start_column(1),
-        end_line(1),
-        end_column(1),
-        last_line(1),
-        last_column(1),
-        next_line(1),
-        next_column(1),
+	start(1, 1),
+	end(1, 1),
+	last(1, 1),
+	next(1, 1),
         token_string(""),
         token_buffer("")
     {
@@ -239,7 +235,7 @@ namespace dmp {
 
     void Lexer::read() {
 
-        next = file.get();
+        next_char = file.get();
         if (!file.eof() && (file.fail() || file.bad()) ) {
             input_error = true;
         }
@@ -249,38 +245,38 @@ namespace dmp {
     void Lexer::append() {
 
         if (token_buffer == "") {
-            start_line = next_line;
-            start_column = next_column;
+            start.line = next.line;
+            start.column = next.column;
         }
-        last_line = end_line;
-        last_column = end_column;
-        end_line = next_line;
-        end_column = next_column;
+        last.line = end.line;
+        last.column = end.column;
+        end.line = next.line;
+        end.column = next.column;
 
-        if (next != EOF) {
-            token_buffer += char(next);
+        if (next_char != EOF) {
+            token_buffer += char(next_char);
         }
 
-        switch (next) {
+        switch (next_char) {
             case EOF:
-                next_line++; 
-                next_column = 1;
+                next.line++; 
+                next.column = 1;
                 break;
             case '\n': 
-                next_line++; 
-                next_column = 1;
+                next.line++; 
+                next.column = 1;
                 break;
             case '\r': 
-                next_column = 1;
+                next.column = 1;
                 break;
             case '\t':
-                next_column += 8;
+                next.column += 8;
                 break;
             case '\v':
-                next_line++;
+                next.line++;
                 break;
             default:
-                next_column++;
+                next.column++;
         }
     }
 
@@ -288,7 +284,7 @@ namespace dmp {
 
         append();
 
-        if (next == EOF) {
+        if (next_char == EOF) {
             token_string = token_buffer = "";
             return (input_error ? RULE_ERROR : RULE_EOF);
         }
@@ -296,7 +292,7 @@ namespace dmp {
         auto m = match(false);
         while (m != RULE_UNDEF) {
             read();    
-            if (next == EOF) {
+            if (next_char == EOF) {
                 if (input_error) {
                     return RULE_ERROR;
                 }
@@ -306,17 +302,17 @@ namespace dmp {
             m = match(false);
         }
 
-        next_line = end_line;
-        next_column = end_column;
+        next.line = end.line;
+        next.column = end.column;
 
         if (m == RULE_UNDEF) {
             token_buffer.erase(token_buffer.end()-1);
-            end_line = last_line;
-            end_column = last_column;
+            end.line = last.line;
+            end.column = last.column;
             m = match(true);
         }
 
-        if (m == RULE_UNDEF && next != EOF) {
+        if (m == RULE_UNDEF && next_char != EOF) {
             append();
         }
         token_string = token_buffer;
