@@ -298,7 +298,7 @@ namespace dmp {
         n++;
 
         if (!parseToken(it+n, TOKEN_DEFINE)) {
-            return (storage == STORAGE_INTERNAL ? error() : error(tokens[it+n], "Expect \':=\' after " + nm + " in global definition"));
+            return error(tokens[it+n], "Expect \':=\' after " + nm + " in global reference definition");
         }
         if (!isAvailable(it+n-1)) {
             return error();
