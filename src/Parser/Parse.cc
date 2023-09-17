@@ -32,9 +32,7 @@ namespace dmp {
         const auto& scanner = input->currentInputFile->scanner;
         auto type = scanner->lex();
         auto str = scanner->token_string;
-        Coordinate start(scanner->start_line, scanner->start_column);
-        Coordinate end(scanner->end_line, scanner->end_column);
-        Location loc(input->currentInputFile->index, start, end);
+        Location loc(input->currentInputFile->index, scanner->start, scanner->end);
 
         return std::make_shared<Token>(type, str, loc);
     }
