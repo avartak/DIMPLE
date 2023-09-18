@@ -255,10 +255,6 @@ namespace dmp {
         }
 
         switch (next_char) {
-            case EOF:
-                next.line++; 
-                next.column = 1;
-                break;
             case '\n': 
                 next.line++; 
                 next.column = 1;
@@ -272,9 +268,17 @@ namespace dmp {
             case '\v':
                 next.line++;
                 break;
+            case EOF:
+                break;
             default:
                 next.column++;
         }
+    }
+
+    void Lexer::unappend() {
+        token_buffer.erase(token_buffer.end()-1);
+        next = end;
+	end = last;
     }
 
     int Lexer::rule() {
@@ -287,33 +291,27 @@ namespace dmp {
         }
 
         auto m = match(false);
-        while (m != RULE_UNDEF) {
-            read();    
-            if (next_char == EOF) {
-                if (input_error) {
-                    return RULE_ERROR;
+	if (m != RULE_UNDEF) {
+            for (; m != RULE_UNDEF; m = match(false)) {
+                read();    
+                append();
+                if (next_char == EOF) {
+                    break;
                 }
-                break;
             }
-            append();
-            m = match(false);
-        }
+            if (m == RULE_UNDEF) {
+                unappend();
+                m = match(true);
+            }
+	    else if (input_error) {
+                return RULE_ERROR;
+            }
+	}
 
-        next = end;
-
-        if (m == RULE_UNDEF) {
-            token_buffer.erase(token_buffer.end()-1);
-	    end = last;
-            m = match(true);
-        }
-
-        if (m == RULE_UNDEF && next_char != EOF) {
-            append();
-        }
         token_string = token_buffer;
         token_buffer = "";
         state = LEXER_STATE_INIT;
-        return (m);
+        return m;
 
     }
 }

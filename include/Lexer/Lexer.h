@@ -49,6 +49,7 @@ namespace dmp {
 
         void read();
         void append();
+        void unappend();
         int rule();
         int lex();
 
