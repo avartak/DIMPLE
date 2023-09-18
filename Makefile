@@ -4,15 +4,7 @@ CXXFLAGS := `$(LLVM)/bin/llvm-config --cxxflags`
 LDFLAGS  := `$(LLVM)/bin/llvm-config --ldflags --libs all`
 LDFLAGS  += -lz -lcurses -lm -lxml2 -ldl -lpthread
 
-SOURCES  := $(wildcard src/Start/*.cc)
-SOURCES  += $(wildcard src/Common/*.cc)
-SOURCES  += $(wildcard src/IO/*.cc)
-SOURCES  += $(wildcard src/AST/*.cc)
-SOURCES  += $(wildcard src/IR/*.cc)
-SOURCES  += $(wildcard src/Lexer/*.cc)
-SOURCES  += $(wildcard src/Parser/*.cc)
-SOURCES  += $(wildcard src/Translator/*.cc)
-SOURCES  += $(wildcard src/Backend/*.cc)
+SOURCES  := $(wildcard src/*/*.cc)
 OBJECTS  := $(patsubst %.cc,%.o,$(SOURCES))
 DEPENDS  := $(patsubst %.cc,%.d,$(SOURCES))
 
