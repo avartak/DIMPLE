@@ -31,18 +31,19 @@ namespace dmp {
         LEXER_STATE_STRING_NEXT,
         LEXER_STATE_STRING_ESC,
         LEXER_STATE_STRING_ESC_HEX,
-        LEXER_STATE_STRING_DONE
+        LEXER_STATE_STRING_DONE,
+	LEXER_STATE_TOTAL_NUM_STATES
 
     };
 
     struct Lexer {
 
-        static std::string bin;
-        static std::string oct;
-        static std::string dec;
-        static std::string hex;
-        static std::string letter;
-        static std::string charset;
+        static const std::string bin;
+        static const std::string oct;
+        static const std::string dec;
+        static const std::string hex;
+        static const std::string letter;
+        static const std::string charset;
         static std::map<int, std::string> symbols;
         static std::map<int, std::string> keywords;
 
@@ -57,24 +58,17 @@ namespace dmp {
         std::string token_string;
         std::string token_buffer;
 
+        int (*state_processors[LEXER_STATE_TOTAL_NUM_STATES])(bool exact, const std::string& token_buffer, int& state);
+
         Lexer(std::ifstream&);
 
+        void populate_state_processors();
         void read();
         void append();
         void unappend();
         int  rule();
         int  lex();
-
         int  match(bool);
-	int  takeFirstLook(bool);
-        bool isWS(bool);
-        bool isOneLineComment(bool);
-        bool isMultiLineComment(bool);
-        bool isIdentifier(bool);
-        bool isInt(bool);
-        bool isReal(bool);
-        bool isChar(bool);
-        bool isString(bool);
 
     };
 

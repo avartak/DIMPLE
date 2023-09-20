@@ -3,12 +3,12 @@
 
 namespace dmp {
 
-    std::string Lexer::bin     = "01";
-    std::string Lexer::oct     = "01234567";
-    std::string Lexer::dec     = "0123456789";
-    std::string Lexer::hex     = "0123456789abcdefABCDEF";
-    std::string Lexer::letter  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    std::string Lexer::charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=~!@#$%^&*()_+[]{}|;:,./<>? ";
+    const std::string Lexer::bin     = "01";
+    const std::string Lexer::oct     = "01234567";
+    const std::string Lexer::dec     = "0123456789";
+    const std::string Lexer::hex     = "0123456789abcdefABCDEF";
+    const std::string Lexer::letter  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const std::string Lexer::charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=~!@#$%^&*()_+[]{}|;:,./<>? ";
 
     std::map<int, std::string> Lexer::symbols = {
         { RULE_CURLY_OPEN,       "{"        },
@@ -115,6 +115,7 @@ namespace dmp {
         token_string(""),
         token_buffer("")
     {
+        populate_state_processors();
         read();
     }
 

@@ -2,79 +2,69 @@
 
 namespace dmp {
 
+    static int process_LEXER_STATE_INIT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_INCLUDE(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_WS(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_ONELINE_COMMENT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_MULTILINE_COMMENT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_CHAR_START(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_CHAR_NEXT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_CHAR_ESC(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_CHAR_ESC_HEX(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_CHAR_DONE(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_STRING_START(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_STRING_NEXT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_STRING_ESC(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_STRING_ESC_HEX(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_STRING_DONE(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_NUM(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_INT_BIN(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_INT_OCT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_INT_HEX(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_REAL_DOT(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_REAL_EXP(bool exact, const std::string& token_buffer, int& state);
+    static int process_LEXER_STATE_WORD(bool exact, const std::string& token_buffer, int& state);
+
+    static inline int select_rule(bool selector, int rule_if_true) {
+        return selector ? rule_if_true : RULE_UNDEF;
+    }
+
+    void Lexer::populate_state_processors() {
+        state_processors[LEXER_STATE_INIT]              = process_LEXER_STATE_INIT;
+        state_processors[LEXER_STATE_INCLUDE]           = process_LEXER_STATE_INCLUDE;
+        state_processors[LEXER_STATE_WS]                = process_LEXER_STATE_WS;
+        state_processors[LEXER_STATE_ONELINE_COMMENT]   = process_LEXER_STATE_ONELINE_COMMENT;
+        state_processors[LEXER_STATE_MULTILINE_COMMENT] = process_LEXER_STATE_MULTILINE_COMMENT;
+        state_processors[LEXER_STATE_CHAR_START]        = process_LEXER_STATE_CHAR_START;
+        state_processors[LEXER_STATE_CHAR_NEXT]         = process_LEXER_STATE_CHAR_NEXT;
+        state_processors[LEXER_STATE_CHAR_ESC]          = process_LEXER_STATE_CHAR_ESC;
+        state_processors[LEXER_STATE_CHAR_ESC_HEX]      = process_LEXER_STATE_CHAR_ESC_HEX;
+        state_processors[LEXER_STATE_CHAR_DONE]         = process_LEXER_STATE_CHAR_DONE;
+        state_processors[LEXER_STATE_STRING_START]      = process_LEXER_STATE_STRING_START;
+        state_processors[LEXER_STATE_STRING_NEXT]       = process_LEXER_STATE_STRING_NEXT;
+        state_processors[LEXER_STATE_STRING_ESC]        = process_LEXER_STATE_STRING_ESC;
+        state_processors[LEXER_STATE_STRING_ESC_HEX]    = process_LEXER_STATE_STRING_ESC_HEX;
+        state_processors[LEXER_STATE_STRING_DONE]       = process_LEXER_STATE_STRING_DONE;
+        state_processors[LEXER_STATE_NUM]               = process_LEXER_STATE_NUM;
+        state_processors[LEXER_STATE_INT_BIN]           = process_LEXER_STATE_INT_BIN;
+        state_processors[LEXER_STATE_INT_OCT]           = process_LEXER_STATE_INT_OCT;
+        state_processors[LEXER_STATE_INT_HEX]           = process_LEXER_STATE_INT_HEX;
+        state_processors[LEXER_STATE_REAL_DOT]          = process_LEXER_STATE_REAL_DOT;
+        state_processors[LEXER_STATE_REAL_EXP]          = process_LEXER_STATE_REAL_EXP;
+        state_processors[LEXER_STATE_WORD]              = process_LEXER_STATE_WORD;
+    }
+
     int Lexer::match(bool exact) {
 
         if (token_buffer == "") {
             return RULE_UNDEF;
         }
-        else if (state == LEXER_STATE_INCLUDE) {
-            return token_buffer.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
-        }
-	else if (state == LEXER_STATE_WS) {
-            return isWS(exact) ? RULE_WS : RULE_UNDEF;
-        }
-	else if (state == LEXER_STATE_ONELINE_COMMENT) {
-            return isOneLineComment(exact) ? RULE_ONELINE_COMMENT : RULE_UNDEF;
-        }
-	else if (state == LEXER_STATE_MULTILINE_COMMENT) {
-            return isMultiLineComment(exact) ? RULE_MULTILINE_COMMENT : RULE_UNDEF;
-        }
-	else if (state == LEXER_STATE_CHAR_START   ||
-                 state == LEXER_STATE_CHAR_NEXT    ||
-                 state == LEXER_STATE_CHAR_ESC     ||
-                 state == LEXER_STATE_CHAR_ESC_HEX ||
-                 state == LEXER_STATE_CHAR_DONE)
-        {
-            return isChar(exact) ? RULE_CHAR : RULE_UNDEF;
-        }
-        else if (state == LEXER_STATE_STRING_START   ||
-                 state == LEXER_STATE_STRING_NEXT    ||
-                 state == LEXER_STATE_STRING_ESC     ||
-                 state == LEXER_STATE_STRING_ESC_HEX ||
-                 state == LEXER_STATE_STRING_DONE)
-        {
-            return isString(exact) ? RULE_STRING : RULE_UNDEF;
-        }
-        else if (state == LEXER_STATE_INT_BIN ||
-                 state == LEXER_STATE_INT_OCT ||
-                 state == LEXER_STATE_INT_HEX)
-        {
-            return isInt(exact) ? RULE_INT : RULE_UNDEF;
-        }
-        else if (state == LEXER_STATE_REAL_DOT ||
-                 state == LEXER_STATE_REAL_EXP)
-        {
-            return isReal(exact) ? RULE_REAL : RULE_UNDEF;
-        }
-        else if (state == LEXER_STATE_NUM) {
-            if (isInt(exact)) {
-                return RULE_INT;
-            }
-            else if (isReal(exact)) {
-                return RULE_REAL;
-            }
-            return RULE_UNDEF;
-        }
-	else if (state == LEXER_STATE_WORD) {
-            if (exact) {
-                for (const auto& keyword_pair : keywords) {
-                    const auto& keyword = keyword_pair.second;
-                    if (token_buffer == keyword) {
-                        return keyword_pair.first;
-                    }
-                }
-            }
-            if (isIdentifier(exact)) {
-                return RULE_IDENT;
-            }
-            return RULE_UNDEF;
-        }
 
-        return takeFirstLook(exact);
+	return state_processors[state](exact, token_buffer, state);
 
     }
 
-    int Lexer::takeFirstLook(bool exact) {
+    int process_LEXER_STATE_INIT(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
@@ -90,7 +80,7 @@ namespace dmp {
                 state = LEXER_STATE_WS;
 		return RULE_WS;
             }
-	    else if (letter.find(token_buffer[0]) != std::string::npos || token_buffer[0] == '_') {
+	    else if (Lexer::letter.find(token_buffer[0]) != std::string::npos || token_buffer[0] == '_') {
                 state = LEXER_STATE_WORD;
 		// We don't have any 1-char keywords
 		// If there are any, they should be tested here
@@ -100,7 +90,7 @@ namespace dmp {
                 state = LEXER_STATE_ONELINE_COMMENT;
                 return exact ? RULE_UNDEF : RULE_ONELINE_COMMENT;
             }
-	    else if (dec.find(last_ch) != std::string::npos) {
+	    else if (Lexer::dec.find(last_ch) != std::string::npos) {
                 state = LEXER_STATE_NUM;
                 return RULE_INT;
             }
@@ -119,13 +109,13 @@ namespace dmp {
                 state = LEXER_STATE_MULTILINE_COMMENT;
                 return exact ? RULE_UNDEF : RULE_MULTILINE_COMMENT;
             }
-	    else if (token_buffer[0] == '.' && dec.find(last_ch) != std::string::npos) {
+	    else if (token_buffer[0] == '.' && Lexer::dec.find(last_ch) != std::string::npos) {
                 state = LEXER_STATE_REAL_DOT;
                 return exact ? RULE_UNDEF : RULE_REAL;
             }
         }
 
-	for (const auto& sym_pair : symbols) {
+	for (const auto& sym_pair : Lexer::symbols) {
             const auto& sym = sym_pair.second;
             if (exact) {
                 if (token_buffer == sym) {
@@ -142,253 +132,318 @@ namespace dmp {
 	return RULE_UNDEF;
     }
 
-    bool Lexer::isWS(bool) {
-
-        const auto& last_ch = token_buffer.back();
-	return last_ch == ' '  ||
-               last_ch == '\t' ||
-               last_ch == '\n' ||
-               last_ch == '\r' ||
-               last_ch == '\v' ||
-               last_ch == '\f';
+    int process_LEXER_STATE_INCLUDE(bool exact, const std::string& token_buffer, int& state) {
+        return token_buffer.back() != '\n' ? RULE_FILENAME : RULE_UNDEF;
     }
 
-    bool Lexer::isIdentifier(bool) {
+    int process_LEXER_STATE_WS(bool, const std::string& token_buffer, int& state) {
 
         const auto& last_ch = token_buffer.back();
-        return letter.find(last_ch) != std::string::npos ||
-               dec.find(last_ch)    != std::string::npos ||
-               last_ch == '_';	
+        bool is_white_space = last_ch == ' '  ||
+                              last_ch == '\t' ||
+                              last_ch == '\n' ||
+                              last_ch == '\r' ||
+                              last_ch == '\v' ||
+                              last_ch == '\f';
+        return select_rule(is_white_space, RULE_WS);
     }
 
-    bool Lexer::isOneLineComment(bool exact) {
+    int process_LEXER_STATE_WORD(bool exact, const std::string& token_buffer, int& state) {
+
+        const auto& last_ch = token_buffer.back();
+
+        if (exact) {
+            for (const auto& keyword_pair : Lexer::keywords) {
+                const auto& keyword = keyword_pair.second;
+                if (token_buffer == keyword) {
+                    return keyword_pair.first;
+                }
+            }
+        }
+
+        bool is_ident = Lexer::letter.find(last_ch) != std::string::npos ||
+                        Lexer::dec.find(last_ch)    != std::string::npos ||
+                        last_ch == '_';
+
+        return select_rule(is_ident, RULE_IDENT);
+    }
+
+    int process_LEXER_STATE_ONELINE_COMMENT(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
         if (len == 2) {
             if (last_ch == '`') {
-                return !exact;
+                return select_rule(!exact, RULE_ONELINE_COMMENT);
             }
         }
         else {
             if (exact) {
-                return last_ch == '\n';
+                return select_rule(last_ch == '\n', RULE_ONELINE_COMMENT);
             }
             else {
-                return token_buffer[len-2] != '\n';
+                return select_rule(token_buffer[len-2] != '\n', RULE_ONELINE_COMMENT);
             }
         }
-        return false;
+        return RULE_UNDEF;
     }
 
-    bool Lexer::isMultiLineComment(bool exact) {
+    int process_LEXER_STATE_MULTILINE_COMMENT(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
         if (len == 3) {
-            return !exact;
+            return select_rule(!exact, RULE_MULTILINE_COMMENT);
         }
         else {
             if (exact) {
-                return token_buffer[len-2] == '*' && last_ch == '/';
+                return select_rule(token_buffer[len-2] == '*' && last_ch == '/', RULE_MULTILINE_COMMENT);
             }
             else {
-                return token_buffer[len-3] != '*' || token_buffer[len-2] != '/';
+                return select_rule(token_buffer[len-3] != '*' || token_buffer[len-2] != '/', RULE_MULTILINE_COMMENT);
             }
         }
-        return false;	    
+        return RULE_UNDEF;	    
     }   
 
-    bool Lexer::isInt(bool exact) {
+    int process_LEXER_STATE_NUM(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-	if (state == LEXER_STATE_NUM) {
-            if (len == 2 && token_buffer[0] == '0') {
-                switch (last_ch) {
-                    case 'b' : state = LEXER_STATE_INT_BIN; return !exact;
-                    case 'o' : state = LEXER_STATE_INT_OCT; return !exact;
-                    case 'x' : state = LEXER_STATE_INT_HEX; return !exact;
-                    default  : return dec.find(last_ch) != std::string::npos;
-                }
+        if (len == 2 && token_buffer[0] == '0') {
+            switch (last_ch) {
+                case 'b' : state = LEXER_STATE_INT_BIN ; return select_rule(!exact, RULE_INT);
+                case 'o' : state = LEXER_STATE_INT_OCT ; return select_rule(!exact, RULE_INT);
+                case 'x' : state = LEXER_STATE_INT_HEX ; return select_rule(!exact, RULE_INT);
+                case '.' : state = LEXER_STATE_REAL_DOT; return select_rule(!exact, RULE_REAL);
             }
-	    return dec.find(last_ch) != std::string::npos;
+	    return select_rule(Lexer::dec.find(last_ch) != std::string::npos, RULE_INT);
         }
-	else if (state == LEXER_STATE_INT_BIN) {
-            return bin.find(last_ch) != std::string::npos;
+        else if (Lexer::dec.find(last_ch) != std::string::npos) {
+            return RULE_INT;
+        } 
+	else if (last_ch == '.') {
+            state = LEXER_STATE_REAL_DOT;
+            return RULE_REAL;
         }
-	else if (state == LEXER_STATE_INT_OCT) {
-            return oct.find(last_ch) != std::string::npos;
+        else if (last_ch == 'e' || last_ch == 'E') {
+            state = LEXER_STATE_REAL_EXP;
+            return select_rule(!exact, RULE_REAL);
         }
-	else if (state == LEXER_STATE_INT_HEX) {
-            return hex.find(last_ch) != std::string::npos;
-        }
-        return false;
+        return RULE_UNDEF;
     }
 
-    bool Lexer::isReal(bool exact) {
+    int process_LEXER_STATE_INT_BIN(bool exact, const std::string& token_buffer, int& state) {
 
-        auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
-
-	if (len >= 2 && state == LEXER_STATE_NUM) {
-            if (last_ch == '.') {
-                state = LEXER_STATE_REAL_DOT;
-		return true;
-            }
-	    else if (last_ch == 'e' || last_ch == 'E') {
-                state = LEXER_STATE_REAL_EXP;
-		return !exact;
-            }
-	    else if (dec.find(last_ch) != std::string::npos) {
-                return true;
-            }
-        }
-	else if (state == LEXER_STATE_REAL_DOT) {
-	    if (last_ch == 'e' || last_ch == 'E') {
-                state = LEXER_STATE_REAL_EXP;
-		return !exact;
-            }
-	    else if (dec.find(last_ch) != std::string::npos) {
-                return true;
-            }
-        }
-	else if (state == LEXER_STATE_REAL_EXP) {
-            if (last_ch == '+' || last_ch == '-') {
-                if (token_buffer[len-2] == 'e' || token_buffer[len-2] == 'E') {
-                    return !exact;
-                }
-            }
-	    else if (dec.find(last_ch) != std::string::npos) {
-                return true;
-            }
-        }
-        return false;
+        return select_rule(Lexer::bin.find(last_ch) != std::string::npos, RULE_INT);
     }
 
-    bool Lexer::isChar(bool exact) {
+    int process_LEXER_STATE_INT_OCT(bool exact, const std::string& token_buffer, int& state) {
+
+        const auto& last_ch = token_buffer.back();
+        return select_rule(Lexer::oct.find(last_ch) != std::string::npos, RULE_INT);
+    }
+
+    int process_LEXER_STATE_INT_HEX(bool exact, const std::string& token_buffer, int& state) {
+
+        const auto& last_ch = token_buffer.back();
+        return select_rule(Lexer::hex.find(last_ch) != std::string::npos, RULE_INT);
+    }    
+
+    int process_LEXER_STATE_REAL_DOT(bool exact, const std::string& token_buffer, int& state) {
+
+        const auto& last_ch = token_buffer.back();
+	if (last_ch == 'e' || last_ch == 'E') {
+            state = LEXER_STATE_REAL_EXP;
+	    return select_rule(!exact, RULE_REAL);
+        }
+	else if (Lexer::dec.find(last_ch) != std::string::npos) {
+            return RULE_REAL;
+        }
+        return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_REAL_EXP(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-	if (state == LEXER_STATE_CHAR_START) {
-            if (charset.find(last_ch) != std::string::npos) {
+        if (last_ch == '+' || last_ch == '-') {
+            if (token_buffer[len-2] == 'e' || token_buffer[len-2] == 'E') {
+                return select_rule(!exact, RULE_REAL);
+            }
+        }
+        else if (Lexer::dec.find(last_ch) != std::string::npos) {
+            return RULE_REAL;
+        }
+        return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_CHAR_START(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (Lexer::charset.find(last_ch) != std::string::npos) {
+            state = LEXER_STATE_CHAR_NEXT;
+            return select_rule(!exact, RULE_CHAR);
+        }
+        else if (last_ch == '\\') {
+            state = LEXER_STATE_CHAR_ESC;
+            return select_rule(!exact, RULE_CHAR);
+        }
+	return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_CHAR_NEXT(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (last_ch == '\'') {
+            state = LEXER_STATE_CHAR_DONE;
+            return RULE_CHAR;
+        }
+	return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_CHAR_ESC(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (last_ch == 'a'  ||
+            last_ch == 'b'  ||
+            last_ch == 'f'  ||
+            last_ch == 'n'  ||
+            last_ch == 'r'  ||
+            last_ch == 't'  ||
+            last_ch == 'v'  ||
+            last_ch == '\\' ||
+            last_ch == '\'' ||
+            last_ch == '\"')
+        {
+            state = LEXER_STATE_CHAR_NEXT;
+            return select_rule(!exact, RULE_CHAR);
+        }
+        else if (last_ch == 'x') {
+            state = LEXER_STATE_CHAR_ESC_HEX;
+            return select_rule(!exact, RULE_CHAR);
+        }
+        return RULE_UNDEF;	    
+    }
+
+    int process_LEXER_STATE_CHAR_ESC_HEX(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (Lexer::hex.find(last_ch)) {
+            if (token_buffer[len-2] == 'x') {
+                return select_rule(!exact, RULE_CHAR);
+            }
+            else {
                 state = LEXER_STATE_CHAR_NEXT;
-                return !exact;
-            }
-	    else if (last_ch == '\\') {
-                state = LEXER_STATE_CHAR_ESC;
-		return !exact;
+                return select_rule(!exact, RULE_CHAR);
             }
         }
-	else if (state == LEXER_STATE_CHAR_NEXT) {
-            if (last_ch == '\'') {
-                state = LEXER_STATE_CHAR_DONE;
-                return true;
-            }
-        }
-	else if (state == LEXER_STATE_CHAR_ESC) {
-            if (last_ch == 'a'  ||
-                last_ch == 'b'  ||
-                last_ch == 'f'  ||
-                last_ch == 'n'  ||
-                last_ch == 'r'  ||
-                last_ch == 't'  ||
-                last_ch == 'v'  ||
-                last_ch == '\\' ||
-                last_ch == '\'' ||
-                last_ch == '\"')
-	    {
-                state = LEXER_STATE_CHAR_NEXT;
-                return !exact;
-            }
-	    else if (last_ch == 'x') {
-                state = LEXER_STATE_CHAR_ESC_HEX;
-                return !exact;
-            }
-        }
-	else if (state == LEXER_STATE_CHAR_ESC_HEX) {
-            if (hex.find(last_ch)) {
-                if (token_buffer[len-2] == 'x') {
-                    return !exact;
-                }
-		else {
-                    state = LEXER_STATE_CHAR_NEXT;
-                    return !exact;
-                }
-	    }
-        }
-	else if (state == LEXER_STATE_CHAR_DONE) {
-            return exact;
-        }
-	return false;
+        return RULE_UNDEF;	    
     }
 
-    bool Lexer::isString(bool exact) {
+    int process_LEXER_STATE_CHAR_DONE(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+        return select_rule(exact, RULE_CHAR);
+    }
+
+    int process_LEXER_STATE_STRING_START(bool exact, const std::string& token_buffer, int& state) {
 
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-        if (state == LEXER_STATE_STRING_START) {
-            if (charset.find(last_ch) != std::string::npos) {
-                state = LEXER_STATE_STRING_NEXT;
-                return !exact;
-            }
-            else if (last_ch == '\\') {
-                state = LEXER_STATE_STRING_ESC;
-                return !exact;
-            }
+        if (Lexer::charset.find(last_ch) != std::string::npos) {
+            state = LEXER_STATE_STRING_NEXT;
+            return select_rule(!exact, RULE_STRING);
         }
-        else if (state == LEXER_STATE_STRING_NEXT) {
-            if (last_ch == '\"') {
-                state = LEXER_STATE_STRING_DONE;
-                return true;
-            }
-	    else if (charset.find(last_ch) != std::string::npos) {
-                return !exact;
-            }
-            else if (last_ch == '\\') {
-                state = LEXER_STATE_STRING_ESC;
-                return !exact;
-            }
+        else if (last_ch == '\\') {
+            state = LEXER_STATE_STRING_ESC;
+            return select_rule(!exact, RULE_STRING);
         }
-        else if (state == LEXER_STATE_STRING_ESC) {
-            if (last_ch == 'a'  ||
-                last_ch == 'b'  ||
-                last_ch == 'f'  ||
-                last_ch == 'n'  ||
-                last_ch == 'r'  ||
-                last_ch == 't'  ||
-                last_ch == 'v'  ||
-                last_ch == '\\' ||
-                last_ch == '\'' ||
-                last_ch == '\"')
-            {
-                state = LEXER_STATE_STRING_NEXT;
-                return !exact;
-            }
-            else if (last_ch == 'x') {
-                state = LEXER_STATE_STRING_ESC_HEX;
-                return !exact;
-            }
-        }
-        else if (state == LEXER_STATE_STRING_ESC_HEX) {
-            if (hex.find(last_ch)) {
-                if (token_buffer[len-2] == 'x') {
-                    return !exact;
-                }
-                else {
-                    state = LEXER_STATE_STRING_NEXT;
-                    return !exact;
-                }
-            }
-        }
-        else if (state == LEXER_STATE_STRING_DONE) {
-            return exact;
-        }
-        return false;	
+        return RULE_UNDEF;
     }
+
+    int process_LEXER_STATE_STRING_NEXT(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (last_ch == '\"') {
+            state = LEXER_STATE_STRING_DONE;
+            return RULE_STRING;
+        }
+        else if (Lexer::charset.find(last_ch) != std::string::npos) {
+            return select_rule(!exact, RULE_STRING);
+        }
+        else if (last_ch == '\\') {
+            state = LEXER_STATE_STRING_ESC;
+            return select_rule(!exact, RULE_STRING);
+        }
+        return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_STRING_ESC(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (last_ch == 'a'  ||
+            last_ch == 'b'  ||
+            last_ch == 'f'  ||
+            last_ch == 'n'  ||
+            last_ch == 'r'  ||
+            last_ch == 't'  ||
+            last_ch == 'v'  ||
+            last_ch == '\\' ||
+            last_ch == '\'' ||
+            last_ch == '\"')
+        {
+            state = LEXER_STATE_STRING_NEXT;
+            return select_rule(!exact, RULE_STRING);
+        }
+        else if (last_ch == 'x') {
+            state = LEXER_STATE_STRING_ESC_HEX;
+            return select_rule(!exact, RULE_STRING);
+        }
+        return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_STRING_ESC_HEX(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+
+        if (Lexer::hex.find(last_ch)) {
+            if (token_buffer[len-2] == 'x') {
+                return select_rule(!exact, RULE_STRING);
+            }
+            else {
+                state = LEXER_STATE_STRING_NEXT;
+                return select_rule(!exact, RULE_STRING);
+            }
+        }	
+        return RULE_UNDEF;
+    }
+
+    int process_LEXER_STATE_STRING_DONE(bool exact, const std::string& token_buffer, int& state) {
+
+        auto len = token_buffer.length();
+        const auto& last_ch = token_buffer.back();
+        return select_rule(exact, RULE_STRING);
+    }
+
 }
