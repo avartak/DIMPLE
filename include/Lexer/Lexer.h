@@ -17,10 +17,21 @@ namespace dmp {
         LEXER_STATE_MULTILINE_COMMENT,
         LEXER_STATE_WORD,
         LEXER_STATE_NUM,
-        LEXER_STATE_INT,
-        LEXER_STATE_REAL,
-        LEXER_STATE_CHAR,
-        LEXER_STATE_STRING
+        LEXER_STATE_INT_BIN,
+        LEXER_STATE_INT_OCT,
+        LEXER_STATE_INT_HEX,
+        LEXER_STATE_REAL_DOT,
+        LEXER_STATE_REAL_EXP,
+        LEXER_STATE_CHAR_START,
+        LEXER_STATE_CHAR_NEXT,
+        LEXER_STATE_CHAR_ESC,
+        LEXER_STATE_CHAR_ESC_HEX,
+        LEXER_STATE_CHAR_DONE,
+        LEXER_STATE_STRING_START,
+        LEXER_STATE_STRING_NEXT,
+        LEXER_STATE_STRING_ESC,
+        LEXER_STATE_STRING_ESC_HEX,
+        LEXER_STATE_STRING_DONE
 
     };
 
@@ -31,6 +42,7 @@ namespace dmp {
         static std::string dec;
         static std::string hex;
         static std::string letter;
+        static std::string charset;
         static std::map<int, std::string> symbols;
         static std::map<int, std::string> keywords;
 
@@ -50,10 +62,11 @@ namespace dmp {
         void read();
         void append();
         void unappend();
-        int rule();
-        int lex();
+        int  rule();
+        int  lex();
 
-        int match(bool);
+        int  match(bool);
+	int  takeFirstLook(bool);
         bool isWS(bool);
         bool isOneLineComment(bool);
         bool isMultiLineComment(bool);
@@ -62,7 +75,6 @@ namespace dmp {
         bool isReal(bool);
         bool isChar(bool);
         bool isString(bool);
-        bool nextChar(std::size_t&, bool);
 
     };
 

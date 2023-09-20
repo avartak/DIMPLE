@@ -1,7 +1,7 @@
 `` Use this file to test the include functionality
 
 `` Some global variable definitions
-n := uint32{2.0 => uint32};
+n := uint32{3.2e+2 => uint32};
 m := 4 => int8;
 p := "This is a string";
 z := int8{~};

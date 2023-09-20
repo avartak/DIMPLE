@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cstdlib>
 #include <cerrno>
 #include <AST/LiteralNode.h>
@@ -49,7 +50,10 @@ namespace dmp {
                 num = num.erase(0, 2);
             }
         }
-        uint64_t i = strtoull(token->str.c_str(), nullptr, 0);
+	while (num.length() > 1 && num[0] == '0') {
+            num = num.erase(0, 1);
+        }
+        uint64_t i = strtoull(num.c_str(), nullptr, base);
         if (errno == ERANGE) {
             return ret;
         }
