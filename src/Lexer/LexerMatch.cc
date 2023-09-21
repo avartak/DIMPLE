@@ -279,11 +279,9 @@ namespace dmp {
         }
 	else if (Lexer::escchar.find(last_ch) != std::string::npos) {
             return RULE_UNDEF;
-            state = LEXER_STATE_CHAR_NEXT;
-            return select_rule(!exact, RULE_CHAR);
         }
-	state = LEXER_STATE_CHAR_NEXT;
-	return RULE_CHAR;
+        state = LEXER_STATE_CHAR_NEXT;
+        return select_rule(!exact, RULE_CHAR);
     }
 
     int process_LEXER_STATE_CHAR_NEXT(bool exact, const std::string& token_buffer, int& state) {
@@ -364,7 +362,7 @@ namespace dmp {
 	else if (Lexer::escchar.find(last_ch) != std::string::npos) {
             return RULE_UNDEF;
         }
-	return RULE_STRING;
+        return select_rule(!exact, RULE_STRING);
     }
 
     int process_LEXER_STATE_STRING_ESC(bool exact, const std::string& token_buffer, int& state) {
