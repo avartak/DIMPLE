@@ -70,17 +70,11 @@ namespace dmp {
         const auto& last_ch = token_buffer.back();
 
 	if (token_buffer.length() == 1) {
-            bool is_white_space = last_ch == ' '  ||
-                                  last_ch == '\t' ||
-                                  last_ch == '\n' ||
-                                  last_ch == '\r' ||
-                                  last_ch == '\v' ||
-                                  last_ch == '\f';
-            if (is_white_space) {
+            if (Lexer::wspace.find(last_ch) != std::string::npos) {
                 state = LEXER_STATE_WS;
 		return RULE_WS;
             }
-	    else if (Lexer::letter.find(token_buffer[0]) != std::string::npos || token_buffer[0] == '_') {
+	    else if (Lexer::letter.find(last_ch) != std::string::npos || last_ch == '_') {
                 state = LEXER_STATE_WORD;
 		// We don't have any 1-char keywords
 		// If there are any, they should be tested here
@@ -137,15 +131,8 @@ namespace dmp {
     }
 
     int process_LEXER_STATE_WS(bool, const std::string& token_buffer, int& state) {
-
         const auto& last_ch = token_buffer.back();
-        bool is_white_space = last_ch == ' '  ||
-                              last_ch == '\t' ||
-                              last_ch == '\n' ||
-                              last_ch == '\r' ||
-                              last_ch == '\v' ||
-                              last_ch == '\f';
-        return select_rule(is_white_space, RULE_WS);
+        return select_rule(Lexer::wspace.find(last_ch) != std::string::npos, RULE_WS);
     }
 
     int process_LEXER_STATE_WORD(bool exact, const std::string& token_buffer, int& state) {

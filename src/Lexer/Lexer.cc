@@ -7,6 +7,7 @@ namespace dmp {
     const std::string Lexer::oct     = "01234567";
     const std::string Lexer::dec     = "0123456789";
     const std::string Lexer::hex     = "0123456789abcdefABCDEF";
+    const std::string Lexer::wspace  = " \t\n\r\v\f";
     const std::string Lexer::letter  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const std::string Lexer::charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=~!@#$%^&*()_+[]{}|;:,./<>? ";
 

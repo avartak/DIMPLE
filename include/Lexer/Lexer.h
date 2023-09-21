@@ -42,6 +42,7 @@ namespace dmp {
         static const std::string oct;
         static const std::string dec;
         static const std::string hex;
+        static const std::string wspace;
         static const std::string letter;
         static const std::string charset;
         static std::map<int, std::string> symbols;
