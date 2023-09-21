@@ -13,7 +13,6 @@ namespace dmp {
     static int process_LEXER_STATE_CHAR_ESC_HEX(bool exact, const std::string& token_buffer, int& state);
     static int process_LEXER_STATE_CHAR_DONE(bool exact, const std::string& token_buffer, int& state);
     static int process_LEXER_STATE_STRING_START(bool exact, const std::string& token_buffer, int& state);
-    static int process_LEXER_STATE_STRING_NEXT(bool exact, const std::string& token_buffer, int& state);
     static int process_LEXER_STATE_STRING_ESC(bool exact, const std::string& token_buffer, int& state);
     static int process_LEXER_STATE_STRING_ESC_HEX(bool exact, const std::string& token_buffer, int& state);
     static int process_LEXER_STATE_STRING_DONE(bool exact, const std::string& token_buffer, int& state);
@@ -41,7 +40,6 @@ namespace dmp {
         state_processors[LEXER_STATE_CHAR_ESC_HEX]      = process_LEXER_STATE_CHAR_ESC_HEX;
         state_processors[LEXER_STATE_CHAR_DONE]         = process_LEXER_STATE_CHAR_DONE;
         state_processors[LEXER_STATE_STRING_START]      = process_LEXER_STATE_STRING_START;
-        state_processors[LEXER_STATE_STRING_NEXT]       = process_LEXER_STATE_STRING_NEXT;
         state_processors[LEXER_STATE_STRING_ESC]        = process_LEXER_STATE_STRING_ESC;
         state_processors[LEXER_STATE_STRING_ESC_HEX]    = process_LEXER_STATE_STRING_ESC_HEX;
         state_processors[LEXER_STATE_STRING_DONE]       = process_LEXER_STATE_STRING_DONE;
@@ -275,15 +273,17 @@ namespace dmp {
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-        if (Lexer::charset.find(last_ch) != std::string::npos) {
-            state = LEXER_STATE_CHAR_NEXT;
-            return select_rule(!exact, RULE_CHAR);
-        }
-        else if (last_ch == '\\') {
+        if (last_ch == '\\') {
             state = LEXER_STATE_CHAR_ESC;
             return select_rule(!exact, RULE_CHAR);
         }
-	return RULE_UNDEF;
+	else if (Lexer::escchar.find(last_ch) != std::string::npos) {
+            return RULE_UNDEF;
+            state = LEXER_STATE_CHAR_NEXT;
+            return select_rule(!exact, RULE_CHAR);
+        }
+	state = LEXER_STATE_CHAR_NEXT;
+	return RULE_CHAR;
     }
 
     int process_LEXER_STATE_CHAR_NEXT(bool exact, const std::string& token_buffer, int& state) {
@@ -353,34 +353,18 @@ namespace dmp {
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-        if (Lexer::charset.find(last_ch) != std::string::npos) {
-            state = LEXER_STATE_STRING_NEXT;
-            return select_rule(!exact, RULE_STRING);
-        }
-        else if (last_ch == '\\') {
+        if (last_ch == '\\') {
             state = LEXER_STATE_STRING_ESC;
             return select_rule(!exact, RULE_STRING);
         }
-        return RULE_UNDEF;
-    }
-
-    int process_LEXER_STATE_STRING_NEXT(bool exact, const std::string& token_buffer, int& state) {
-
-        auto len = token_buffer.length();
-        const auto& last_ch = token_buffer.back();
-
-        if (last_ch == '\"') {
+	else if (last_ch == '\"') {
             state = LEXER_STATE_STRING_DONE;
             return RULE_STRING;
         }
-        else if (Lexer::charset.find(last_ch) != std::string::npos) {
-            return select_rule(!exact, RULE_STRING);
+	else if (Lexer::escchar.find(last_ch) != std::string::npos) {
+            return RULE_UNDEF;
         }
-        else if (last_ch == '\\') {
-            state = LEXER_STATE_STRING_ESC;
-            return select_rule(!exact, RULE_STRING);
-        }
-        return RULE_UNDEF;
+	return RULE_STRING;
     }
 
     int process_LEXER_STATE_STRING_ESC(bool exact, const std::string& token_buffer, int& state) {
@@ -399,7 +383,7 @@ namespace dmp {
             last_ch == '\'' ||
             last_ch == '\"')
         {
-            state = LEXER_STATE_STRING_NEXT;
+            state = LEXER_STATE_STRING_START;
             return select_rule(!exact, RULE_STRING);
         }
         else if (last_ch == 'x') {
@@ -419,7 +403,7 @@ namespace dmp {
                 return select_rule(!exact, RULE_STRING);
             }
             else {
-                state = LEXER_STATE_STRING_NEXT;
+                state = LEXER_STATE_STRING_START;
                 return select_rule(!exact, RULE_STRING);
             }
         }	

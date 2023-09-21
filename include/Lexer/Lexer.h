@@ -28,7 +28,6 @@ namespace dmp {
         LEXER_STATE_CHAR_ESC_HEX,
         LEXER_STATE_CHAR_DONE,
         LEXER_STATE_STRING_START,
-        LEXER_STATE_STRING_NEXT,
         LEXER_STATE_STRING_ESC,
         LEXER_STATE_STRING_ESC_HEX,
         LEXER_STATE_STRING_DONE,
@@ -44,7 +43,7 @@ namespace dmp {
         static const std::string hex;
         static const std::string wspace;
         static const std::string letter;
-        static const std::string charset;
+        static const std::string escchar;
         static std::map<int, std::string> symbols;
         static std::map<int, std::string> keywords;
 

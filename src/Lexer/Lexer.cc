@@ -9,7 +9,7 @@ namespace dmp {
     const std::string Lexer::hex     = "0123456789abcdefABCDEF";
     const std::string Lexer::wspace  = " \t\n\r\v\f";
     const std::string Lexer::letter  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const std::string Lexer::charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=~!@#$%^&*()_+[]{}|;:,./<>? ";
+    const std::string Lexer::escchar = "\a\b\t\n\r\v\f\'\"\\";
 
     std::map<int, std::string> Lexer::symbols = {
         { RULE_CURLY_OPEN,       "{"        },
