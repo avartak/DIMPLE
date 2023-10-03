@@ -85,7 +85,7 @@ namespace dmp {
 
     /*
 
-    POINTER_TYPE : '%?' | '%' (TOKEN_IDENT | TYPE)
+    POINTER_TYPE : '@?' | '@' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -102,7 +102,7 @@ namespace dmp {
             return success(1);
         }
 
-        if (!parseToken(it, TOKEN_POINTER)) {
+        if (!parseToken(it, TOKEN_ADDRESS)) {
             return error();
         }
         n++;
@@ -375,7 +375,7 @@ namespace dmp {
 
     ONE_OR_MORE_ARGS : ARG | ARG ',' ONE_OR_MORE_ARGS
 
-    ARG : [@] TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
+    ARG : [$] TOKEN_IDENT ':' (TOKEN_IDENT | TYPE)
 
     */
 
@@ -393,7 +393,7 @@ namespace dmp {
             std::shared_ptr<Identifier> name;
             std::shared_ptr<Node> type;
             uint64_t attr = 0;
-            if (parseToken(it+n, TOKEN_ADDRESS)) {
+            if (parseToken(it+n, TOKEN_DEREF)) {
                 attr |= PASS_BY_REFERENCE;
                 n++;
             }

@@ -2,33 +2,33 @@
 This program prints "Hello World!" to screen multiple times
 */
 
-`` Include a header file
+// Include a header file
 include include.dmp
 
-`` Representations
+// Representations
 char :: int8
 int  :: int64
 null :: 0 => char
 
-`` Declaration
+// Declaration
 printChar : func(c : char)
 
-`` Function definition
+// Function definition
 hello := func() {
 
     s := "Hello World!\n";
     i := 0;
 
-    loop ; s[i] != (0 => char); i += 1 {
+    for ; s[i] != (0 => char); i += 1 {
         printChar(s[i]);
     }
 
-    loop i = 0; s[i] != null; i += 1 {
+    for i = 0; s[i] != null; i += 1 {
         printChar(s[i]);
     }
 
     i = 0;
-    loop s[i] != 0 => char {
+    while s[i] != 0 => char {
         printChar(s[i]);
         i += 1;
     }
@@ -44,8 +44,8 @@ hello := func() {
 
 }
 
-`` The "main" function
-extern main := func(argc : int32, argv : %%char) -> int32 {
+// The "main" function
+extern main := func(argc : int32, argv : @@char) -> int32 {
 
     hello();
 

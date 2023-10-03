@@ -1,10 +1,12 @@
-`` Use this file to test the include functionality
+// Use this file to test the include functionality
 
-`` Some global variable definitions
+// Some global variable definitions
 n := uint32{.2e+2 => uint32};
 m := 4 => int8;
 p := "This is a string";
 z := int8{~};
+t := @m;
+$u := n;
 
-`` Some global declarations
+// Some global declarations
 q : int64;

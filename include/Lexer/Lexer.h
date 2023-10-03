@@ -116,6 +116,8 @@ namespace dmp {
         RULE_IF,
         RULE_ELSE,
         RULE_LOOP,
+        RULE_WHILE,
+        RULE_FOR,
         RULE_BREAK,
         RULE_CONTINUE,
         RULE_RETURN,
@@ -149,7 +151,6 @@ namespace dmp {
         RULE_DIVIDE,      
         RULE_REMAINDER,
 
-        RULE_POINTER,
         RULE_ADDRESS,          
         RULE_SIZE,        
         RULE_DEREF,      

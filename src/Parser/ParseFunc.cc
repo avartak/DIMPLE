@@ -205,9 +205,9 @@ namespace dmp {
 
     /*
 
-    LOOP_BLOCK : 'loop' BLOCK | 
-                 'loop' EXPR BLOCK | 
-                 'loop' [EXPR] ';' [EXPR] ';' [EXPR] BLOCK
+    LOOP_BLOCK : 'loop'  BLOCK | 
+                 'while' EXPR BLOCK | 
+                 'for'   [EXPR] ';' [EXPR] ';' [EXPR] BLOCK
 
     */
 
@@ -215,42 +215,52 @@ namespace dmp {
         
         std::size_t n = 0;
        
-        //auto loop = std::make_shared<LoopBlockNode>(b);
         auto loop = std::make_shared<BlockNode>(BLOCK_LOOP, b);
         auto cond_block = std::make_shared<CondBlockNode>(loop);
         std::shared_ptr<Statement> init;
         std::shared_ptr<Statement> update;
 
-        if (!parseToken(it, TOKEN_LOOP)) {
+        if (!parseToken(it, TOKEN_LOOP)  && 
+            !parseToken(it, TOKEN_WHILE) &&
+            !parseToken(it, TOKEN_FOR)) 
+        {
             return error();
         }
         n++;
 
-        if (parseExpr(it+n) && parseToken(it+n+nParsed, TOKEN_CURLY_OPEN)) {
+	if (parseToken(it, TOKEN_LOOP)) {
+            if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
+                return error(tokens[it+n], "Expect start of loop block after \'loop\'");
+            }
+        }
+	else if (parseToken(it, TOKEN_WHILE)) {
+            if (!parseExpr(it+n)) {
+                return error(tokens[it+n], "Failed to parse the while loop termination condition");
+            }
             cond_block->condition = result;
             n += nParsed;
+            if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
+                return error(tokens[it+n], "Expect start of loop block after while loop termination condition");
+            }
         }
-        else if (parseToken(it+n, TOKEN_SEMICOLON) || parseStatement(it+n, loop)) {
-            if (!parseToken(it+n, TOKEN_SEMICOLON)) {
+        else {
+            if (parseStatement(it+n, loop)) {
                 init = std::static_pointer_cast<Statement>(result);
                 init->loc = tokens[it+n]->loc;
                 n += nParsed;
                 init->loc.end = tokens[it+n-1]->loc.end;
-                if (!parseToken(it+n, TOKEN_SEMICOLON)) {
-                    return error(tokens[it+n], "Expect \';\' at the end of the loop initialization statement");
-                }
+            }
+            if (!parseToken(it+n, TOKEN_SEMICOLON)) {
+                return error(tokens[it+n], "Failed to parse the for loop initialization statement");
             }
             n++;
 
-            if (!parseToken(it+n, TOKEN_SEMICOLON)) {
-                if (!parseExpr(it+n)) {
-                    return error(tokens[it+n], "Failed to parse loop termination expression");
-                }
+            if (parseExpr(it+n)) {
                 cond_block->condition = result;
-                n += nParsed;
-                if (!parseToken(it+n, TOKEN_SEMICOLON)) {
-                    return error(tokens[it+n], "Expect \';\' at the end of the loop termination expression");
-                }
+		n += nParsed;
+            }
+            if (!parseToken(it+n, TOKEN_SEMICOLON)) {
+                return error(tokens[it+n], "Failed to parse the for loop termination condition");
             }
             n++;
 
@@ -259,6 +269,9 @@ namespace dmp {
                 update->loc = tokens[it+n]->loc;
                 n += nParsed;
                 update->loc.end = tokens[it+n-1]->loc.end;
+            }
+            if (!parseToken(it+n, TOKEN_CURLY_OPEN)) {
+                return error(tokens[it+n], "Failed to parse the for loop update statement");
             }
         }
 
@@ -273,6 +286,7 @@ namespace dmp {
 
         result = loop;
         return success(n);
+
     }
 
     /*
@@ -329,7 +343,7 @@ namespace dmp {
 
     /*
 
-    LOCAL_REF_DEF : TOKEN_IDENT ':=' EXPR
+    LOCAL_REF_DEF : '$' TOKEN_IDENT ':=' EXPR
 
     */
 
@@ -340,13 +354,13 @@ namespace dmp {
         std::shared_ptr<Identifier> name;
         std::shared_ptr<Node> def;
 
-        if (!parseToken(it, TOKEN_ADDRESS)) {
+        if (!parseToken(it, TOKEN_DEREF)) {
             return error();
         }
         n++;
         if (!parseToken(it+n, TOKEN_IDENT) || !parseToken(it+n+1, TOKEN_DEFINE)) {
             if (!parseToken(it+n, TOKEN_IDENT)) {
-                return error(tokens[it+n], "Expect identifier after \'@\'");
+                return error(tokens[it+n], "Expect identifier after \'$\'");
             }
             else {
                 return error(tokens[it+n], "Expect \':=\' after " + tokens[it+n]->str);

@@ -38,12 +38,12 @@ A key distinction between DIMPLE and C is that the global constructs (i.e. globa
 ```
 A :: struct (
     i : int64,
-    p : %B
+    p : @B
 )
 
 B :: struct (
     d : real64,
-    p : %A
+    p : @A
 )
 ```
 
@@ -105,19 +105,19 @@ S :: struct (
 There are some interesting and unique ways of using representations, which don't have natural counterparts in C. For example, one may construct a self-referencing pointer type
 
 ```
-P :: %P;
+P :: @P;
 ```
 
 Or one could construct an array whose element type is it's own pointer
 
 ```
-A :: [4]%A;
+A :: [4]@A;
 ```
 
 One could also construct a function that takes as an argument (or returns) a pointer to it's own type
 
 ```
-F :: func(%F);
+F :: func(fptr : @F);
 ```
 
 ## Anonymous members 
@@ -137,10 +137,10 @@ s[1] = 2.5;
 ```
 
 ## Function arguments
-DIMPLE allows both pass-by-value and pass-by-reference arguments to functions. By default, arguments are passed by value. However, if the argument name is preceded by the `@` symbol in the function signature, that argument is passed by reference. 
+DIMPLE allows both pass-by-value and pass-by-reference arguments to functions. By default, arguments are passed by value. However, if the argument name is preceded by the `$` symbol in the function signature, that argument is passed by reference. 
 
 ```
-flip := func(@b : bool) {
+flip := func($b : bool) {
 
     if b {
         b = false;
@@ -157,9 +157,9 @@ DIMPLE allows the use of _aliases_ or references. An alias is basically another 
 
 ```
 a := [4]int8;
-@i := a[2];
+$i := a[2];
 p := int32{0};
-@q := p;
+$q := p;
 ```
 
 

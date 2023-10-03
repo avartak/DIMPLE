@@ -272,7 +272,7 @@ namespace dmp {
 
     /*
 
-    REF_DEF : '@' TOKEN_IDENT ':=' EXPR [';']
+    REF_DEF : '$' TOKEN_IDENT ':=' EXPR [';']
 
     */
 
@@ -285,7 +285,7 @@ namespace dmp {
         std::shared_ptr<Node> type;
         std::shared_ptr<Node> def;
 
-        if (!parseToken(it, TOKEN_ADDRESS)) {
+        if (!parseToken(it, TOKEN_DEREF)) {
             return error();
         }
         n++;

@@ -4,9 +4,9 @@ int  :: int64
 printInt : func(i : int)
 printChar : func(c : char)
 
-`` Flip the value of a boolean variable
-`` The boolean variable is passed by reference
-flip := func(@b : bool) {
+// Flip the value of a boolean variable
+// The boolean variable is passed by reference
+flip := func($b : bool) {
 
     if b {
         b = false;
@@ -16,7 +16,7 @@ flip := func(@b : bool) {
     }
 }
 
-extern main := func(argc : int32, argv : %%char) -> int32 {
+extern main := func(argc : int32, argv : @@char) -> int32 {
 
     b := bool{false};
     printInt(b => int);

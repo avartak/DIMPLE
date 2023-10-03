@@ -45,6 +45,8 @@ namespace dmp {
         TOKEN_IF,
         TOKEN_ELSE,
         TOKEN_LOOP,
+        TOKEN_WHILE,
+        TOKEN_FOR,
         TOKEN_BREAK,
         TOKEN_CONTINUE,
        
@@ -63,7 +65,6 @@ namespace dmp {
         TOKEN_RETURNS,
         TOKEN_CAST,
 
-        TOKEN_POINTER,
         TOKEN_ADDRESS,
         TOKEN_SIZE,
         TOKEN_DEREF,

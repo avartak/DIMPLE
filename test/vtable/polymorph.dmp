@@ -4,69 +4,69 @@ An example of late binding functions using a vtable.
 
 */
 
-`` Defining some representations for convenience
+// Defining some representations for convenience
 char :: int8
 int  :: int64
 
-`` printChar is an externally defined function 
-`` It's basically a wrapper on fputc() from C standard library
+// printChar is an externally defined function 
+// It's basically a wrapper on fputc() from C standard library
 printChar : func(c : char)
 
-`` I is equivalent to an abstract base class with one virtual method
+// I is equivalent to an abstract base class with one virtual method
 I :: struct (
-    vptr : %%?
+    vptr : @@?
 )
 
-`` A is a child class of I
+// A is a child class of I
 A :: struct (
-    vptr : %%?
+    vptr : @@?
 )
 
-`` vtable of A that contains one function pointer (for the one virtual method of I)
-vtable_A := [1]%? {@f_A}
+// vtable of A that contains one function pointer (for the one virtual method of I)
+vtable_A := [1]@? {@f_A}
 
-`` init_A() is equivalent to the constructor of A
-init_A := func(this : %A) {
+// init_A() is equivalent to the constructor of A
+init_A := func(this : @A) {
     this$.vptr = @vtable_A[0];
 }
 
-`` virtual function that is overriden by A
-`` Returns character 'f'
-f_A := func(a : %A) -> char {
+// virtual function that is overriden by A
+// Returns character 'f'
+f_A := func(a : @A) -> char {
     return 'f';
 }
 
-`` B is another child class of I
+// B is another child class of I
 B :: struct (
-    vptr : %%?
+    vptr : @@?
 )
 
-`` vtable of B
-vtable_B := [1]%? {@f_B}
+// vtable of B
+vtable_B := [1]@? {@f_B}
 
-`` Constructor of B; attaches the appropriate vtable to the vptr member
-init_B := func(this : %B) {
+// Constructor of B; attaches the appropriate vtable to the vptr member
+init_B := func(this : @B) {
     this$.vptr = @vtable_B[0];
 }
 
-`` virtual function overriden by B
-`` Returns character 'F'
-f_B := func(b : %B) -> char {
+// virtual function overriden by B
+// Returns character 'F'
+f_B := func(b : @B) -> char {
     return 'F';
 }
 
-`` print() function takes a pointer to I as an argument
-`` It prints either 'f' or 'F' depending on whether the argument is an instance of A or B
-print := func(i : %I) {
-    printChar((i$.vptr[0] => %func(i : %I) -> char)$(i));
+// print() function takes a pointer to I as an argument
+// It prints either 'f' or 'F' depending on whether the argument is an instance of A or B
+print := func(i : @I) {
+    printChar((i$.vptr[0] => @func(i : @I) -> char)$(i));
     printChar('\n');
 }
 
-`` main() function
-`` Here we define an instance of A and B each
-`` We initialize these instances (set the vtables)
-`` Then we call the print() function on them (casting them to I)
-extern main := func(argc : int32, argv : %%char) -> int32 {
+// main() function
+// Here we define an instance of A and B each
+// We initialize these instances (set the vtables)
+// Then we call the print() function on them (casting them to I)
+extern main := func(argc : int32, argv : @@char) -> int32 {
 
     a := A{};
     b := B{};
@@ -74,8 +74,8 @@ extern main := func(argc : int32, argv : %%char) -> int32 {
     init_A(@a);
     init_B(@b);
 
-    print(@a => %I);
-    print(@b => %I);
+    print(@a => @I);
+    print(@b => @I);
 
     return 0 => int32;
 }

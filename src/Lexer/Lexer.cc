@@ -31,9 +31,8 @@ namespace dmp {
         { RULE_MINUS,            "-"        },
         { RULE_MULTIPLY,         "*"        },
         { RULE_DIVIDE,           "/"        },
-        { RULE_REMAINDER,        "//"       },
+        { RULE_REMAINDER,        "%"        },
 
-        { RULE_POINTER,          "%"        },
         { RULE_ADDRESS,          "@"        },
         { RULE_SIZE,             "#"        },
         { RULE_DEREF,            "$"        },
@@ -61,14 +60,14 @@ namespace dmp {
         { RULE_SUB_ASSIGN,       "-="       },
         { RULE_MUL_ASSIGN,       "*="       },
         { RULE_DIV_ASSIGN,       "/="       },
-        { RULE_REM_ASSIGN,       "//="      },
+        { RULE_REM_ASSIGN,       "%="       },
         { RULE_AND_ASSIGN,       "&="       },
         { RULE_OR_ASSIGN,        "|="       },
         { RULE_XOR_ASSIGN,       "^="       },
         { RULE_BIT_RIGHT_ASSIGN, ">>="      },
         { RULE_BIT_LEFT_ASSIGN,  "<<="      },
 
-        { RULE_GENERIC_POINTER,  "%?"       }
+        { RULE_GENERIC_POINTER,  "@?"       }
     };
 
     std::map<int, std::string> Lexer::keywords = {
@@ -99,6 +98,8 @@ namespace dmp {
         { RULE_IF,               "if"       },
         { RULE_ELSE,             "else"     },
         { RULE_LOOP,             "loop"     },
+        { RULE_WHILE,            "while"    },
+        { RULE_FOR,              "for"      },
         { RULE_BREAK,            "break"    },
         { RULE_CONTINUE,         "continue" },
         { RULE_RETURN,           "return"   }
@@ -169,6 +170,8 @@ namespace dmp {
                 case RULE_IF               : return TOKEN_IF;
                 case RULE_ELSE             : return TOKEN_ELSE;
                 case RULE_LOOP             : return TOKEN_LOOP;
+                case RULE_WHILE            : return TOKEN_WHILE;
+                case RULE_FOR              : return TOKEN_FOR;
                 case RULE_BREAK            : return TOKEN_BREAK;
                 case RULE_CONTINUE         : return TOKEN_CONTINUE;
                 case RULE_RETURN           : return TOKEN_RETURN;
@@ -188,7 +191,6 @@ namespace dmp {
                 case RULE_RETURNS          : return TOKEN_RETURNS;
                 case RULE_CAST             : return TOKEN_CAST;
 
-                case RULE_POINTER          : return TOKEN_POINTER;
                 case RULE_ADDRESS          : return TOKEN_ADDRESS;
                 case RULE_SIZE             : return TOKEN_SIZE;
                 case RULE_DEREF            : return TOKEN_DEREF;

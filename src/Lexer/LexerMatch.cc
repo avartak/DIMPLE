@@ -78,10 +78,6 @@ namespace dmp {
 		// If there are any, they should be tested here
 		return RULE_IDENT;
             }
-	    else if (last_ch == '`') {
-                state = LEXER_STATE_ONELINE_COMMENT;
-                return exact ? RULE_UNDEF : RULE_ONELINE_COMMENT;
-            }
 	    else if (Lexer::dec.find(last_ch) != std::string::npos) {
                 state = LEXER_STATE_NUM;
                 return RULE_INT;
@@ -97,9 +93,15 @@ namespace dmp {
         }
 
 	else if (token_buffer.length() == 2) {
-            if (token_buffer[0] == '/' && last_ch == '*') {
-                state = LEXER_STATE_MULTILINE_COMMENT;
-                return exact ? RULE_UNDEF : RULE_MULTILINE_COMMENT;
+            if (token_buffer[0] == '/') {
+                if (last_ch == '/') {
+                    state = LEXER_STATE_ONELINE_COMMENT;
+                    return exact ? RULE_UNDEF : RULE_ONELINE_COMMENT;
+                }
+		else if (last_ch == '*') {
+                    state = LEXER_STATE_MULTILINE_COMMENT;
+                    return exact ? RULE_UNDEF : RULE_MULTILINE_COMMENT;
+                }
             }
 	    else if (token_buffer[0] == '.' && Lexer::dec.find(last_ch) != std::string::npos) {
                 state = LEXER_STATE_REAL_DOT;
@@ -158,18 +160,11 @@ namespace dmp {
         auto len = token_buffer.length();
         const auto& last_ch = token_buffer.back();
 
-        if (len == 2) {
-            if (last_ch == '`') {
-                return select_rule(!exact, RULE_ONELINE_COMMENT);
-            }
+        if (exact) {
+            return select_rule(last_ch == '\n', RULE_ONELINE_COMMENT);
         }
         else {
-            if (exact) {
-                return select_rule(last_ch == '\n', RULE_ONELINE_COMMENT);
-            }
-            else {
-                return select_rule(token_buffer[len-2] != '\n', RULE_ONELINE_COMMENT);
-            }
+            return select_rule(token_buffer[len-2] != '\n', RULE_ONELINE_COMMENT);
         }
         return RULE_UNDEF;
     }
